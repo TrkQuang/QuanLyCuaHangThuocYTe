@@ -1,0 +1,13 @@
+node_modules/
+.vscode/
+.idea/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+target/
+build/
+dist/
+.DS_Store
+Thumbs.db
