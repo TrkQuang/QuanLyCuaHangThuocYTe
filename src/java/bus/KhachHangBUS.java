@@ -20,7 +20,7 @@ public class KhachHangBUS {
         return dskh;
     }
 
-    public boolean themKhachHang(KhachHangDTO kh) {
+    public boolean ThemKhachHang(KhachHangDTO kh) {
         if(kh.getMaKhachHang().isEmpty()) return false;
         if(kh.getMaTaiKhoan().isEmpty()) return false;
         if(kh.getTen().isEmpty()) return false;
@@ -35,7 +35,7 @@ public class KhachHangBUS {
         return ok;
     }
 
-    public boolean capNhatKhachHang(KhachHangDTO kh) {
+    public boolean CapNhatKhachHang(KhachHangDTO kh) {
         if (kh.getMaKhachHang().isEmpty()) return false;
         boolean check = khachHangDAO.updateKhachHang(kh);
         if(check) {
@@ -49,7 +49,7 @@ public class KhachHangBUS {
         return check;
     }
 
-    public boolean xoaKhachHang(String maKH) {
+    public boolean XoaKhachHang(String maKH) {
         if (maKH.isEmpty()) return false;
         boolean check = khachHangDAO.deleteKhachHang(maKH);
         if (check) {
