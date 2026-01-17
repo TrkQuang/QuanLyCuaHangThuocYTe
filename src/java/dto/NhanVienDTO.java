@@ -1,79 +1,81 @@
 package java.dto;
 
 public class NhanVienDTO {
-    private String maNNV;
-    private String hoTen;
-    private String sdt;
-    private String diaChi;
-    private String chucVu;
-    private String maTK;
+    private String MaNhanVien;
+    private String Ho;
+    private String Ten;
+    private String SDT;
+    private String DiaChi;
+    private String MaTaiKhoan;
     
     public NhanVienDTO() {
-        this.maNNV = "";
-        this.hoTen = "";
-        this.sdt = "";
-        this.diaChi = "";
-        this.chucVu = "";
-        this.maTK = "";
+        this.MaNhanVien = "";
+        this.Ho = "";
+        this.Ten = "";
+        this.SDT = "";
+        this.DiaChi = "";
+        this.MaTaiKhoan = "";
     }
     
-    public NhanVienDTO(String maNNV, String hoTen, String sdt, String diaChi, String chucVu, String maTK) {
-        this.maNNV = maNNV;
-        this.hoTen = hoTen;
-        this.sdt = sdt;
-        this.diaChi = diaChi;
-        this.chucVu = chucVu;
-        this.maTK = maTK;
+    public NhanVienDTO(String MaNhanVien, String Ho, String Ten, String SDT, String DiaChi, String MaTaiKhoan) {
+        this.MaNhanVien = MaNhanVien;
+        this.Ho = Ho;
+        this.Ten = Ten;
+        this.SDT = SDT;
+        this.DiaChi = DiaChi;
+        this.MaTaiKhoan = MaTaiKhoan;
     }
     
-    public NhanVienDTO(NhanVienDTO other) {
-        this.maNNV = other.maNNV;
-        this.hoTen = other.hoTen;
-        this.sdt = other.sdt;
-        this.diaChi = other.diaChi;
-        this.chucVu = other.chucVu;
-        this.maTK = other.maTK;
+    public NhanVienDTO(NhanVienDTO nv) {
+        this.MaNhanVien = nv.MaNhanVien;
+        this.Ho = nv.Ho;
+        this.Ten = nv.Ten;
+        this.SDT = nv.SDT;
+        this.DiaChi = nv.DiaChi;
+        this.MaTaiKhoan = nv.MaTaiKhoan;
     }
-    public String getMaNNV() {
-        return maNNV;
-    }
-    
-    public void setMaNNV(String maNNV) {
-        this.maNNV = maNNV;
+    public String getMaNhanVien() {
+        return MaNhanVien;
     }
     
-    public String getHoTen() {
-        return hoTen;
+    public void setMaNhanVien(String MaNhanVien) {
+        this.MaNhanVien = MaNhanVien;
     }
     
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
+    public String getHo() {
+        return Ho;
     }
     
-    public String getSdt() {
-        return sdt;
+    public void setHo(String Ho) {
+        this.Ho = Ho;
+    }
+
+    public String getTen() {
+        return Ten;
+    }
+
+    public void setTen(String Ten){
+        this.Ten = Ten;
     }
     
-    public void setSdt(String sdt) {
-        this.sdt = sdt;
+    public String getSDT() {
+        return SDT;
+    }
+    
+    public void setSDT(String SDT) {
+        this.SDT = SDT;
     }
     public String getDiaChi() {
-        return diaChi;
+        return DiaChi;
     }
-    public void setDiaChi(String diaChi) {
-        this.diaChi = diaChi;
+    public void setDiaChi(String DiaChi) {
+        this.DiaChi = DiaChi;
     }
-    
-    public String getChucVu() {
-        return chucVu;
+ 
+    public String getMaTaiKhoan() {
+        return MaTaiKhoan;
     }
-    public void setChucVu(String chucVu) {
-        this.chucVu = chucVu;
-    }
-    public String getMaTK() {
-        return maTK;
-    }
-    public void setMaTK(String maTK) {
-        this.maTK = maTK;
+    public void setMaTaiKhoan(String MaTaiKhoan) {
+        this.MaTaiKhoan = MaTaiKhoan;
     }
 }
