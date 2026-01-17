@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
     
-    <groupId>quanly</groupId>
+    <groupId>com.quanlycuahangthuoc</groupId>
     <artifactId>QuanLyCuaHangThuocYTe</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -54,17 +54,6 @@
     </dependencies>
     
     <build>
-        <sourceDirectory>src/java</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>src/resources</directory>
-            </resource>
-            <resource>
-                <directory>frontend</directory>
-                <targetPath>static</targetPath>
-            </resource>
-        </resources>
-        
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

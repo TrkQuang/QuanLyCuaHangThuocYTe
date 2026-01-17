@@ -1,4 +1,4 @@
-package java.db;
+package com.quanlycuahangthuoc.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
