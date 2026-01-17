@@ -1,10 +1,10 @@
 package com.quanlycuahangthuoc.dao;
-
+import org.springframework.stereotype.Repository;
 import com.quanlycuahangthuoc.db.DBConnection;
 import com.quanlycuahangthuoc.dto.KhachHangDTO;
 import java.sql.*;
 import java.util.ArrayList;
-
+@Repository
 public class KhachHangDAO {
 
   // Lấy danh sách tất cả khách hàng
