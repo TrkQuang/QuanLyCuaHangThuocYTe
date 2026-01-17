@@ -1,6 +1,6 @@
 package java.dao;
 
-import java.util.DBConnection;
+import java.db.DBConnection;
 import java.dto.KhachHangDTO;
 
 import java.sql.*;
