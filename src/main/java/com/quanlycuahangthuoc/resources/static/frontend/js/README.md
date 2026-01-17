@@ -4,7 +4,7 @@ Chứa các file JavaScript để tương tác với backend và xử lý giao d
 
 ## Chức năng:
 
-- Gọi API từ backend (Servlet)
+- Gọi REST API từ Spring Boot Controller
 - Hiển thị dữ liệu động
 - Xử lý sự kiện người dùng
 - Validate input phía client
@@ -18,7 +18,7 @@ Chứa các file JavaScript để tương tác với backend và xử lý giao d
 ```javascript
 // Gọi API để lấy tất cả thuốc
 function layDanhSachThuoc() {
-  fetch("/QuanLyCuaHangThuocYTe/thuoc?action=getAll")
+  fetch("/api/thuoc")
     .then((response) => response.json()) // Parse JSON từ backend
     .then((data) => {
       // data là array của các thuốc
@@ -66,22 +66,21 @@ function themThuoc() {
   };
 
   // Gửi request POST với JSON body
-  fetch("/QuanLyCuaHangThuocYTe/thuoc?action=add", {
+  fetch("/api/thuoc", {
     method: "POST",
     headers: {
       "Content-Type": "application/json", // Quan trọng!
     },
     body: JSON.stringify(thuoc), // Chuyển object thành JSON string
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) throw new Error("HTTP error " + response.status);
+      return response.json();
+    })
     .then((result) => {
-      if (result.success) {
-        alert("Thêm thuốc thành công!");
-        layDanhSachThuoc(); // Refresh danh sách
-        document.getElementById("formThuoc").reset(); // Clear form
-      } else {
-        alert("Lỗi: " + result.message);
-      }
+      alert("Thêm thuốc thành công!");
+      layDanhSachThuoc(); // Refresh danh sách
+      document.getElementById("formThuoc").reset(); // Clear form
     })
     .catch((error) => {
       console.error("Lỗi:", error);
@@ -92,12 +91,15 @@ function themThuoc() {
 
 ---
 
-### 3. **Xem chi tiết thuốc** (GET với parameter)
+### 3. **Xem chi tiết thuốc** (GET với path variable)
 
-```javascript
+````javascript
 function xemChiTiet(maThuoc) {
-  fetch(`/QuanLyCuaHangThuocYTe/thuoc?action=getById&id=${maThuoc}`)
-    .then((response) => response.json())
+  fetch(`/api/thuoc/${maThuoc}`)
+    .then((response) => {
+      if (!response.ok) throw new Error('Không tìm thấy thuốc');
+      return response.json();
+    })
     .then((thuoc) => {
       // Hiển thị trong modal hoặc form
       document.getElementById("modalTenThuoc").textContent = thuoc.tenThuoc;
@@ -108,81 +110,90 @@ function xemChiTiet(maThuoc) {
     })
     .catch((error) => {
       console.error("Lỗi:", error);
+      alert("Không thể xem chi tiết thuốc!");
     });
 }
-```
-
----
-
-### 4. **Cập nhật thuốc** (POST)
+```UT)
 
 ```javascript
 function capNhatThuoc(maThuoc) {
   const thuoc = {
-    maThuoc: maThuoc,
     tenThuoc: document.getElementById("editTenThuoc").value,
     gia: parseFloat(document.getElementById("editGia").value),
     soLuong: parseInt(document.getElementById("editSoLuong").value),
   };
 
-  fetch("/QuanLyCuaHangThuocYTe/thuoc?action=update", {
-    method: "POST",
+  fetch(`/api/thuoc/${maThuoc}`, {
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(thuoc),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) throw new Error('HTTP error ' + response.status);
+      return response.json();
+    })
     .then((result) => {
+      alert("Cập nhật thành công!");
+      layDanhSachThuoc();
+    })
+    .catch((error) => {
+      console.error("Lỗi:", error);
+      alert("Có lỗi xảy ra khi cập nhật!");en((result) => {
       if (result.success) {
         alert("Cập nhật thành công!");
         layDanhSachThuoc();
       }
     });
 }
-```
-
----
-
-### 5. **Xóa thuốc** (POST)
+```DELETE)
 
 ```javascript
 function xoa(maThuoc) {
   if (!confirm("Bạn có chắc muốn xóa thuốc này?")) return;
 
-  fetch(`/QuanLyCuaHangThuocYTe/thuoc?action=delete&id=${maThuoc}`, {
-    method: "POST",
+  fetch(`/api/thuoc/${maThuoc}`, {
+    method: "DELETE",
   })
-    .then((response) => response.json())
-    .then((result) => {
-      if (result.success) {
-        alert("Xóa thành công!");
+    .then((response) => {
+      if (!response.ok) throw new Error('HTTP error ' + response.status);
+      alert("Xóa thành công!");
+      layDanhSachThuoc(); // Refresh danh sách
+    })
+    .catch((error) => {
+      console.error("Lỗi:", error);
+      alert("Không thể xóa thuốc!"); alert("Xóa thành công!");
         layDanhSachThuoc(); // Refresh danh sách
       } else {
         alert("Lỗi: " + result.message);
       }
     });
 }
-```
+````
 
 ---
 
 ### 6. **Tìm kiếm thuốc**
 
-```javascript
-function timKiem() {
-  const keyword = document.getElementById("searchInput").value;
-
-  fetch(`/QuanLyCuaHangThuocYTe/thuoc?action=search&keyword=${keyword}`)
-    .then((response) => response.json())
-    .then((data) => {
-      hienThiDanhSach(data);
-    });
+```javascrapi/thuoc/search?keyword=${encodeURIComponent(keyword)}`)
+.then((response) => response.json())
+.then((data) => {
+hienThiDanhSach(data);
+})
+.catch((error) => {
+console.error("Lỗi:", error
+fetch(`/QuanLyCuaHangThuocYTe/thuoc?action=search&keyword=${keyword}`)
+.then((response) => response.json())
+.then((data) => {
+hienThiDanhSach(data);
+});
 }
 
 // Tìm kiếm realtime khi gõ
 document.getElementById("searchInput").addEventListener("input", function () {
-  timKiem();
+timKiem();
 });
-```
+
+````
 
 ---
 
@@ -192,7 +203,7 @@ document.getElementById("searchInput").addEventListener("input", function () {
 
 ```javascript
 fetch(url, options);
-```
+````
 
 - `url`: Đường dẫn API (ví dụ: `/thuoc?action=getAll`)
 - `options`: Cấu hình (method, headers, body)
@@ -264,18 +275,54 @@ fetch(url)
 
 ✅ **Validate input trước khi gửi**
 
-```javascript
+````javascript
 if (!tenThuoc || gia <= 0) {
   alert("Vui lòng nhập đầy đủ thông tin!");
   return;
-}
-```
-
-✅ **URL phải đúng format**
+} (RESTful API)**
 
 ```javascript
-// Đúng
-"/QuanLyCuaHangThuocYTe/thuoc?action=getAll";
+// Đúng - Spring Boot REST API
+"/api/thuoc";                    // GET all, POST new
+"/api/thuoc/{id}";               // GET by id, PUT update, DELETE
+"/api/thuoc/search?keyword=abc"; // Search with query param
+
+// Sai
+"api/thuoc";                     // Thiếu dấu /
+"/api/thuoc?action=getAll";      // Không dùng action parameter nữa
+````
+
+---
+
+## Spring Boot REST API Pattern
+
+### **HTTP Methods chuẩn REST:**
+
+- **GET** `/api/thuoc` - Lấy tất cả
+- **GET** `/api/thuoc/{id}` - Lấy theo ID
+- **POST** `/api/thuoc` - Thêm mới
+- **PUT** `/api/thuoc/{id}` - Cập nhật
+- **DELETE** `/api/thuoc/{id}` - Xóa
+- **GET** `/api/thuoc/search?keyword=...` - Tìm kiếm
+
+### **Response format từ Spring Boot:**
+
+```javascript
+// Success response
+{
+  "maThuoc": 1,
+  "tenThuoc": "Paracetamol",
+  "gia": 5000,
+  "soLuong": 100
+}
+
+// Error response (tùy cấu hình exception handler)
+{
+  "timestamp": "2026-01-17T20:30:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Thuốc không tồn tại"
+}
 
 // Sai
 "QuanLyCuaHangThuocYTe/thuoc?action=getAll"; // Thiếu dấu /
