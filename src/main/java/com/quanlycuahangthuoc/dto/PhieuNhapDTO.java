@@ -6,7 +6,7 @@ public class PhieuNhapDTO {
   private String MaNhanVien;
   private String MaNhaCungCap;
   private String NgayNhap;
-  private float TongTien;
+  private float TongTien; 
 
   public PhieuNhapDTO() {
     MaPhieuNhap = "";

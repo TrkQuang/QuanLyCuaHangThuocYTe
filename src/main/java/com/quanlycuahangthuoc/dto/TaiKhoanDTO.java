@@ -3,7 +3,7 @@ package com.quanlycuahangthuoc.dto;
 public class TaiKhoanDTO {
 
   private String MaTaiKhoan;
-  private String TenDangNhap;
+  private String TenDangNhap; 
   private String MatKhau;
   private String Email;
   private String LoaiTaiKhoan;

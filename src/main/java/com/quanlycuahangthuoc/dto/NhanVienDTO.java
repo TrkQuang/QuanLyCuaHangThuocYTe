@@ -2,7 +2,7 @@ package com.quanlycuahangthuoc.dto;
 
 public class NhanVienDTO {
 
-  private String MaNhanVien;
+  private String MaNhanVien; 
   private String Ho;
   private String Ten;
   private String SDT;

@@ -4,7 +4,7 @@ public class KhachHangDTO {
 
   private String MaKhachHang;
   private String MaTaiKhoan;
-  private String Ho;
+  private String Ho; 
   private String Ten;
   private String NgaySinh;
   private String GioiTinh;

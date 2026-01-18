@@ -6,7 +6,7 @@ public class ThuocDTO {
   private String MaNhaCungCap;
   private String TenThuoc;
   private String DonViTinh;
-  private String NSX;
+  private String NSX; 
   private String HSD;
   private float GiaBan;
   private int SoLuongTon;

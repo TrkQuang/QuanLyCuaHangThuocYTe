@@ -4,22 +4,23 @@ import com.quanlycuahangthuoc.db.DBConnection;
 import com.quanlycuahangthuoc.dto.KhachHangDTO;
 import java.sql.*;
 import java.util.ArrayList;
-@Repository
+@Repository //giúp Spring hiểu đây là lớp truy xuất dữ liệu.
 public class KhachHangDAO {
 
   // Lấy danh sách tất cả khách hàng
   public ArrayList<KhachHangDTO> getAllKhachHang() {
     ArrayList<KhachHangDTO> ds = new ArrayList<>();
-    String sql = "SELECT * FROM khachhang";
+    String sql = "SELECT * FROM KhachHang"; //Lấy toàn bộ bảng
 
     try (
-      Connection conn = DBConnection.getConnection();
+      Connection conn = DBConnection.getConnection(); //mở kết nối csdl
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(sql)
     ) {
       while (rs.next()) {
         KhachHangDTO kh = new KhachHangDTO();
         kh.setMaKhachHang(rs.getString("MaKhachHang"));
+        kh.setMaTaiKhoan(rs.getString("TaiKhoan"));
         kh.setHo(rs.getString("Ho"));
         kh.setTen(rs.getString("Ten"));
         kh.setNgaySinh(rs.getString("NgaySinh"));
@@ -38,20 +39,21 @@ public class KhachHangDAO {
 
   // Thêm khách hàng
   public boolean insertKhachHang(KhachHangDTO kh) {
-    String sql = "INSERT INTO khachhang VALUES (?,?,?,?,?,?,?,?)";
+    String sql = "INSERT INTO KhachHang VALUES (?,?,?,?,?,?,?,?,?)";
 
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
     ) {
       ps.setString(1, kh.getMaKhachHang());
-      ps.setString(2, kh.getHo());
-      ps.setString(3, kh.getTen());
-      ps.setString(4, kh.getNgaySinh());
-      ps.setString(5, kh.getGioiTinh());
-      ps.setString(6, kh.getSDT());
-      ps.setString(7, kh.getDiaChi());
-      ps.setString(8, kh.getTienSuBenhLy());
+      ps.setString(2, kh.getMaTaiKhoan());
+      ps.setString(3, kh.getHo());
+      ps.setString(4, kh.getTen());
+      ps.setString(5, kh.getNgaySinh());
+      ps.setString(6, kh.getGioiTinh());
+      ps.setString(7, kh.getSDT());
+      ps.setString(8, kh.getDiaChi());
+      ps.setString(9, kh.getTienSuBenhLy());
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
@@ -63,7 +65,7 @@ public class KhachHangDAO {
   // Cập nhật khách hàng
   public boolean updateKhachHang(KhachHangDTO kh) {
     String sql =
-      "UPDATE khachhang SET Ho=?, Ten=?, NgaySinh=?, GioiTinh=?, SDT=?, DiaChi=?, TienSuBenhLy=? WHERE MaKhachHang=?";
+      "UPDATE KhachHang SET Ho=?, Ten=?, NgaySinh=?, GioiTinh=?, SDT=?, DiaChi=?, TienSuBenhLy=?, MaTaiKhoan=? WHERE MaKhachHang=?";
 
     try (
       Connection conn = DBConnection.getConnection();
@@ -86,14 +88,14 @@ public class KhachHangDAO {
   }
 
   // Xóa khách hàng
-  public boolean deleteKhachHang(String maKH) {
-    String sql = "DELETE FROM khachhang WHERE MaKhachHang=?";
+  public boolean deleteKhachHang(String MaKhachHang) {
+    String sql = "DELETE FROM KhachHang WHERE MaKhachHang=?";
 
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
     ) {
-      ps.setString(1, maKH);
+      ps.setString(1, MaKhachHang);
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
       e.printStackTrace();
