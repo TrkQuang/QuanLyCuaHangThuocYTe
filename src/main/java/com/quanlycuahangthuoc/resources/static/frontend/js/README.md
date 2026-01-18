@@ -327,3 +327,20 @@ if (!tenThuoc || gia <= 0) {
 // Sai
 "QuanLyCuaHangThuocYTe/thuoc?action=getAll"; // Thiếu dấu /
 ```
+HTML Login
+   ↓
+JS fetch API /api/auth/login
+   ↓
+Controller
+   ↓
+BUS (kiểm tra user + role)
+   ↓
+DAO (JDBC)
+   ↓
+DB
+   ↓
+Trả JSON: { success, role }
+   ↓
+JS redirect:
+   if role == "NHANVIEN" → nhanvien.html
+   if role == "KHACHHANG" → khachhang.html
