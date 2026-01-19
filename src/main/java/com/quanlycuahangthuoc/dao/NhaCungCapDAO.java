@@ -29,7 +29,7 @@ public class NhaCungCapDAO {
                 ncc.setTenNhaCungCap(rs.getString("TenNhaCungCap"));
                 ncc.setDiaChi(rs.getString("DiaChi"));
                 ncc.setSDT(rs.getString("SDT"));
-
+                ncc.setTrangThai(rs.getString("TrangThai"));
                 ds.add(ncc);
             }
         }catch(SQLException e){
@@ -49,6 +49,7 @@ public class NhaCungCapDAO {
             ps.setString(2, ncc.getTenNhaCungCap());
             ps.setString(3, ncc.getDiaChi());
             ps.setString(4, ncc.getSDT());
+            ps.setString(5, ncc.getTrangThai());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
@@ -67,6 +68,7 @@ public class NhaCungCapDAO {
             ps.setString(2, ncc.getTenNhaCungCap());
             ps.setString(3, ncc.getDiaChi());
             ps.setString(4, ncc.getSDT());
+            ps.setString(5, ncc.getTrangThai());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
@@ -90,4 +92,29 @@ public class NhaCungCapDAO {
         }
         return false;
     }
-}
+    
+    public NhaCungCapDTO getById(String maNCC){
+        String sql = "SELECT * FROM NhaCungCap WHERE MaNhaCungCap=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, maNCC);
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()){
+                NhaCungCapDTO ncc = new NhaCungCapDTO();
+                ncc.setMaNhaCungCap(rs.getString("MaNhaCungCap"));
+                ncc.setTenNhaCungCap(rs.getString("TenNhaCungCap"));
+                ncc.setSDT(rs.getString("SDT"));
+                ncc.setDiaChi(rs.getString("DiaChi"));
+                ncc.setTrangThai(rs.getString("TrangThai"));
+                return ncc;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+} 

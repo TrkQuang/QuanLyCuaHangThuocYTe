@@ -6,24 +6,28 @@ public class NhaCungCapDTO {
   private String TenNhaCungCap;
   private String SDT;
   private String DiaChi;
+  private String TrangThai; //HOPTAC hoặc NGUNGHOPTAC
 
   public NhaCungCapDTO() {
     MaNhaCungCap = "";
     TenNhaCungCap = "";
     SDT = "";
     DiaChi = "";
+    TrangThai = "";
   }
 
   public NhaCungCapDTO(
     String MaNhaCungCap,
     String TenNhaCungCap,
     String SDT,
-    String DiaChi
+    String DiaChi,
+    String TrangThai
   ) {
     this.MaNhaCungCap = MaNhaCungCap;
     this.TenNhaCungCap = TenNhaCungCap;
     this.SDT = SDT;
     this.DiaChi = DiaChi;
+    this.TrangThai = TrangThai;
   }
 
   public NhaCungCapDTO(NhaCungCapDTO ncc) {
@@ -31,6 +35,7 @@ public class NhaCungCapDTO {
     this.TenNhaCungCap = ncc.TenNhaCungCap;
     this.SDT = ncc.SDT;
     this.DiaChi = ncc.DiaChi;
+    this.TrangThai = ncc.TrangThai;
   }
 
   public String getMaNhaCungCap() {
@@ -48,6 +53,9 @@ public class NhaCungCapDTO {
   public String getDiaChi() {
     return DiaChi;
   }
+  public String getTrangThai() {
+    return TrangThai;
+  }
 
   public void setMaNhaCungCap(String MaNhaCungCap) {
     this.MaNhaCungCap = MaNhaCungCap;
@@ -63,5 +71,8 @@ public class NhaCungCapDTO {
 
   public void setDiaChi(String DiaChi) {
     this.DiaChi = DiaChi;
+  }
+  public void setTrangThai(String tt) {
+    this.TrangThai = tt;
   }
 }

@@ -3,6 +3,7 @@ package com.quanlycuahangthuoc.controller;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.quanlycuahangthuoc.bus.NhanVienBUS;
@@ -10,33 +11,39 @@ import com.quanlycuahangthuoc.dto.NhanVienDTO;
 
 @RestController
 @RequestMapping("/api/nhanvien")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class NhanVienController {
 
     @Autowired
     private NhanVienBUS nhanVienBUS;
 
-    // GET: lấy danh sách nhân viên
+    // Lấy danh sách nhân viên
     @GetMapping
-    public ArrayList<NhanVienDTO> getAllNhanVien() {
+    public ArrayList<NhanVienDTO> getAll(){
         return nhanVienBUS.getAllNhanVien();
     }
 
-    // POST: thêm nhân viên
+    // Thêm nhân viên
     @PostMapping
-    public boolean ThemNhanVien(@RequestBody NhanVienDTO nv) {
-        return nhanVienBUS.ThemNhanVien(nv);
+    public ResponseEntity<?> them(@RequestBody NhanVienDTO nv){
+        if(nhanVienBUS.ThemNhanVien(nv))
+            return ResponseEntity.ok("Thêm nhân viên thành công");
+        return ResponseEntity.badRequest().body("Thêm nhân viên thất bại");
     }
 
-    // PUT: cập nhật nhân viên
+    // Cập nhật nhân viên
     @PutMapping
-    public boolean CapNhatNhanVien(@RequestBody NhanVienDTO nv) {
-        return nhanVienBUS.CapNhatNhanVien(nv);
+    public ResponseEntity<?> sua(@RequestBody NhanVienDTO nv){
+        if(nhanVienBUS.CapNhatNhanVien(nv))
+            return ResponseEntity.ok("Cập nhật nhân viên thành công");
+        return ResponseEntity.badRequest().body("Cập nhật nhân viên thất bại");
     }
 
-    // DELETE: xóa nhân viên
+    // Xóa nhân viên
     @DeleteMapping("/{maNhanVien}")
-    public boolean XoaNhanVien(@PathVariable String maNhanVien) {
-        return nhanVienBUS.XoaNhanVien(maNhanVien);
+    public ResponseEntity<?> xoa(@PathVariable String maNhanVien){
+        if(nhanVienBUS.XoaNhanVien(maNhanVien))
+            return ResponseEntity.ok("Đã xóa nhân viên");
+        return ResponseEntity.badRequest().body("Xóa nhân viên thất bại");
     }
 }

@@ -91,5 +91,81 @@ public class TaiKhoanDAO {
         }
         return false;
     }
-    
+
+    public boolean existUsername(String username){
+        String sql = "SELECT 1 FROM TaiKhoan WHERE TenDangNhap=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean existEmail(String email){
+        String sql = "SELECT 1 FROM TaiKhoan WHERE Email=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public TaiKhoanDTO getByUsername(String username){
+        String sql = "SELECT * FROM TaiKhoan WHERE TenDangNhap=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                TaiKhoanDTO tk = new TaiKhoanDTO();
+                tk.setMaTaiKhoan(rs.getString("MaTaiKhoan"));
+                tk.setTenDangNhap(rs.getString("TenDangNhap"));
+                tk.setMatKhau(rs.getString("MatKhau"));
+                tk.setEmail(rs.getString("Email"));
+                tk.setLoaiTaiKhoan(rs.getString("LoaiTaiKhoan"));
+                return tk;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public TaiKhoanDTO getById(String maTK){
+        String sql = "SELECT * FROM TaiKhoan WHERE MaTaiKhoan=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, maTK);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                TaiKhoanDTO tk = new TaiKhoanDTO();
+                tk.setMaTaiKhoan(rs.getString("MaTaiKhoan"));
+                tk.setTenDangNhap(rs.getString("TenDangNhap"));
+                tk.setMatKhau(rs.getString("MatKhau"));
+                tk.setEmail(rs.getString("Email"));
+                tk.setLoaiTaiKhoan(rs.getString("LoaiTaiKhoan"));
+                return tk;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

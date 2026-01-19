@@ -59,16 +59,16 @@ public class PhieuNhapDAO {
     }
 
     public boolean updatePhieuNhap(PhieuNhapDTO pn){
-         String sql = "UPDATE PhieuNhap SET MaNhanVien=?, MaNhaCungCap=?, NgayNhap=?, TongTien=? WHERE MaPhieuNhap";
+         String sql = "UPDATE PhieuNhap SET MaNhanVien=?, MaNhaCungCap=?, NgayNhap=?, TongTien=? WHERE MaPhieuNhap=?";
         try(
             Connection conn = DBConnection.getConnection(); 
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, pn.getMaPhieuNhap());
-            ps.setString(2, pn.getMaNhanVien());
-            ps.setString(3, pn.getMaNhaCungCap());
-            ps.setString(4, pn.getNgayNhap());
-            ps.setFloat(5, pn.getTongTien());
+            ps.setString(1, pn.getMaNhanVien());
+            ps.setString(2, pn.getMaNhaCungCap());
+            ps.setString(3, pn.getNgayNhap());
+            ps.setFloat(4, pn.getTongTien());
+            ps.setString(5, pn.getMaPhieuNhap());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
@@ -78,7 +78,7 @@ public class PhieuNhapDAO {
     }
 
     public boolean deletePhieuNhap(String MaPhieuNhap){
-        String sql = "DELETE PhieuNhap WHERE MaPhieuNhap=?";
+        String sql = "DELETE FROM PhieuNhap WHERE MaPhieuNhap=?";
         try(
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
@@ -90,5 +90,65 @@ public class PhieuNhapDAO {
             e.printStackTrace();
         }
         return false;
+    }
+    //hàm để CTPhieuNhap cộng tiền vào phiếu nhập
+    public boolean CongTongTien(String maPhieuNhap, float tien) {
+        String sql = "UPDATE PhieuNhap SET TongTien = TongTien + ? WHERE MaPhieuNhap=?";
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+            ps.setFloat(1, tien);
+            ps.setString(2, maPhieuNhap);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    //đếm số chi tiết nhập theo mã phiếu nhập
+    public int demSoCTTheoMaPhieuNhap(String maPN){
+        String sql = "SELECT COUNT(*) FROM CTPhieuNhap WHERE MaPhieuNhap=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, maPN);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) return rs.getInt(1);
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    //đếm số phiếu nhập theo mã nhà cung cấp
+    public int countByNhaCungCap(String maNhaCungCap){
+        String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNhaCungCap=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, maNhaCungCap);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) return rs.getInt(1);
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countByNhanVien(String maNV) {
+        String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNhanVien=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+        ) {
+            ps.setString(1, maNV);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) return rs.getInt(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

@@ -4,9 +4,10 @@ import java.sql.DriverManager;
 
 public class DBConnection {
 
-  private static final String URL = "";
-  private static final String Username = "";
-  private static final String Password = "";
+  private static final String URL =
+    "jdbc:mysql://tramway.proxy.rlwy.net:57864/QuanLyNhaThuoc";
+  private static final String Username = "root";
+  private static final String Password = "RSfJaDbgzwfGdkHBtEGwLPhFyXVemcGZ";
 
   private static Connection connection = null;
 

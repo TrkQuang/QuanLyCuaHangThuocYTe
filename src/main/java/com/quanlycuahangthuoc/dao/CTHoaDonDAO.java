@@ -84,4 +84,30 @@ public class CTHoaDonDAO {
         }
         return false;
     }
+    
+    public ArrayList<CTHoaDonDTO> getCTHoaDonByMaHoaDon(String maHoaDon) {
+        ArrayList<CTHoaDonDTO> ds = new ArrayList<>();
+        String sql = "SELECT * FROM CTHoaDon WHERE MaHoaDon=?";
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, maHoaDon);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CTHoaDonDTO ct = new CTHoaDonDTO();
+                ct.setMaCTHD(rs.getString("MaCTHD"));
+                ct.setMaHoaDon(rs.getString("MaHoaDon"));
+                ct.setMaThuoc(rs.getString("MaThuoc"));
+                ct.setSoLuong(rs.getInt("SoLuong"));
+                ct.setHDSD(rs.getString("HDSD"));
+                ds.add(ct);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ds;
+    }
 }

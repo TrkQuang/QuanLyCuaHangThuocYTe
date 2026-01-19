@@ -5,12 +5,14 @@ public class HoaDonDTO {
   private String MaHoaDon;
   private String MaKhachHang;
   private String NgayTao;
+  private String TrangThai;
   private float TongTien;
 
   public HoaDonDTO() {
     MaHoaDon = "";
     MaKhachHang = "";
     NgayTao = "";
+    TrangThai = "CHOXACNHAN";
     TongTien = 0;
   }
 
@@ -18,11 +20,13 @@ public class HoaDonDTO {
     String MaHoaDon,
     String MaKhachHang,
     String NgayTao,
+    String TrangThai,
     float TongTien
   ) {
     this.MaHoaDon = MaHoaDon;
     this.MaKhachHang = MaKhachHang;
     this.NgayTao = NgayTao;
+    this.TrangThai = TrangThai;
     this.TongTien = TongTien;
   }
 
@@ -30,6 +34,7 @@ public class HoaDonDTO {
     this.MaHoaDon = hd.MaHoaDon;
     this.MaKhachHang = hd.MaKhachHang;
     this.NgayTao = hd.NgayTao;
+    this.TrangThai = hd.TrangThai;
     this.TongTien = hd.TongTien;
   }
 
@@ -43,6 +48,10 @@ public class HoaDonDTO {
 
   public String getNgayTao() {
     return NgayTao;
+  }
+
+  public String getTrangThai() {
+    return TrangThai;
   }
 
   public float getTongTien() {
@@ -63,5 +72,8 @@ public class HoaDonDTO {
 
   public void setTongTien(float TongTien) {
     this.TongTien = TongTien;
+  }
+  public void setTrangThai(String a) {
+    this.TrangThai = a;
   }
 }

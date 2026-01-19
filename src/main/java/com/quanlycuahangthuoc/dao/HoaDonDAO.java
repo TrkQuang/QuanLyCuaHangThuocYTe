@@ -16,7 +16,6 @@ import com.quanlycuahangthuoc.dto.HoaDonDTO;
 public class HoaDonDAO {
     public ArrayList<HoaDonDTO> getAllHoaDon(){
         ArrayList<HoaDonDTO> ds = new ArrayList<>();
-
         String sql = "SELECT * FROM HoaDon";
         try(
             Connection conn = DBConnection.getConnection();
@@ -28,6 +27,7 @@ public class HoaDonDAO {
                 hd.setMaHoaDon(rs.getString("MaHoaDon"));
                 hd.setMaKhachHang(rs.getString("MaKhachHang"));
                 hd.setNgayTao(rs.getString("NgayTao"));
+                hd.setTrangThai(rs.getString("TrangThai"));
                 hd.setTongTien(rs.getFloat("TongTien"));
                 ds.add(hd);
             }
@@ -38,7 +38,7 @@ public class HoaDonDAO {
     }
 
     public boolean insertHoaDon(HoaDonDTO hd){
-        String sql = "INSERT INTO HoaDon VALUES (?,?,?,?)";
+        String sql = "INSERT INTO HoaDon VALUES (?,?,?,?,?)";
         try(
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
@@ -46,7 +46,8 @@ public class HoaDonDAO {
             ps.setString(1, hd.getMaHoaDon());
             ps.setString(2, hd.getMaKhachHang());
             ps.setString(3, hd.getNgayTao());
-            ps.setFloat(4, hd.getTongTien());
+            ps.setString(4, hd.getTrangThai());
+            ps.setFloat(5, hd.getTongTien());
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
             e.printStackTrace();
@@ -55,15 +56,16 @@ public class HoaDonDAO {
     }
 
     public boolean updateHoaDon(HoaDonDTO hd){
-        String sql = "UPDATE HoaDon SET MaKhachHang=?, NgayTao=?, TongTien=? WHERE MaHoaDon=?";
+        String sql = "UPDATE HoaDon SET MaKhachHang=?, NgayTao=?, TrangThai=?, TongTien=? WHERE MaHoaDon=?";
         try(
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, hd.getMaHoaDon());
-            ps.setString(2, hd.getMaKhachHang());
-            ps.setString(3, hd.getNgayTao());
+            ps.setString(1, hd.getMaKhachHang());
+            ps.setString(2, hd.getNgayTao());
+            ps.setString(3, hd.getTrangThai());
             ps.setFloat(4, hd.getTongTien());
+            ps.setString(5, hd.getMaHoaDon());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
@@ -84,6 +86,34 @@ public class HoaDonDAO {
             e.printStackTrace();
         }
         return false;
+    }
+    public int countByNhanVien(String maNV) {
+        String sql = "SELECT COUNT(*) FROM HoaDon WHERE MaNhanVien=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+        ) {
+            ps.setString(1, maNV);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) return rs.getInt(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    public int countByKhachHang(String maKH) {
+        String sql = "SELECT COUNT(*) FROM HoaDon WHERE MaKhachHang=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+        ) {
+            ps.setString(1, maKH);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) return rs.getInt(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 }

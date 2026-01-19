@@ -89,4 +89,29 @@ public class CTPhieuNhapDAO {
         }
         return false;
     }
+
+    public CTPhieuNhapDTO getCTPhieuNhapById(String maCTPN){
+        String sql = "SELECT * FROM CTPhieuNhap WHERE MaCTPN=?";
+        try(
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ){
+            ps.setString(1, maCTPN);
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()){
+                CTPhieuNhapDTO ctpn = new CTPhieuNhapDTO();
+                ctpn.setMaCTPN(rs.getString("MaCTPN"));
+                ctpn.setMaPhieuNhap(rs.getString("MaPhieuNhap"));
+                ctpn.setMaThuoc(rs.getString("MaThuoc"));
+                ctpn.setSoLuongNhap(rs.getInt("SoLuongNhap"));
+                ctpn.setDonGia(rs.getFloat("DonGia"));
+                return ctpn;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 } 

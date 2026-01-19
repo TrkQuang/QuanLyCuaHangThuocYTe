@@ -1,8 +1,11 @@
 package com.quanlycuahangthuoc.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.quanlycuahangthuoc.bus.KhachHangBUS;
@@ -16,27 +19,41 @@ public class KhachHangController {
     @Autowired
     private KhachHangBUS khachHangBUS;
 
-    // GET: lấy danh sách khách hàng
     @GetMapping
-    public ArrayList<KhachHangDTO> getAllKhachHang() {
+    public ArrayList<KhachHangDTO> getAll(){
         return khachHangBUS.getAllKhachHang();
     }
 
-    // POST: thêm khách hàng
     @PostMapping
-    public boolean themKhachHang(@RequestBody KhachHangDTO kh) {
-        return khachHangBUS.ThemKhachHang(kh);
+    public ResponseEntity<?> them(@RequestBody KhachHangDTO kh){
+        try{
+            return ResponseEntity.ok(khachHangBUS.themKhachHang(kh));
+        }catch(Exception e){
+            Map<String,String> err = new HashMap<>();
+            err.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
     }
 
-    // PUT: cập nhật khách hàng
     @PutMapping
-    public boolean capNhatKhachHang(@RequestBody KhachHangDTO kh) {
-        return khachHangBUS.CapNhatKhachHang(kh);
+    public ResponseEntity<?> sua(@RequestBody KhachHangDTO kh){
+        try{
+            return ResponseEntity.ok(khachHangBUS.suaKhachHang(kh));
+        }catch(Exception e){
+            Map<String,String> err = new HashMap<>();
+            err.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
     }
 
-    // DELETE: xóa khách hàng
     @DeleteMapping("/{maKH}")
-    public boolean xoaKhachHang(@PathVariable String maKH) {
-        return khachHangBUS.XoaKhachHang(maKH);
+    public ResponseEntity<?> xoa(@PathVariable String maKH){
+        try{
+            return ResponseEntity.ok(khachHangBUS.xoaKhachHang(maKH));
+        }catch(Exception e){
+            Map<String,String> err = new HashMap<>();
+            err.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
     }
 }

@@ -99,4 +99,20 @@ public class ThuocDAO {
         }
         return false;
     }
+
+    public boolean CongSoLuongTon(String maThuoc, int soLuong) {
+        String sql = "UPDATE Thuoc SET SoLuongTon = SoLuongTon + ? WHERE MaThuoc=?";
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+            ps.setInt(1, soLuong);
+            ps.setString(2, maThuoc);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
