@@ -64,11 +64,11 @@ public class LichLamDAO {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, ll.getMaLich());
-            ps.setString(2, ll.getMaNhanVien());
-            ps.setString(3, ll.getNgayLam());
-            ps.setString(4, ll.getGioBatDau());
-            ps.setString(5, ll.getGioKetThuc());
+            ps.setString(1, ll.getMaNhanVien());
+            ps.setString(2, ll.getNgayLam());
+            ps.setString(3, ll.getGioBatDau());
+            ps.setString(4, ll.getGioKetThuc());
+            ps.setString(5, ll.getMaLich());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){

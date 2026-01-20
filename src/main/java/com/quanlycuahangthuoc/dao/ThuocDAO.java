@@ -70,14 +70,14 @@ public class ThuocDAO {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, t.getMaThuoc());
-            ps.setString(2, t.getMaNhaCungCap());
-            ps.setString(3, t.getTenThuoc());
-            ps.setString(4, t.getDonViTinh());
-            ps.setString(5, t.getNSX());
-            ps.setString(6, t.getHSD());
-            ps.setFloat(7, t.getGiaBan());
-            ps.setInt(8, t.getSoLuongTon());
+            ps.setString(1, t.getMaNhaCungCap());
+            ps.setString(2, t.getTenThuoc());
+            ps.setString(3, t.getDonViTinh());
+            ps.setString(4, t.getNSX());
+            ps.setString(5, t.getHSD());
+            ps.setFloat(6, t.getGiaBan());
+            ps.setInt(7, t.getSoLuongTon());
+            ps.setString(8, t.getMaThuoc());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
@@ -114,5 +114,4 @@ public class ThuocDAO {
         }
         return false;
     }
-
 }

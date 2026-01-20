@@ -91,6 +91,7 @@ public class PhieuNhapDAO {
         }
         return false;
     }
+
     //hàm để CTPhieuNhap cộng tiền vào phiếu nhập
     public boolean CongTongTien(String maPhieuNhap, float tien) {
         String sql = "UPDATE PhieuNhap SET TongTien = TongTien + ? WHERE MaPhieuNhap=?";
@@ -106,6 +107,7 @@ public class PhieuNhapDAO {
         }
         return false;
     }
+
     //đếm số chi tiết nhập theo mã phiếu nhập
     public int demSoCTTheoMaPhieuNhap(String maPN){
         String sql = "SELECT COUNT(*) FROM CTPhieuNhap WHERE MaPhieuNhap=?";
@@ -121,6 +123,7 @@ public class PhieuNhapDAO {
         }
         return 0;
     }
+    
     //đếm số phiếu nhập theo mã nhà cung cấp
     public int countByNhaCungCap(String maNhaCungCap){
         String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNhaCungCap=?";

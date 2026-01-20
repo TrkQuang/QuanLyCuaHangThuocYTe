@@ -58,11 +58,11 @@ public class CTHoaDonDAO {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, cthd.getMaCTHD());
-            ps.setString(2, cthd.getMaHoaDon());
-            ps.setString(3, cthd.getMaThuoc());
-            ps.setInt(4, cthd.getSoLuong());
-            ps.setString(5, cthd.getHDSD());
+            ps.setString(1, cthd.getMaHoaDon());
+            ps.setString(2, cthd.getMaThuoc());
+            ps.setInt(3, cthd.getSoLuong());
+            ps.setString(4, cthd.getHDSD());
+            ps.setString(5, cthd.getMaCTHD());
             
             return ps.executeUpdate() > 0;
         }catch(SQLException e){

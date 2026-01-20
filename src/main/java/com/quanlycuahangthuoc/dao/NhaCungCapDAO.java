@@ -17,7 +17,7 @@ public class NhaCungCapDAO {
     public ArrayList<NhaCungCapDTO> getAllNhaCungCap(){
         ArrayList<NhaCungCapDTO> ds = new ArrayList<>();
 
-        String sql = "SELECT * FROM LichLam";
+        String sql = "SELECT * FROM NhaCungCap";
         try(
             Connection conn = DBConnection.getConnection();
             Statement stmt = conn.createStatement();
@@ -59,16 +59,16 @@ public class NhaCungCapDAO {
     }
 
     public boolean updateNhaCungCap(NhaCungCapDTO ncc){
-        String sql = "UPDATE NhaCungCap SET TenNhaCungCap=?, DiaChi=?, SDT=?";
+        String sql = "UPDATE NhaCungCap SET TenNhaCungCap=?, DiaChi=?, SDT=?, TrangThai=? WHERE MaNhaCungCap=?";
         try(
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, ncc.getMaNhaCungCap());
-            ps.setString(2, ncc.getTenNhaCungCap());
-            ps.setString(3, ncc.getDiaChi());
-            ps.setString(4, ncc.getSDT());
-            ps.setString(5, ncc.getTrangThai());
+            ps.setString(1, ncc.getTenNhaCungCap());
+            ps.setString(2, ncc.getDiaChi());
+            ps.setString(3, ncc.getSDT());
+            ps.setString(4, ncc.getTrangThai());
+            ps.setString(5, ncc.getMaNhaCungCap());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){

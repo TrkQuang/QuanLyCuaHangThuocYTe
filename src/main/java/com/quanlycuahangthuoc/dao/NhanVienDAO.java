@@ -67,12 +67,12 @@ public class NhanVienDAO {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, nv.getMaNhanVien());
-            ps.setString(2, nv.getMaTaiKhoan());
-            ps.setString(3, nv.getHo());
-            ps.setString(4, nv.getTen());
-            ps.setString(5, nv.getDiaChi());
-            ps.setString(6, nv.getSDT());
+            ps.setString(1, nv.getMaTaiKhoan());
+            ps.setString(2, nv.getHo());
+            ps.setString(3, nv.getTen());
+            ps.setString(4, nv.getDiaChi());
+            ps.setString(5, nv.getSDT());
+            ps.setString(6, nv.getMaNhanVien());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
