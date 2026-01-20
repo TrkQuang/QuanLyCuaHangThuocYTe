@@ -2,6 +2,7 @@ package com.quanlycuahangthuoc.bus;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 
 import com.quanlycuahangthuoc.dao.TaiKhoanDAO;
 import com.quanlycuahangthuoc.dao.HoaDonDAO;
@@ -81,6 +82,10 @@ public class TaiKhoanBUS {
             throw new RuntimeException("Tài khoản đã phát sinh giao dịch, không được xoá");
 
         return taiKhoanDAO.deleteTaiKhoan(maTK);
+    }
+
+    public ArrayList<TaiKhoanDTO>  getAllTaiKhoan() {
+        return taiKhoanDAO.getAllTaiKhoan();
     }
 }
 
