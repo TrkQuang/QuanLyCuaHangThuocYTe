@@ -64,12 +64,12 @@ public class TaiKhoanDAO {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, tk.getMaTaiKhoan());
-            ps.setString(2, tk.getTenDangNhap());
-            ps.setString(3, tk.getEmail());
-            ps.setString(4, tk.getLoaiTaiKhoan());
-            ps.setString(5, tk.getMatKhau());
-
+            ps.setString(1, tk.getTenDangNhap());
+            ps.setString(2, tk.getEmail());
+            ps.setString(3, tk.getLoaiTaiKhoan());
+            ps.setString(4, tk.getMatKhau());
+            ps.setString(5, tk.getMaTaiKhoan());
+            
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
             e.printStackTrace();

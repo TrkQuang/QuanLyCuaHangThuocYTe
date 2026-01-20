@@ -78,7 +78,8 @@ public class KhachHangDAO {
       ps.setString(5, kh.getSDT());
       ps.setString(6, kh.getDiaChi());
       ps.setString(7, kh.getTienSuBenhLy());
-      ps.setString(8, kh.getMaKhachHang());
+      ps.setString(8, kh.getMaTaiKhoan());
+      ps.setString(9, kh.getMaKhachHang());
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {

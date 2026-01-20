@@ -63,11 +63,11 @@ public class CTPhieuNhapDAO {
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ){
-            ps.setString(1, ctpn.getMaCTPN());
-            ps.setString(2, ctpn.getMaPhieuNhap());
-            ps.setString(3, ctpn.getMaThuoc());
-            ps.setInt(4, ctpn.getSoLuongNhap());
-            ps.setFloat(5, ctpn.getDonGia());
+            ps.setString(1, ctpn.getMaPhieuNhap());
+            ps.setString(2, ctpn.getMaThuoc());
+            ps.setInt(3, ctpn.getSoLuongNhap());
+            ps.setFloat(4, ctpn.getDonGia());
+            ps.setString(5, ctpn.getMaCTPN());
 
             return ps.executeUpdate() > 0;
         }catch(SQLException e){
