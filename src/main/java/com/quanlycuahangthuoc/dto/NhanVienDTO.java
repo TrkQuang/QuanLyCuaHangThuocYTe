@@ -2,12 +2,14 @@ package com.quanlycuahangthuoc.dto;
 
 public class NhanVienDTO {
 
-  private String MaNhanVien; 
+  private String MaNhanVien;
   private String Ho;
   private String Ten;
   private String SDT;
   private String DiaChi;
   private String MaTaiKhoan;
+  private String Email;
+  private String GioiTinh;
 
   public NhanVienDTO() {
     this.MaNhanVien = "";
@@ -16,6 +18,8 @@ public class NhanVienDTO {
     this.SDT = "";
     this.DiaChi = "";
     this.MaTaiKhoan = "";
+    this.Email = "";
+    this.GioiTinh = "";
   }
 
   public NhanVienDTO(
@@ -89,5 +93,21 @@ public class NhanVienDTO {
 
   public void setMaTaiKhoan(String MaTaiKhoan) {
     this.MaTaiKhoan = MaTaiKhoan;
+  }
+
+  public String getEmail() {
+    return Email;
+  }
+
+  public void setEmail(String Email) {
+    this.Email = Email;
+  }
+
+  public String getGioiTinh() {
+    return GioiTinh;
+  }
+
+  public void setGioiTinh(String GioiTinh) {
+    this.GioiTinh = GioiTinh;
   }
 }

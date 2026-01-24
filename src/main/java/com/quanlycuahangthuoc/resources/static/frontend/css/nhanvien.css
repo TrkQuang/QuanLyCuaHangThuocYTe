@@ -1,0 +1,176 @@
+/* Import admin styles làm base */
+@import url("./admin.css");
+
+/* Tùy chỉnh màu gradient cho nhân viên - màu xanh lá */
+.sidebar {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
+}
+
+/* ===== SALE PAGE STYLES ===== */
+.sale-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+}
+
+.sale-search,
+.cart-section {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sale-search h3,
+.cart-section h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.sale-search input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.sale-search input:focus {
+  outline: none;
+  border-color: #11998e;
+}
+
+/* Search results */
+.search-results {
+  margin-top: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.drug-item {
+  padding: 12px;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.drug-item:hover {
+  background: #f8f9fa;
+  border-color: #11998e;
+}
+
+.drug-item-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.drug-item-info {
+  font-size: 13px;
+  color: #666;
+}
+
+.drug-item-price {
+  color: #11998e;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+/* Cart table */
+.cart-section table {
+  margin-bottom: 20px;
+}
+
+.cart-section input[type="number"] {
+  width: 70px;
+  padding: 5px;
+  border: 1px solid #e1e8ed;
+  border-radius: 4px;
+}
+
+.btn-remove {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-remove:hover {
+  background: #d32f2f;
+}
+
+/* Cart total */
+.cart-total {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.cart-total h3 {
+  color: #2c3e50;
+  font-size: 20px;
+}
+
+.cart-total span {
+  color: #11998e;
+}
+
+/* Customer info */
+.customer-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.customer-info h3 {
+  margin-bottom: 15px;
+}
+
+/* Button large */
+.btn-large {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+}
+
+/* Search box */
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 15px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #11998e;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sale-container {
+    grid-template-columns: 1fr;
+  }
+}

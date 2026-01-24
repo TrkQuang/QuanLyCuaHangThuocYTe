@@ -1,133 +1,91 @@
-// Tài khoản admin mặc định
-const ADMIN_CREDENTIALS = {
-  username: "admin",
-  password: "admin",
-};
+// URL API backend
+const API_URL = "http://localhost:8080/api";
 
-const API_BASE_URL = "/api";
+// Lấy các element từ form
+const loginForm = document.getElementById("loginForm");
+const errorMessage = document.getElementById("errorMessage");
 
-document
-  .getElementById("loginForm")
-  .addEventListener("submit", async function (e) {
-    e.preventDefault();
+// Xử lý sự kiện submit form đăng nhập
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault(); // Ngăn form reload trang
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
-    const remember = document.getElementById("remember").checked;
+  // Lấy giá trị từ input
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-    // Xóa thông báo cũ
-    hideAlert();
+  // Validate đơn giản
+  if (!username || !password) {
+    showError("Vui lòng nhập đầy đủ thông tin!");
+    return;
+  }
 
-    // Kiểm tra tài khoản admin mặc định trước
-    if (
-      username === ADMIN_CREDENTIALS.username &&
-      password === ADMIN_CREDENTIALS.password
-    ) {
-      loginAsAdmin(remember);
-      return;
-    }
+  // Gọi API đăng nhập
+  await handleLogin(username, password);
+});
 
-    // Nếu không phải admin, thử đăng nhập qua API
-    try {
-      const response = await fetch(`${API_BASE_URL}/taikhoan/dangnhap`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tenDangNhap: username,
-          matKhau: password,
-        }),
-      });
+/**
+ * Hàm xử lý đăng nhập
+ * @param {string} username - Tên đăng nhập
+ * @param {string} password - Mật khẩu
+ */
+async function handleLogin(username, password) {
+  try {
+    // Chuẩn bị dữ liệu gửi đi
+    const loginData = {
+      tenDangNhap: username,
+      matKhau: password,
+    };
 
-      if (response.ok) {
-        const data = await response.json();
+    // Gọi API login nhân viên/admin
+    const response = await fetch(`${API_URL}/taikhoan/login-nhanvien`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(loginData),
+    });
 
-        // Kiểm tra vai trò và chuyển hướng phù hợp
-        if (data.vaiTro === "admin" || data.vaiTro === "ADMIN") {
-          loginAsAdmin(remember, data);
+    // Kiểm tra response
+    if (response.ok) {
+      const userData = await response.json();
+
+      // Kiểm tra xem có dữ liệu trả về không
+      if (userData && userData.maTaiKhoan) {
+        // Lưu thông tin user vào localStorage để dùng ở các trang khác
+        localStorage.setItem("currentUser", JSON.stringify(userData));
+
+        // Kiểm tra loại tài khoản và chuyển hướng
+        if (userData.loaiTaiKhoan === "Admin") {
+          // Nếu là Admin -> chuyển đến trang admin
+          window.location.href = "idx_admin.html";
+        } else if (userData.loaiTaiKhoan === "NhanVien") {
+          // Nếu là Nhân viên -> chuyển đến trang nhân viên
+          window.location.href = "idx_nv.html";
         } else {
-          loginAsEmployee(remember, data);
+          showError("Loại tài khoản không hợp lệ!");
         }
       } else {
-        showAlert("Tên đăng nhập hoặc mật khẩu không đúng!", "error");
+        showError("Tên đăng nhập hoặc mật khẩu không đúng!");
       }
-    } catch (error) {
-      console.error("Lỗi đăng nhập:", error);
-      showAlert("Không thể kết nối đến máy chủ. Vui lòng thử lại!", "error");
+    } else {
+      showError("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
     }
-  });
-
-// Đăng nhập với quyền Admin
-function loginAsAdmin(remember, data = null) {
-  const adminUser = data || {
-    maTK: "ADMIN001",
-    tenDangNhap: "admin",
-    vaiTro: "admin",
-    hoTen: "Quản Trị Viên",
-    loginTime: new Date().toISOString(),
-  };
-
-  // Lưu vào storage phù hợp
-  const storage = remember ? localStorage : sessionStorage;
-  storage.setItem("currentAdmin", JSON.stringify(adminUser));
-
-  showAlert("Đăng nhập Admin thành công! Đang chuyển hướng...", "success");
-
-  setTimeout(() => {
-    window.location.href = "index_admin.html";
-  }, 1000);
-}
-
-// Đăng nhập với quyền Nhân viên
-function loginAsEmployee(remember, data) {
-  // Lấy thông tin nhân viên từ API nếu cần
-  const employeeUser = {
-    maTK: data.maTK,
-    maNhanVien: data.maNhanVien,
-    tenDangNhap: data.tenDangNhap,
-    tenNhanVien: data.tenNhanVien || data.hoTen,
-    vaiTro: data.vaiTro || "nhanvien",
-    loginTime: new Date().toISOString(),
-  };
-
-  // Lưu vào storage phù hợp
-  const storage = remember ? localStorage : sessionStorage;
-  storage.setItem("currentUser", JSON.stringify(employeeUser));
-
-  showAlert("Đăng nhập Nhân viên thành công! Đang chuyển hướng...", "success");
-
-  setTimeout(() => {
-    window.location.href = "index_nv.html";
-  }, 1000);
-}
-
-function showAlert(message, type) {
-  const alertBox = document.getElementById("alertBox");
-  alertBox.textContent = message;
-  alertBox.className = `alert alert-${type}`;
-  alertBox.style.display = "block";
-}
-
-function hideAlert() {
-  const alertBox = document.getElementById("alertBox");
-  alertBox.style.display = "none";
-}
-
-// Kiểm tra nếu đã đăng nhập
-window.addEventListener("load", function () {
-  const currentAdmin =
-    localStorage.getItem("currentAdmin") ||
-    sessionStorage.getItem("currentAdmin");
-  const currentUser =
-    localStorage.getItem("currentUser") ||
-    sessionStorage.getItem("currentUser");
-
-  if (currentAdmin) {
-    // Đã đăng nhập admin, chuyển thẳng vào trang admin
-    window.location.href = "index_admin.html";
-  } else if (currentUser) {
-    // Đã đăng nhập nhân viên, chuyển thẳng vào trang nhân viên
-    window.location.href = "index_nv.html";
+  } catch (error) {
+    console.error("Lỗi khi đăng nhập:", error);
+    showError("Không thể kết nối đến server. Vui lòng thử lại sau!");
   }
-});
+}
+
+/**
+ * Hàm hiển thị thông báo lỗi
+ * @param {string} message - Nội dung lỗi
+ */
+function showError(message) {
+  errorMessage.textContent = message;
+  errorMessage.classList.add("show");
+
+  // Tự động ẩn sau 5 giây
+  setTimeout(() => {
+    errorMessage.classList.remove("show");
+  }, 5000);
+}

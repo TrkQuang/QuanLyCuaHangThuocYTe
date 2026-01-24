@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nhân Viên - Quản Lý Nhà Thuốc</title>
+    <link rel="stylesheet" href="../css/nhanvien.css" />
+    <!-- Font Awesome cho icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>🏥 Nhân Viên Panel</h2>
+        <p id="nvName">Nhân Viên</p>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="#" class="menu-item active" data-page="dashboard">
+          <i class="fas fa-chart-line"></i> Dashboard
+        </a>
+        <a href="#" class="menu-item" data-page="thuoc">
+          <i class="fas fa-pills"></i> Quản Lý Thuốc
+        </a>
+        <a href="#" class="menu-item" data-page="phieunhap">
+          <i class="fas fa-file-import"></i> Phiếu Nhập Hàng
+        </a>
+        <a href="#" class="menu-item" data-page="banhang">
+          <i class="fas fa-shopping-cart"></i> Bán Hàng
+        </a>
+        <a href="#" class="menu-item" data-page="hoadon">
+          <i class="fas fa-receipt"></i> Hóa Đơn
+        </a>
+        <a href="#" class="menu-item" data-page="hoso">
+          <i class="fas fa-id-card"></i> Hồ Sơ Của Tôi
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn-logout">
+          <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="header-right">
+          <span class="date" id="currentDate"></span>
+          <span class="time" id="currentTime"></span>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+          <div class="stats-container">
+            <!-- Card thống kê -->
+            <div class="stat-card">
+              <div class="stat-icon orange">
+                <i class="fas fa-pills"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="totalThuoc">0</h3>
+                <p>Loại Thuốc</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon blue">
+                <i class="fas fa-file-import"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="totalPhieuNhap">0</h3>
+                <p>Phiếu Nhập</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon red">
+                <i class="fas fa-receipt"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="totalHoaDon">0</h3>
+                <p>Hóa Đơn</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="todayRevenue">0 đ</h3>
+                <p>Doanh Thu Hôm Nay</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Biểu đồ và thông tin -->
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h3>📊 Hóa đơn gần đây</h3>
+              <div id="recentOrders" class="activity-list">
+                <p>Đang tải dữ liệu...</p>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <h3>⚠️ Thuốc sắp hết</h3>
+              <div id="lowStockDrugs" class="activity-list">
+                <p>Đang tải dữ liệu...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quản Lý Thuốc Page -->
+        <div id="thuoc-page" class="page">
+          <div class="page-header">
+            <h2>Danh Sách Thuốc</h2>
+            <button class="btn btn-primary" onclick="showAddThuocModal()">
+              <i class="fas fa-plus"></i> Thêm Thuốc
+            </button>
+          </div>
+
+          <!-- Search box -->
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchThuoc"
+              placeholder="Tìm kiếm thuốc..."
+              onkeyup="searchThuoc()"
+            />
+          </div>
+
+          <div class="table-container">
+            <table id="thuocTable">
+              <thead>
+                <tr>
+                  <th>Mã Thuốc</th>
+                  <th>Tên Thuốc</th>
+                  <th>Loại</th>
+                  <th>Đơn Vị</th>
+                  <th>Giá Bán</th>
+                  <th>Số Lượng</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="thuocTableBody">
+                <tr>
+                  <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Phiếu Nhập Page -->
+        <div id="phieunhap-page" class="page">
+          <div class="page-header">
+            <h2>Danh Sách Phiếu Nhập</h2>
+            <button class="btn btn-primary" onclick="showAddPhieuNhapModal()">
+              <i class="fas fa-plus"></i> Tạo Phiếu Nhập
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table id="phieunhapTable">
+              <thead>
+                <tr>
+                  <th>Mã PN</th>
+                  <th>Ngày Nhập</th>
+                  <th>Nhà Cung Cấp</th>
+                  <th>Nhân Viên</th>
+                  <th>Tổng Tiền</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="phieunhapTableBody">
+                <tr>
+                  <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bán Hàng Page -->
+        <div id="banhang-page" class="page">
+          <h2>Tạo Hóa Đơn Bán Hàng</h2>
+
+          <div class="sale-container">
+            <!-- Tìm kiếm thuốc -->
+            <div class="sale-search">
+              <h3>Tìm Thuốc</h3>
+              <input
+                type="text"
+                id="searchDrug"
+                placeholder="Nhập tên hoặc mã thuốc..."
+                onkeyup="searchDrugForSale()"
+              />
+              <div id="drugSearchResults" class="search-results"></div>
+            </div>
+
+            <!-- Giỏ hàng -->
+            <div class="cart-section">
+              <h3>Giỏ Hàng</h3>
+              <table id="cartTable">
+                <thead>
+                  <tr>
+                    <th>Tên Thuốc</th>
+                    <th>Giá</th>
+                    <th>Số Lượng</th>
+                    <th>Thành Tiền</th>
+                    <th>Xóa</th>
+                  </tr>
+                </thead>
+                <tbody id="cartTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center">Giỏ hàng trống</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="cart-total">
+                <h3>Tổng Tiền: <span id="cartTotal">0 đ</span></h3>
+              </div>
+
+              <!-- Thông tin khách hàng -->
+              <div class="customer-info">
+                <h3>Thông Tin Khách Hàng</h3>
+                <div class="form-group">
+                  <label>Số điện thoại</label>
+                  <input
+                    type="tel"
+                    id="customerPhone"
+                    placeholder="Nhập SĐT để tìm khách hàng"
+                    onblur="searchCustomer()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Tên khách hàng</label>
+                  <input
+                    type="text"
+                    id="customerName"
+                    placeholder="Tự động điền nếu có"
+                  />
+                </div>
+              </div>
+
+              <button
+                class="btn btn-primary btn-large"
+                onclick="createInvoice()"
+              >
+                <i class="fas fa-check"></i> Tạo Hóa Đơn
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hóa Đơn Page -->
+        <div id="hoadon-page" class="page">
+          <div class="page-header">
+            <h2>Danh Sách Hóa Đơn</h2>
+          </div>
+
+          <div class="table-container">
+            <table id="hoadonTable">
+              <thead>
+                <tr>
+                  <th>Mã HD</th>
+                  <th>Ngày Lập</th>
+                  <th>Khách Hàng</th>
+                  <th>Nhân Viên</th>
+                  <th>Tổng Tiền</th>
+                  <th>Trạng Thái</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="hoadonTableBody">
+                <tr>
+                  <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Hồ Sơ Của Tôi Page -->
+        <div id="hoso-page" class="page">
+          <div class="page-header">
+            <h2><i class="fas fa-id-card"></i> Hồ Sơ Của Tôi</h2>
+          </div>
+
+          <div id="hosoContent" style="max-width: 800px; margin: 0 auto;">
+            <div style="text-align: center; padding: 50px;">
+              <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #667eea;"></i>
+              <p style="margin-top: 15px; color: #666;">Đang tải thông tin...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <script src="../js/nhanvien.js"></script>
+  </body>
+</html>
