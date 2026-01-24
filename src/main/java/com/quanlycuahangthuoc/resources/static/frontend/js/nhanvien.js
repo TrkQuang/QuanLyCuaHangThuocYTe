@@ -907,15 +907,16 @@ async function loadHoSoCuaToi() {
   try {
     // Lấy mã nhân viên từ localStorage (giả sử có lưu mã nhân viên khi đăng nhập)
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    
+
     // Lấy danh sách tất cả nhân viên
     const response = await fetch(`${API_URL}/nhanvien`);
     const allNhanVien = await response.json();
-    
+
     // Tìm thông tin nhân viên hiện tại dựa trên username hoặc email
     const myInfo = allNhanVien.find(
-      nv => nv.email === currentUser.email || 
-            nv.maTaiKhoan === currentUser.maTaiKhoan
+      (nv) =>
+        nv.email === currentUser.email ||
+        nv.maTaiKhoan === currentUser.maTaiKhoan,
     );
 
     if (!myInfo) {
@@ -928,8 +929,8 @@ async function loadHoSoCuaToi() {
       return;
     }
 
-    const hoTen = `${myInfo.ho || ''} ${myInfo.ten || ''}`.trim();
-    
+    const hoTen = `${myInfo.ho || ""} ${myInfo.ten || ""}`.trim();
+
     // Hiển thị hồ sơ
     document.getElementById("hosoContent").innerHTML = `
       <div style="background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); padding: 40px; border-radius: 20px; color: white; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(26, 188, 156, 0.3);">
@@ -954,7 +955,7 @@ async function loadHoSoCuaToi() {
             </div>
             <div>
               <p style="margin: 0; font-size: 13px; color: #999;">Giới Tính</p>
-              <h3 style="margin: 5px 0 0; font-size: 18px; color: #333;">${myInfo.gioiTinh || 'Chưa cập nhật'}</h3>
+              <h3 style="margin: 5px 0 0; font-size: 18px; color: #333;">${myInfo.gioiTinh || "Chưa cập nhật"}</h3>
             </div>
           </div>
         </div>
@@ -966,7 +967,7 @@ async function loadHoSoCuaToi() {
             </div>
             <div>
               <p style="margin: 0; font-size: 13px; color: #999;">Số Điện Thoại</p>
-              <h3 style="margin: 5px 0 0; font-size: 18px; color: #333;">${myInfo.sdt || myInfo.SDT || 'Chưa cập nhật'}</h3>
+              <h3 style="margin: 5px 0 0; font-size: 18px; color: #333;">${myInfo.sdt || myInfo.SDT || "Chưa cập nhật"}</h3>
             </div>
           </div>
         </div>
@@ -978,7 +979,7 @@ async function loadHoSoCuaToi() {
             </div>
             <div>
               <p style="margin: 0; font-size: 13px; color: #999;">Email</p>
-              <h3 style="margin: 5px 0 0; font-size: 16px; color: #333; word-break: break-all;">${myInfo.email || 'Chưa cập nhật'}</h3>
+              <h3 style="margin: 5px 0 0; font-size: 16px; color: #333; word-break: break-all;">${myInfo.email || "Chưa cập nhật"}</h3>
             </div>
           </div>
         </div>
@@ -990,7 +991,7 @@ async function loadHoSoCuaToi() {
             </div>
             <div>
               <p style="margin: 0; font-size: 13px; color: #999;">Mã Tài Khoản</p>
-              <h3 style="margin: 5px 0 0; font-size: 18px; color: #333;">${myInfo.maTaiKhoan || 'Chưa cập nhật'}</h3>
+              <h3 style="margin: 5px 0 0; font-size: 18px; color: #333;">${myInfo.maTaiKhoan || "Chưa cập nhật"}</h3>
             </div>
           </div>
         </div>
@@ -1004,7 +1005,7 @@ async function loadHoSoCuaToi() {
           </div>
           <div>
             <p style="margin: 0; font-size: 13px; color: #999;">Địa Chỉ</p>
-            <h3 style="margin: 5px 0 0; font-size: 16px; color: #333;">${myInfo.diaChi || 'Chưa cập nhật'}</h3>
+            <h3 style="margin: 5px 0 0; font-size: 16px; color: #333;">${myInfo.diaChi || "Chưa cập nhật"}</h3>
           </div>
         </div>
       </div>
@@ -1016,7 +1017,6 @@ async function loadHoSoCuaToi() {
         </p>
       </div>
     `;
-    
   } catch (error) {
     console.error("Lỗi khi tải hồ sơ:", error);
     document.getElementById("hosoContent").innerHTML = `

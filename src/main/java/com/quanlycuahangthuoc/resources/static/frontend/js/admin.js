@@ -440,15 +440,15 @@ async function viewHoSoNhanVien(maNV) {
     // Lấy thông tin nhân viên từ API
     const response = await fetch(`${API_URL}/nhanvien`);
     const data = await response.json();
-    const nhanvien = data.find(nv => nv.maNhanVien === maNV);
+    const nhanvien = data.find((nv) => nv.maNhanVien === maNV);
 
     if (!nhanvien) {
       showNotification("Không tìm thấy thông tin nhân viên", "error");
       return;
     }
 
-    const hoTen = `${nhanvien.ho || ''} ${nhanvien.ten || ''}`.trim();
-    
+    const hoTen = `${nhanvien.ho || ""} ${nhanvien.ten || ""}`.trim();
+
     const modalBody = document.getElementById("modalBody");
     modalBody.innerHTML = `
       <div style="max-width: 600px; margin: 0 auto;">
@@ -472,7 +472,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-venus-mars" style="color: #667eea; width: 20px;"></i>
                 <strong>Giới tính:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.gioiTinh || 'Chưa cập nhật'}</div>
+              <div style="padding-left: 30px; color: #555;">${nhanvien.gioiTinh || "Chưa cập nhật"}</div>
             </div>
 
             <div class="info-row">
@@ -480,7 +480,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-phone" style="color: #667eea; width: 20px;"></i>
                 <strong>Số điện thoại:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.sdt || nhanvien.SDT || 'Chưa cập nhật'}</div>
+              <div style="padding-left: 30px; color: #555;">${nhanvien.sdt || nhanvien.SDT || "Chưa cập nhật"}</div>
             </div>
 
             <div class="info-row">
@@ -488,7 +488,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-envelope" style="color: #667eea; width: 20px;"></i>
                 <strong>Email:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.email || 'Chưa cập nhật'}</div>
+              <div style="padding-left: 30px; color: #555;">${nhanvien.email || "Chưa cập nhật"}</div>
             </div>
 
             <div class="info-row">
@@ -496,7 +496,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-map-marker-alt" style="color: #667eea; width: 20px;"></i>
                 <strong>Địa chỉ:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.diaChi || 'Chưa cập nhật'}</div>
+              <div style="padding-left: 30px; color: #555;">${nhanvien.diaChi || "Chưa cập nhật"}</div>
             </div>
 
             <div class="info-row">
@@ -504,7 +504,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-id-badge" style="color: #667eea; width: 20px;"></i>
                 <strong>Mã tài khoản:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.maTaiKhoan || 'Chưa cập nhật'}</div>
+              <div style="padding-left: 30px; color: #555;">${nhanvien.maTaiKhoan || "Chưa cập nhật"}</div>
             </div>
 
           </div>
@@ -517,7 +517,7 @@ async function viewHoSoNhanVien(maNV) {
         </div>
       </div>
     `;
-    
+
     document.getElementById("modal").style.display = "flex";
   } catch (error) {
     console.error("Lỗi:", error);
