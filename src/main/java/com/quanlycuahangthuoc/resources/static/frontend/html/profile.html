@@ -1,21 +1,79 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tài khoản</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Hồ Sơ Cá Nhân</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/profile.css" />
 </head>
 <body>
-    <h1 class="text-center">👤 Thông tin cá nhân</h1>
-    <div class="container card">
-        <input id="name" class="form-control" placeholder="Tên">
-        <input id="phone" class="form-control" placeholder="SĐT">
-        <input id="address" class="form-control" placeholder="Địa chỉ">
-        <button class="btn-primary" onclick="saveProfile()">Lưu</button>
-    </div>
 
-    <!--JAVASCRIPT-->
-    <script src="../js/khachhang.js"></script>
+  <div class="profile-container">
+    <div class="profile-card">
+
+      <!-- Thông tin -->
+      <h2 id="username">Tên người dùng</h2>
+      <p class="role">Tài khoản: User</p>
+
+      <div class="profile-info">
+        <div class="info-item">
+          <span>🆔 Mã tài khoản:</span>
+          <strong id="userId">---</strong>
+        </div>
+
+        <div class="info-item">
+          <span>📅 Ngày tạo:</span>
+          <strong id="createdAt">---</strong>
+        </div>
+      </div>
+
+      <!-- MENU CHỨC NĂNG -->
+      <div class="profile-menu">
+        <a href="cart.html" class="menu-item">
+          🛒 Xem giỏ hàng
+        </a>
+
+        <div class="menu-item disabled" onclick="showProcessing()">
+          📦 Lịch sử mua hàng
+        </div>
+
+        <div class="menu-item disabled" onclick="showProcessing()">
+          ⏳ Trạng thái đơn hàng
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="profile-actions">
+        <a href="index.html" class="btn">🏠 Trang chủ</a>
+        <button class="btn btn-logout" id="logoutBtn">🚪 Đăng xuất</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("username").innerText = user.tenDangNhap;
+      document.getElementById("userId").innerText = user.maTaiKhoan;
+      document.getElementById("createdAt").innerText =
+        user.ngayTao
+          ? new Date(user.ngayTao).toLocaleDateString("vi-VN")
+          : "Không xác định";
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        window.location.href = "login.html";
+      }
+    );
+
+    function showProcessing() {
+      alert("⚙️ Chức năng đang được xử lý. Vui lòng quay lại sau!");
+    }
+  </script>
+
 </body>
 </html>
