@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giỏ hàng</title>
+  <link rel="stylesheet" href="../css/cart.css" />
+</head>
+<body>
+
+  <h1 class="text-center">🛒 Giỏ hàng của bạn</h1>
+
+  <!-- Nút trở về -->
+  <div class="back-home">
+    <a href="index.html">⬅ Tiếp tục mua sắm</a>
+  </div>
+
+  <div class="cart-container">
+    <!-- DANH SÁCH SẢN PHẨM -->
+    <div class="cart-card">
+      <h2>Sản phẩm</h2>
+      <div id="cartItems"></div>
+    </div>
+
+    <!-- TỔNG TIỀN -->
+    <div class="cart-card summary">
+      <h2>Thanh toán</h2>
+
+      <p class="total">
+        Tổng tiền:
+        <span id="totalPrice">0</span>đ
+      </p>
+
+      <a href="checkout.html" class="btn-primary">
+        Tiến hành thanh toán
+      </a>
+    </div>
+  </div>
+
+  <script src="../js/cart.js"></script>
+</body>
+</html>
