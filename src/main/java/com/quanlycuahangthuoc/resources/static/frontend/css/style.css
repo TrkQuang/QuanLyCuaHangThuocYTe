@@ -6,17 +6,16 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
     color: #333;
-    background-color: #f4f4f4;
+    background: #6b91dc;
 }
 
 /* Container */
 .container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: auto;
     padding: 0 20px;
+    width: 90%;
 }
 
 /* Header */
@@ -37,6 +36,8 @@ body {
 }
 
 .main {
+    background: #ededf4;
+    border-bottom: 1px solid #ddd;
     padding: 15px 0;
 }
 
@@ -44,11 +45,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 15px 0;
 }
 
 .logo {
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 700;
     color: #2c5aa0;
     text-decoration: none;
 }
@@ -59,10 +61,10 @@ body {
 }
 
 .search-box input {
-    width: 100%;
+    width: 300px;
     padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
     font-size: 16px;
 }
 
@@ -70,7 +72,7 @@ body {
     color: #333;
     text-decoration: none;
     margin-left: 20px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .menu a:hover {
@@ -86,26 +88,35 @@ body {
 .nav ul {
     list-style: none;
     display: flex;
-    margin: 0;
-    padding: 0;
+    width: 100%;
 }
 
-.nav li {
+.nav ul li {
     flex: 1;
+    text-align: center;
 }
 
-.nav a {
+.nav ul li a {
     display: block;
+    padding: 16px 0;
     color: white;
     text-decoration: none;
-    padding: 15px 20px;
-    text-align: center;
-    border-right: 1px solid #1e3d6f;
+    font-weight: bold;
 }
 
-.nav a:hover,
-.nav a.active {
-    background: #1e3d6f;
+/* Hover */
+.nav ul li a:hover {
+    background: #163a70;
+}
+
+/* Active (trang đang đứng) */
+.nav ul li a.active {
+    background: #0f2f5f;
+}
+
+/* Tiêu đề */
+h1{
+    font-size:28px;
 }
 
 /* Buttons */
@@ -123,6 +134,11 @@ body {
 .btn-primary {
     background: #2c5aa0;
     color: white;
+    border:none;
+    padding:12px;
+    border-radius:12px;
+    font-weight:600;
+    cursor:pointer;
 }
 
 .btn-primary:hover {
@@ -146,12 +162,45 @@ body {
 
 /* Cards */
 .card {
-    background: white;
-    border: 1px solid #ddd;
+    background: linear-gradient(to right, #42a5f5, #1976d2);
     border-radius: 5px;
     padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    color:white;
+}
+
+.card h3 {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.card label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: white
+}
+
+.card select{
+    background: white;
+    color: #333;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.card button{
+    background:#0d47a1;
+    border-radius:12px;
+}
+
+.control {
+    background:white;
+    color:#333;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
 }
 
 /* Product Grid */
@@ -183,11 +232,43 @@ body {
     color: #333;
 }
 
+/* Mỗi sản phẩm */
+.product-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.product-card:hover{
+    transform: translateY(-4px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.product-card h4 {
+    margin: 10px 0;
+    color: #2c5aa0;
+    margin: 10px 0;
+}
+
+.product-card p {
+    font-size: 14px;
+    color: #555;
+}
+
 .product-price {
     font-size: 18px;
     font-weight: bold;
     color: #2c5aa0;
-    margin-bottom: 10px;
+    margin: 10px 0;
 }
 
 /* Table */
@@ -243,9 +324,7 @@ body {
 }
 
 .footer-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
+    display: flex;
 }
 
 .footer-section h3 {
