@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 class="text-center">🛒 Giỏ hàng</h1>
+    <div class="container card">
+        <div id="cartItems"></div>
+        <h3>Tổng tiền: <span id="totalPrice">0</span>đ</h3>
+        <a href="checkout.html" class="btn-primary">Thanh toán</a>
+        <input id="coupon" placeholder="Nhập mã giảm giá">
+        <button onclick="applyCoupon()">Áp dụng</button>
+    </div>
+
+    <!--JAVASCRIPT-->
+    <script src="../js/khachhang.js"></script>
+</body>
+</html>

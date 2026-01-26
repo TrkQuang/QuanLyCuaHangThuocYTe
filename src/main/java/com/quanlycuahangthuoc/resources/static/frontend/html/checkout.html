@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 class="text-center">Thanh toán</h1>
+    <div class="container-card">
+        <form onsubmit="placeOrder(); return false;">
+            <div class="form-group">
+                <label>Họ tên</label>
+                <input class="control" required>
+            </div>
+            <div class="form-group">
+                <label>Số điện thoại</label>
+                <input class="control" required>
+            </div>
+            <div class="form-group">
+                <label>Địa chỉ</label>
+                <input class="control" required>
+            </div>
+            <button class="btn-success">Xác nhận đơn hàng</button>
+        </form>
+    </div>
+</body>
+</html>

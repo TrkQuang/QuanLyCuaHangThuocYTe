@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cửa Hàng Thuốc</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!--Header-->
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                Hotline: 19001514 | Giao hàng miễn phí từ 200k
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container">
+                <div class="content">
+                    <a href="index.html" class="logo">🏥 Nhà Thuốc</a>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm thuốc.......">
+                    </div>
+                    <div class="menu">
+                        <a href="profile.html">👤 Tài khoản</a>
+                        <a href="cart.html">🛒  Giỏ hàng (<span id="cartCount">0</span>)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!--Navigation-->
+    <nav class="nav">
+        <div class="container">
+            <ul>
+                <li><a href="index.html" class="active">🏠 Trang chủ</a></li>
+                <li><a href="shop.html">💊 Sản phẩm</a></li>
+                <li><a href="cart.html">🛒 Giỏ hàng</a></li>
+                <li><a href="order-history.html">📋 Đơn hàng</a></li>
+                <li><a href="profile.html">👤 Tài khoản</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--Banner-->
+    <section style=" background:linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 60px 0; text-align: center; ">
+        <div class="container">
+            <h1 style="font-size: 36px; margin-bottom: 15px;">Cửa Hàng Thuốc Trực Tuyến</h1>
+            <p style="font-size:18px; margin-bottom: 25px">Thuốc chính hãng - Giá tốt nhất - Giao hàng nhanh</p>
+            <a href="shop.html" class="btn-warning" style="font-size: 16px; padding: 12px 30px;">Mua sắm ngay</a>
+        </div>
+    </section>
+
+    <!--Sale Banner-->
+    <div style="background: #ff6b6b; color: white; text-align: center; padding: 15px;">
+        <strong>🔥 KHUYẾN MÃI HOT: Giảm đến 50% cho tất cả sản phẩm</strong>
+    </div>
+
+    <!--Sản phẩm bán chạy-->
+    <section style="padding: 40px 0px;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c5aa0;"> Thuốc Bán Chạy Nhất</h2>
+            <div class="products-grid">
+                <div class="product-item">
+                    <img src="OIP (2).jpg" alt="Panadol">
+                    <h3>Panadol Extra</h3>
+                    <div class="product-price">20.000đ</div>
+                    <p>Hộp 24 viên - Giảm đau, hạ sốt</p>
+                    <button class="btn-primary" onclick="addToCart('panadol', 20000)">Thêm giỏ hàng</button>
+                </div>
+                <div class="product-item">
+                    <img src="thuoc-vitamin-c-tw3-500mg-dieu-tri-thieu-hut-vitamin-c-65f15f008f538.jpg" alt="Vitamin C">
+                    <h3>Vitamin C 1000mg</h3>
+                    <div class="product-price">70.000đ</div>
+                    <p>Hộp 30 viên - Tăng sức đề kháng</p>
+                    <button class="btn-primary" onclick="addToCart('vitamin c', 70000)">Thêm giỏ hàng</button>
+                </div>
+                <div class="product-item">
+                    <img src="OIP.jpg" alt="Amoxicillin">
+                    <h3>Amoxicillin</h3>
+                    <div class="product-price">25.000đ</div>
+                    <p>Hộp 20 viên - Kháng sinh</p>
+                    <button class="btn-primary" onclick="addToCart('amoxicillin', 25000)">Thêm giỏ hàng</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Sản phẩm khuyến mãi-->
+    <section style="padding: 40px 0; background: white;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c5aa0;">🎁 Sản Phẩm Khuyến Mãi</h2>
+            <div class="product-grid">
+                <div class="product-item">
+                    <img src="36dea234165d80e3db8d4ec7a12be007.jpg" alt="Kem chống nắng">
+                    <h3>Kem chống nắng La Roche</h3>
+                    <div class="product-price">400.000đ</div>
+                    <p> SPF 60+ PA++++</p>
+                    <button class="btn-primary" onclick="addToCart('laroche', 400000)">Thêm giỏ hàng</button>
+                </div>
+                <div class="product-item">
+                    <img src="OIP (1).jpg" alt="Dầu gội">
+                    <h3>Dầu gội Head & Shoulder</h3>
+                    <div class="product-price">90.000đ</div>
+                    <p>Chai 500ml - Trị gàu</p>
+                    <button class="btn-primary" onclick="addToCart('head&shoulder', 90000)">Thêm giỏ hàng</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Dịch vụ-->
+    <section style="padding: 40px 0px; background: #f8f9fa;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c5aa0;">Dịch Vụ Của Cửa Hàng</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 30px;">
+                <div class="card text-center">
+                    <div style="font-size: 48px; margin-bottom: 15px;">👨‍⚕️</div>
+                    <h3>Tư Vấn Dược Sĩ</h3>
+                    <p> Tư Vấn 24/7</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🚚</div>
+                    <h3>Giao Hàng Nhanh</h3>
+                    <p>Giao hàng trong 2 giờ nội thành</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🛡️</div>
+                    <h3>Hàng Chính Hãng</h3>
+                    <p>Cam kết 100% Hàng Chính Hãng</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Footer-->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Nhà Thuốc</h3>
+                    <p>CỬa hàng trức tuyến uy tín</p>
+                    <p>📞 Hotline: 19001514</p>
+                    <p>📧 Email: nhathuocyte@gmail.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên kết nhanh</h3>
+                    <ul>
+                        <li><a href="#">Về chúng tôi</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Hướng dẫn mua hàng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Hỗ trợ khách hàng</h3>
+                    <ul>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="#">Chính sách đổi trả</a></li>
+                        <li><a href="#">Hướng dẫn thanh toán</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #555;">
+                <p>&copy; 2026 Nhà Thuốc. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!--JAVASCRIPT-->
+    <script src="../js/khachhang.js"></script>
+</body>
+</html>

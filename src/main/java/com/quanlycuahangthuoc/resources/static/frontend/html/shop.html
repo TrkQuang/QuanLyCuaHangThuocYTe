@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cửa hàng</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!--Header-->
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                Hotline: 19001514 | Giao hàng miễn phí đơn từ 200k
+            </div>
+        </div>
+        <div class="main">
+            <div class="container">
+                <div class="content">
+                    <a href="index.html" class="logo">🏥 Nhà Thuốc</a>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm thuốc.......">
+                    </div>
+                    <div class="menu">
+                        <a href="profile.html">👤 Tài khoản</a>
+                        <a href="cart.html">🛒 Giỏ hàng (<span id="cartCount">0</span>)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!--Navigation-->
+    <nav class="nav">
+        <div class="container">
+            <ul>
+                <li><a href="index.html">🏠 Trang chủ</a></li>
+                <li><a href="shop.html" class="active">💊 Sản phẩm</a></li>
+                <li><a href="cart.html">🛒 Giỏ hàng</a></li>
+                <li><a href="order-history.html">📋 Đơn hàng</a></li>
+                <li><a href="profile.html">👤 Tài khoản</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--Content-->
+    <div class="container" style="padding: 20px 0px;">
+        <h1 style="color: #2c5aa0; margin-bottom: 20px;">💊 Tất cả sản phẩm</h1>
+        <!--Bộ lọc-->
+        <div class="card" style="margin-bottom: 20px;">
+            <h3>🔍 Bộ lọc sắp xếp</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div>
+                    <label>Loại thuốc</label>
+                    <select id="categoryFilter" class="control">
+                        <option value="">Tất cả</option>
+                        <option value="thuoc-dau">Thuốc giảm đau</option>
+                        <option value="vitamin">Vitamin</option>
+                        <option value="khang-sinh">Kháng sinh</option>
+                        <option value="thiet-bi">Thiết bị y tế</option>
+                        <option value="lam-dep">Làm đẹp</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Khoảng giá: </label>
+                    <select id="priceFilter" class="control">
+                        <option value="">Tất cả</option>
+                        <option value="0-100000">Dưới 100.000đ</option>
+                        <option value="100000-500000">100.000 - 500.000đ</option>
+                        <option value="500000-1000000">500.000 - 1.000.000đ</option>
+                        <option value="1000000+">Trên 1.000.000đ</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Sắp xếp theo: </label>
+                    <select id="sortBy" class="control">
+                        <option value="name">Tên A-Z</option>
+                        <option value="price-low">Giá thấp đến cao</option>
+                        <option value="price-high">Giá cao đến thấp</option>
+                        <option value="popular">Bán chạy nhất</option>
+                    </select>
+                </div>
+                <div>
+                    <label>&nbsp</label>
+                    <button class="btn-primary" onclick="applyFilter()" style="width: 100%;">Áp dụng</button>
+                </div>
+            </div>
+        </div>
+
+        <!--Danh sách sản phẩm-->
+        <div id="productsList" class="products-grid">
+            <!--Sản phẩm sẽ tạo bởi Javascript-->
+        </div>
+
+        <!--Phân trang-->
+        <div class="text-center">
+            <button class="btn-primary" onclick="loadMore()">Xem thêm sản phẩm</button>
+        </div>
+    </div>
+
+    <!--Footer-->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Nhà Thuốc</h3>
+                    <p>Cửa hàng thuốc trực tuyến uy tín</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!--JAVASCRIPT-->
+    <script src="../js/khachhang.js"></script>
+</body>
+</html>
