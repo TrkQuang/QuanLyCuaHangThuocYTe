@@ -1,8 +1,8 @@
 package com.quanlycuahangthuoc.db;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class DBConnection {
@@ -15,7 +15,10 @@ public class DBConnection {
   static {
     try {
       Properties props = new Properties();
-      InputStream input = DBConnection.class.getClassLoader().getResourceAsStream("application.properties");
+      InputStream input =
+        DBConnection.class.getClassLoader().getResourceAsStream(
+          "application.properties"
+        );
       if (input != null) {
         props.load(input);
         URL = props.getProperty("db.url");
