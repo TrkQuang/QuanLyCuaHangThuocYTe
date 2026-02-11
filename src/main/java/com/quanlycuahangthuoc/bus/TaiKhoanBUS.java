@@ -22,11 +22,39 @@ public class TaiKhoanBUS {
 
   // ================== KHÁCH ĐĂNG KÝ ==================
   public boolean dangKyKhach(TaiKhoanDTO tk) {
-    if (
-      tk.getTenDangNhap().isEmpty() ||
-      tk.getMatKhau().isEmpty() ||
-      tk.getEmail().isEmpty()
-    ) throw new RuntimeException("Thiếu thông tin đăng ký");
+    if (tk == null) {
+      throw new IllegalArgumentException("Thông tin tài khoản không được null");
+    }
+
+    // Validate username
+    if (tk.getTenDangNhap() == null || tk.getTenDangNhap().trim().isEmpty()) {
+      throw new RuntimeException("Tên đăng nhập không được để trống");
+    }
+    if (tk.getTenDangNhap().length() < 3 || tk.getTenDangNhap().length() > 50) {
+      throw new RuntimeException("Tên đăng nhập phải từ 3-50 ký tự");
+    }
+    if (!tk.getTenDangNhap().matches("^[a-zA-Z0-9_]+$")) {
+      throw new RuntimeException("Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới");
+    }
+
+    // Validate password
+    if (tk.getMatKhau() == null || tk.getMatKhau().trim().isEmpty()) {
+      throw new RuntimeException("Mật khẩu không được để trống");
+    }
+    if (tk.getMatKhau().length() < 6) {
+      throw new RuntimeException("Mật khẩu phải có ít nhất 6 ký tự");
+    }
+    if (tk.getMatKhau().length() > 100) {
+      throw new RuntimeException("Mật khẩu không được quá 100 ký tự");
+    }
+
+    // Validate email
+    if (tk.getEmail() == null || tk.getEmail().trim().isEmpty()) {
+      throw new RuntimeException("Email không được để trống");
+    }
+    if (!tk.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+      throw new RuntimeException("Email không hợp lệ");
+    }
 
     if (
       taiKhoanDAO.existUsername(tk.getTenDangNhap())
@@ -35,6 +63,11 @@ public class TaiKhoanBUS {
     if (taiKhoanDAO.existEmail(tk.getEmail())) throw new RuntimeException(
       "Email đã tồn tại"
     );
+
+    // Generate mã tài khoản nếu chưa có
+    if (tk.getMaTaiKhoan() == null || tk.getMaTaiKhoan().isEmpty()) {
+      tk.setMaTaiKhoan("TK" + System.currentTimeMillis());
+    }
 
     tk.setLoaiTaiKhoan("Khach"); // Mặc định khách (capitalize đầu)
     return taiKhoanDAO.insertTaiKhoan(tk);

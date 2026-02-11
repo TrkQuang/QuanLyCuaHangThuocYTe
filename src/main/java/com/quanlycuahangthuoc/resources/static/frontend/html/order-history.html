@@ -1,15 +1,253 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lịch sử đơn hàng</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
-    <h1 class="text-center">📋 Lịch sử đơn hàng</h1>
-    <div class="container card" id="orderList"></div>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .page-header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .page-header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .content-wrapper {
+        flex: 1;
+        padding: 40px 0;
+      }
+
+      #orderList {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+      }
+
+      .order-item {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+      }
+
+      .order-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .order-id {
+        font-size: 18px;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .order-status {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .status-completed {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #0a5f38;
+      }
+
+      .status-pending {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        color: #7f5a00;
+      }
+
+      .status-cancelled {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: #9e0000;
+      }
+
+      .order-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .detail-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .detail-label {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 5px;
+      }
+
+      .detail-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .empty-state-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+      }
+
+      .empty-state h3 {
+        font-size: 24px;
+        color: #666;
+        margin-bottom: 10px;
+      }
+
+      .empty-state p {
+        color: #999;
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--Header-->
+    <header class="header">
+      <div class="header-top">
+        <div class="container">
+          Hotline: 19001514 | Giao hàng miễn phí từ 200k
+        </div>
+      </div>
+      <div class="header-main">
+        <div class="container">
+          <div class="content">
+            <a href="index.html" class="logo">🏥 Nhà Thuốc</a>
+            <div class="search-box">
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Tìm kiếm thuốc......."
+              />
+            </div>
+            <div class="menu">
+              <a href="login.html" id="loginLink"
+                >👤 Đăng nhập
+                <script src="../js/header.js"></script>
+              </a>
+              <a href="cart.html"
+                >🛒 Giỏ hàng (<span id="cartCount">0</span>)</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!--Navigation-->
+    <nav class="nav">
+      <div class="container">
+        <ul>
+          <li><a href="index.html">🏠 Trang chủ</a></li>
+          <li><a href="shop.html">💊 Sản phẩm</a></li>
+          <li><a href="cart.html">🛒 Giỏ hàng</a></li>
+          <li><a href="order-history.html" class="active">📋 Đơn hàng</a></li>
+          <li><a href="profile.html">👤 Tài khoản</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!--Page Header-->
+    <div class="page-header">
+      <div class="container">
+        <h1>📋 Lịch sử đơn hàng</h1>
+        <p>Theo dõi và quản lý các đơn hàng của bạn</p>
+      </div>
+    </div>
+
+    <!--Content-->
+    <div class="content-wrapper">
+      <div class="container">
+        <div id="orderList"></div>
+      </div>
+    </div>
+
+    <!--Footer-->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>Nhà Thuốc</h3>
+            <p>Cửa hàng trực tuyến uy tín</p>
+            <p>📞 Hotline: 19001514</p>
+            <p>📧 Email: nhathuocyte@gmail.com</p>
+          </div>
+          <div class="footer-section">
+            <h3>Liên kết nhanh</h3>
+            <ul>
+              <li><a href="#">Về chúng tôi</a></li>
+              <li><a href="#">Chính sách bảo mật</a></li>
+              <li><a href="#">Điều khoản sử dụng</a></li>
+              <li><a href="#">Hướng dẫn mua hàng</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h3>Hỗ trợ khách hàng</h3>
+            <ul>
+              <li><a href="#">Câu hỏi thường gặp</a></li>
+              <li><a href="#">Chính sách đổi trả</a></li>
+              <li><a href="#">Hướng dẫn thanh toán</a></li>
+              <li><a href="#">Liên hệ</a></li>
+            </ul>
+          </div>
+        </div>
+        <div
+          style="
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #555;
+          "
+        >
+          <p>&copy; 2026 Nhà Thuốc. Tất cả quyền được bảo lưu.</p>
+        </div>
+      </div>
+    </footer>
+
     <!--JAVASCRIPT-->
+    <script src="../js/cart.js"></script>
     <script src="../js/khachhang.js"></script>
-</body>
+  </body>
 </html>

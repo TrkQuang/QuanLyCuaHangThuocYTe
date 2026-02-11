@@ -1,8 +1,8 @@
 spring.application.name=Application
 
-db.url=jdbc:mysql://tramway.proxy.rlwy.net:57864/QuanLyNhaThuoc
-db.username=root
-db.password=RSfJaDbgzwfGdkHBtEGwLPhFyXVemcGZ
+db.url=jdbc:mysql://your-database-host:port/database-name
+db.username=your-username
+db.password=your-password
 db.driver=com.mysql.cj.jdbc.Driver
 
 server.port=8080

@@ -10,3 +10,6 @@ build/
 dist/
 .DS_Store
 Thumbs.db
+
+# Sensitive configuration files
+src/main/resources/application.properties

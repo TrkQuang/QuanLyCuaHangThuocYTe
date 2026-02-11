@@ -1,3 +1,17 @@
+// API Configuration
+const API_URL = "http://localhost:8080/api";
+
+// Lấy session ID
+function getSessionId() {
+  let sessionId = localStorage.getItem("sessionId");
+  if (!sessionId) {
+    sessionId =
+      "session-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("sessionId", sessionId);
+  }
+  return sessionId;
+}
+
 // ===== KIỂM TRA ĐĂNG NHẬP =====
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 if (!currentUser) {
@@ -5,18 +19,37 @@ if (!currentUser) {
   window.location.href = "login.html";
 }
 
-// ===== CART STORAGE =====
-function getCart() {
-  return JSON.parse(localStorage.getItem("cart")) || [];
+// ===== CART API =====
+async function getCart() {
+  try {
+    const response = await fetch(`${API_URL}/cart`, {
+      headers: {
+        "Session-Id": getSessionId(),
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Lỗi khi lấy giỏ hàng:", error);
+    return [];
+  }
 }
 
-function saveCart(cart) {
-  localStorage.setItem("cart", JSON.stringify(cart));
+async function clearCart() {
+  try {
+    await fetch(`${API_URL}/cart`, {
+      method: "DELETE",
+      headers: {
+        "Session-Id": getSessionId(),
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi khi xóa giỏ hàng:", error);
+  }
 }
 
 // ===== RENDER CHECKOUT =====
-function renderCheckout() {
-  const cart = getCart();
+async function renderCheckout() {
+  const cart = await getCart();
   const checkoutItems = document.getElementById("checkoutItems");
   const totalPriceEl = document.getElementById("totalPrice");
 
@@ -35,10 +68,10 @@ function renderCheckout() {
     checkoutItems.innerHTML += `
       <div class="checkout-item">
         <div class="checkout-info">
-          <h4>${item.name}</h4>
+          <h4>${item.title || item.name}</h4>
           <p>${item.quantity} × ${item.price.toLocaleString()}đ</p>
         </div>
-        <button class="btn-remove" onclick="removeItem(${index})">❌ Bỏ</button>
+        <button class="btn-remove" onclick="removeItem('${item.id}')">❌ Bỏ</button>
       </div>
     `;
   });
@@ -47,15 +80,22 @@ function renderCheckout() {
 }
 
 // ===== XOÁ SẢN PHẨM =====
-function removeItem(index) {
-  const cart = getCart();
-  cart.splice(index, 1);
-  saveCart(cart);
-  renderCheckout();
+async function removeItem(productId) {
+  try {
+    await fetch(`${API_URL}/cart/${productId}`, {
+      method: "DELETE",
+      headers: {
+        "Session-Id": getSessionId(),
+      },
+    });
+    renderCheckout();
+  } catch (error) {
+    console.error("Lỗi khi xóa sản phẩm:", error);
+  }
 }
 
 // ===== THANH TOÁN =====
-function handleCheckout() {
+async function handleCheckout() {
   const fullName = document.getElementById("fullName").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const address = document.getElementById("address").value.trim();
@@ -66,28 +106,49 @@ function handleCheckout() {
     return;
   }
 
-  if (getCart().length === 0) {
+  const cart = await getCart();
+
+  if (cart.length === 0) {
     alert("❌ Giỏ hàng trống!");
     return;
   }
 
-  // Demo lưu đơn hàng
+  // Tạo đơn hàng
   const order = {
-    user: currentUser.tenDangNhap,
-    items: getCart(),
-    total: document.getElementById("totalPrice").innerText,
-    paymentMethod,
-    address,
-    status: "Đang xử lý",
-    createdAt: new Date().toLocaleString()
+    maKhachHang: currentUser.maKhachHang || "KH" + Date.now(),
+    tenNguoiNhan: fullName,
+    soDienThoai: phone,
+    diaChi: address,
+    phuongThucThanhToan: paymentMethod,
+    tongTien: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    trangThai: "Đang xử lý",
+    ngayTao: new Date().toISOString(),
   };
 
-  console.log("ORDER:", order);
+  try {
+    // Gọi API tạo hóa đơn
+    const response = await fetch(`${API_URL}/hoadon`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
 
-  alert("✅ Đặt hàng thành công!\nĐơn hàng đang được xử lý.");
+    if (response.ok) {
+      alert("✅ Đặt hàng thành công!\nĐơn hàng đang được xử lý.");
 
-  localStorage.removeItem("cart");
-  window.location.href = "index.html";
+      // Xóa giỏ hàng
+      await clearCart();
+
+      window.location.href = "index.html";
+    } else {
+      alert("❌ Đặt hàng thất bại! Vui lòng thử lại.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi đặt hàng:", error);
+    alert("❌ Không thể kết nối đến server!");
+  }
 }
 
 // INIT

@@ -36,8 +36,8 @@ async function handleLogin(username, password) {
       matKhau: password,
     };
 
-    // Gọi API login nhân viên/admin
-    const response = await fetch(`${API_URL}/taikhoan/login-nhanvien`, {
+    // Thử đăng nhập với tài khoản nhân viên/admin trước
+    let response = await fetch(`${API_URL}/taikhoan/login-nhanvien`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,31 +45,51 @@ async function handleLogin(username, password) {
       body: JSON.stringify(loginData),
     });
 
-    // Kiểm tra response
-    if (response.ok) {
-      const userData = await response.json();
+    let userData = null;
 
-      // Kiểm tra xem có dữ liệu trả về không
+    // Nếu đăng nhập nhân viên thành công
+    if (response.ok) {
+      userData = await response.json();
+
       if (userData && userData.maTaiKhoan) {
-        // Lưu thông tin user vào localStorage để dùng ở các trang khác
+        // Lưu thông tin user vào localStorage
         localStorage.setItem("currentUser", JSON.stringify(userData));
 
         // Kiểm tra loại tài khoản và chuyển hướng
         if (userData.loaiTaiKhoan === "Admin") {
-          // Nếu là Admin -> chuyển đến trang admin
           window.location.href = "idx_admin.html";
+          return;
         } else if (userData.loaiTaiKhoan === "NhanVien") {
-          // Nếu là Nhân viên -> chuyển đến trang nhân viên
           window.location.href = "idx_nv.html";
-        } else {
-          showError("Loại tài khoản không hợp lệ!");
+          return;
         }
-      } else {
-        showError("Tên đăng nhập hoặc mật khẩu không đúng!");
       }
-    } else {
-      showError("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
     }
+
+    // Nếu không phải nhân viên, thử đăng nhập với tài khoản khách hàng
+    response = await fetch(`${API_URL}/taikhoan/login-khach`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(loginData),
+    });
+
+    if (response.ok) {
+      userData = await response.json();
+
+      if (userData && userData.maTaiKhoan) {
+        // Lưu thông tin user vào localStorage
+        localStorage.setItem("currentUser", JSON.stringify(userData));
+
+        // Chuyển về trang chủ
+        window.location.href = "index.html";
+        return;
+      }
+    }
+
+    // Nếu cả hai đều thất bại
+    showError("Tên đăng nhập hoặc mật khẩu không đúng!");
   } catch (error) {
     console.error("Lỗi khi đăng nhập:", error);
     showError("Không thể kết nối đến server. Vui lòng thử lại sau!");
