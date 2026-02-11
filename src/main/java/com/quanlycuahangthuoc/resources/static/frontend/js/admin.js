@@ -559,13 +559,13 @@ function displayKhachHangTable(data) {
 
   let html = "";
   data.forEach((kh) => {
+    const hoTen = `${kh.ho || ""} ${kh.ten || ""}`.trim();
     html += `
             <tr>
                 <td>${kh.maKhachHang}</td>
-                <td>${kh.hoTen}</td>
+                <td>${hoTen}</td>
                 <td>${kh.gioiTinh}</td>
-                <td>${kh.soDienThoai}</td>
-                <td>${kh.email || ""}</td>
+                <td>${kh.sdt}</td>
                 <td>${kh.diaChi || ""}</td>
                 <td>
                     <button class="btn btn-edit" onclick="editKhachHang('${kh.maKhachHang}')">
@@ -720,10 +720,10 @@ function displayThuocTable(data) {
             <tr>
                 <td>${thuoc.maThuoc}</td>
                 <td>${thuoc.tenThuoc}</td>
-                <td>${thuoc.loaiThuoc || ""}</td>
-                <td>${thuoc.donVi || ""}</td>
+                <td>${thuoc.nsx || ""}</td>
+                <td>${thuoc.donViTinh || ""}</td>
                 <td>${formatCurrency(thuoc.giaBan)}</td>
-                <td>${thuoc.soLuong}</td>
+                <td>${thuoc.soLuongTon}</td>
                 <td>
                     <button class="btn btn-view" onclick="viewThuoc('${thuoc.maThuoc}')">
                         <i class="fas fa-eye"></i>

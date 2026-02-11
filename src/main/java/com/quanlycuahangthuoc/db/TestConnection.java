@@ -57,11 +57,10 @@ public class TestConnection {
         rsNV.close();
         rsKH.close();
         stmt.close();
+        conn.close();
       } catch (Exception e) {
         System.out.println("❌ Lỗi khi test truy vấn:");
         e.printStackTrace();
-      } finally {
-        DBConnection.closeConnection();
       }
     } else {
       System.out.println("❌ Không thể kết nối database");

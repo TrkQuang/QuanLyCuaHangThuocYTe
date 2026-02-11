@@ -25,13 +25,17 @@ public class ThuocDAO {
       while (rs.next()) {
         ThuocDTO t = new ThuocDTO();
         t.setMaThuoc(rs.getString("MaThuoc"));
-        t.setMaNhaCungCap(rs.getString("MaNhaCungCap"));
+        t.setMaNhaCungCap(rs.getString("MaNCC")); // MaNCC in DB
         t.setTenThuoc(rs.getString("TenThuoc"));
         t.setDonViTinh(rs.getString("DonViTinh"));
-        t.setNSX(rs.getString("NSX"));
-        t.setHSD(rs.getString("HSD"));
+        t.setNSX(""); // NSX not in DB
+
+        // HanSuDung is DATE type in DB
+        java.sql.Date hsd = rs.getDate("HanSuDung");
+        t.setHSD(hsd != null ? hsd.toString() : "");
+
         t.setGiaBan(rs.getFloat("GiaBan"));
-        t.setSoLuongTon(rs.getInt("SoLuongTon"));
+        t.setSoLuongTon(rs.getInt("SoLuong")); // SoLuong in DB
 
         ds.add(t);
       }

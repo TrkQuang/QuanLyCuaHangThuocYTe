@@ -24,10 +24,11 @@ public class PhieuNhapDAO {
     ) {
       while (rs.next()) {
         PhieuNhapDTO pn = new PhieuNhapDTO();
-        pn.setMaPhieuNhap(rs.getString("MaPhieuNhap"));
-        pn.setMaNhanVien(rs.getString("MaNhanVien"));
-        pn.setMaNhaCungCap(rs.getString("MaNhaCungCap"));
-        pn.setNgayNhap(rs.getString("NgayNhap"));
+        pn.setMaPhieuNhap(rs.getString("MaPN"));
+        pn.setMaNhanVien(rs.getString("MaNV"));
+        pn.setMaNhaCungCap(rs.getString("MaNCC"));
+        java.sql.Date ngayNhap = rs.getDate("NgayNhap");
+        pn.setNgayNhap(ngayNhap != null ? ngayNhap.toString() : "");
         pn.setTongTien(rs.getFloat("TongTien"));
 
         ds.add(pn);
@@ -39,16 +40,17 @@ public class PhieuNhapDAO {
   }
 
   public boolean insertPhieuNhap(PhieuNhapDTO pn) {
-    String sql = "INSERT INTO PhieuNhap VALUES (?,?,?,?,?)";
+    String sql =
+      "INSERT INTO PhieuNhap (MaPN, NgayNhap, TongTien, MaNV, MaNCC) VALUES (?,?,?,?,?)";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
     ) {
       ps.setString(1, pn.getMaPhieuNhap());
-      ps.setString(2, pn.getMaNhanVien());
-      ps.setString(3, pn.getMaNhaCungCap());
-      ps.setString(4, pn.getNgayNhap());
-      ps.setFloat(5, pn.getTongTien());
+      ps.setString(2, pn.getNgayNhap());
+      ps.setFloat(3, pn.getTongTien());
+      ps.setString(4, pn.getMaNhanVien());
+      ps.setString(5, pn.getMaNhaCungCap());
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {

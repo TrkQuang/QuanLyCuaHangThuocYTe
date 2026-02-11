@@ -10,7 +10,6 @@ public class DBConnection {
   private static String URL;
   private static String USERNAME;
   private static String PASSWORD;
-  private static Connection connection = null;
 
   static {
     try {
@@ -33,26 +32,15 @@ public class DBConnection {
   private DBConnection() {}
 
   public static Connection getConnection() {
+    Connection connection = null;
     try {
-      if (connection == null || connection.isClosed()) {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        System.out.println("Kết nối database thành công!");
-      }
+      Class.forName("com.mysql.cj.jdbc.Driver");
+      connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+      System.out.println("Kết nối database thành công!");
     } catch (Exception e) {
       System.out.println("Lỗi kết nối database");
       e.printStackTrace();
     }
     return connection;
-  }
-
-  public static void closeConnection() {
-    try {
-      if (connection != null && !connection.isClosed()) {
-        connection.close();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 }

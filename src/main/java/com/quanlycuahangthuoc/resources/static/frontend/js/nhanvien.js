@@ -242,8 +242,8 @@ function displayLowStockDrugs(thuocList) {
 
   // Lọc thuốc có số lượng < 10
   const lowStock = thuocList
-    .filter((t) => t.soLuong < 10)
-    .sort((a, b) => a.soLuong - b.soLuong)
+    .filter((t) => t.soLuongTon < 10)
+    .sort((a, b) => a.soLuongTon - b.soLuongTon)
     .slice(0, 5);
 
   if (lowStock.length === 0) {
@@ -257,7 +257,7 @@ function displayLowStockDrugs(thuocList) {
     html += `
             <div class="activity-item" style="color: #f44336;">
                 <strong>${t.tenThuoc}</strong><br>
-                Còn ${t.soLuong} ${t.donVi}
+                Còn ${t.soLuongTon} ${t.donViTinh}
             </div>
         `;
   });
@@ -301,15 +301,16 @@ function displayThuocTable(data) {
   let html = "";
   data.forEach((thuoc) => {
     // Highlight nếu số lượng < 10
-    const rowClass = thuoc.soLuong < 10 ? 'style="background: #fff3e0;"' : "";
+    const rowClass =
+      thuoc.soLuongTon < 10 ? 'style="background: #fff3e0;"' : "";
     html += `
             <tr ${rowClass}>
                 <td>${thuoc.maThuoc}</td>
                 <td>${thuoc.tenThuoc}</td>
-                <td>${thuoc.loaiThuoc || ""}</td>
-                <td>${thuoc.donVi || ""}</td>
+                <td>${thuoc.nsx || ""}</td>
+                <td>${thuoc.donViTinh || ""}</td>
                 <td>${formatCurrency(thuoc.giaBan)}</td>
-                <td>${thuoc.soLuong}</td>
+                <td>${thuoc.soLuongTon}</td>
                 <td>
                     <button class="btn btn-edit" onclick="editThuoc('${thuoc.maThuoc}')">
                         <i class="fas fa-edit"></i>
@@ -337,7 +338,7 @@ function searchThuoc() {
     (t) =>
       t.tenThuoc.toLowerCase().includes(keyword) ||
       t.maThuoc.toLowerCase().includes(keyword) ||
-      (t.loaiThuoc && t.loaiThuoc.toLowerCase().includes(keyword)),
+      (t.nsx && t.nsx.toLowerCase().includes(keyword)),
   );
 
   displayThuocTable(filtered);
@@ -522,7 +523,7 @@ function searchDrugForSale() {
     html += `
             <div class="drug-item" onclick='addToCart(${JSON.stringify(t)})'>
                 <div class="drug-item-name">${t.tenThuoc}</div>
-                <div class="drug-item-info">Mã: ${t.maThuoc} | Còn: ${t.soLuong} ${t.donVi}</div>
+                <div class="drug-item-info">Mã: ${t.maThuoc} | Còn: ${t.soLuongTon} ${t.donViTinh}</div>
                 <div class="drug-item-price">${formatCurrency(t.giaBan)}</div>
             </div>
         `;
@@ -541,7 +542,7 @@ function addToCart(drug) {
 
   if (existingItem) {
     // Nếu đã có thì tăng số lượng
-    if (existingItem.quantity < drug.soLuong) {
+    if (existingItem.quantity < drug.soLuongTon) {
       existingItem.quantity++;
     } else {
       showNotification("Không đủ số lượng trong kho", "error");
@@ -584,7 +585,7 @@ function updateCartDisplay() {
                 <td>${item.tenThuoc}</td>
                 <td>${formatCurrency(item.giaBan)}</td>
                 <td>
-                    <input type="number" value="${item.quantity}" min="1" max="${item.soLuong}" 
+                    <input type="number" value="${item.quantity}" min="1" max="${item.soLuongTon}" 
                            onchange="updateCartQuantity(${index}, this.value)">
                 </td>
                 <td>${formatCurrency(itemTotal)}</td>
@@ -616,7 +617,7 @@ function updateCartQuantity(index, quantity) {
     return;
   }
 
-  if (quantity > item.soLuong) {
+  if (quantity > item.soLuongTon) {
     showNotification("Không đủ số lượng trong kho", "error");
     updateCartDisplay();
     return;
@@ -649,10 +650,11 @@ async function searchCustomer() {
     const response = await fetch(`${API_URL}/khachhang`);
     const customers = await response.json();
 
-    const customer = customers.find((c) => c.soDienThoai === phone);
+    const customer = customers.find((c) => c.sdt === phone);
 
     if (customer) {
-      document.getElementById("customerName").value = customer.hoTen;
+      const customerName = `${customer.ho || ""} ${customer.ten || ""}`.trim();
+      document.getElementById("customerName").value = customerName;
       showNotification("Đã tìm thấy khách hàng", "success");
     } else {
       document.getElementById("customerName").value = "";

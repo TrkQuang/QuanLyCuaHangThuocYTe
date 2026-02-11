@@ -41,7 +41,7 @@ async function loadProducts() {
       price: thuoc.donGia,
       description: thuoc.moTa || "Thuốc chất lượng cao",
       image: thuoc.hinhAnh || "https://via.placeholder.com/200",
-      category: thuoc.loaiThuoc || "Khác",
+      category: thuoc.nsx || "Khác",
       popular: thuoc.soLuongTon || 0,
     }));
 

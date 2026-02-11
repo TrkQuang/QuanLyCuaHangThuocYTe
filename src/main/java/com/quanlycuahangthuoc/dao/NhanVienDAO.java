@@ -27,9 +27,16 @@ public class NhanVienDAO {
         NhanVienDTO nv = new NhanVienDTO();
         nv.setMaNhanVien(rs.getString("MaNV"));
         nv.setMaTaiKhoan(rs.getString("MaTK"));
-        nv.setHo(rs.getString("Ho"));
-        nv.setTen(rs.getString("Ten"));
-        nv.setGioiTinh(rs.getString("GioiTinh"));
+
+        // Database has HoTen as single field
+        String hoTen = rs.getString("HoTen");
+        if (hoTen != null && !hoTen.isEmpty()) {
+          String[] parts = hoTen.trim().split("\\s+", 2);
+          nv.setHo(parts.length > 0 ? parts[0] : "");
+          nv.setTen(parts.length > 1 ? parts[1] : "");
+        }
+
+        nv.setGioiTinh(rs.getString("ChucVu")); // ChucVu in DB
         nv.setDiaChi(rs.getString("DiaChi"));
         nv.setSDT(rs.getString("SDT"));
         nv.setEmail(rs.getString("Email"));

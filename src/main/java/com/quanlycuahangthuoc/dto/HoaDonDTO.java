@@ -4,6 +4,7 @@ public class HoaDonDTO {
 
   private String MaHoaDon;
   private String MaKhachHang;
+  private String MaNhanVien;
   private String NgayTao;
   private String TrangThai;
   private float TongTien;
@@ -73,7 +74,16 @@ public class HoaDonDTO {
   public void setTongTien(float TongTien) {
     this.TongTien = TongTien;
   }
+
   public void setTrangThai(String a) {
     this.TrangThai = a;
+  }
+
+  public String getMaNhanVien() {
+    return MaNhanVien;
+  }
+
+  public void setMaNhanVien(String MaNhanVien) {
+    this.MaNhanVien = MaNhanVien;
   }
 }

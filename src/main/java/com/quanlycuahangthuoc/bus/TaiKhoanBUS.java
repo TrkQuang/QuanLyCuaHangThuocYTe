@@ -34,7 +34,9 @@ public class TaiKhoanBUS {
       throw new RuntimeException("Tên đăng nhập phải từ 3-50 ký tự");
     }
     if (!tk.getTenDangNhap().matches("^[a-zA-Z0-9_]+$")) {
-      throw new RuntimeException("Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới");
+      throw new RuntimeException(
+        "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới"
+      );
     }
 
     // Validate password
@@ -52,7 +54,9 @@ public class TaiKhoanBUS {
     if (tk.getEmail() == null || tk.getEmail().trim().isEmpty()) {
       throw new RuntimeException("Email không được để trống");
     }
-    if (!tk.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+    if (
+      !tk.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+    ) {
       throw new RuntimeException("Email không hợp lệ");
     }
 
@@ -69,7 +73,7 @@ public class TaiKhoanBUS {
       tk.setMaTaiKhoan("TK" + System.currentTimeMillis());
     }
 
-    tk.setLoaiTaiKhoan("Khach"); // Mặc định khách (capitalize đầu)
+    tk.setLoaiTaiKhoan("KhachHang");
     return taiKhoanDAO.insertTaiKhoan(tk);
   }
 
@@ -109,7 +113,7 @@ public class TaiKhoanBUS {
 
   public TaiKhoanDTO dangNhapWebKhach(String username, String password) {
     TaiKhoanDTO tk = dangNhap(username, password);
-    if (!tk.getLoaiTaiKhoan().equals("Khach")) throw new RuntimeException(
+    if (!tk.getLoaiTaiKhoan().equals("KhachHang")) throw new RuntimeException(
       "Không có quyền truy cập web khách"
     );
     return tk;

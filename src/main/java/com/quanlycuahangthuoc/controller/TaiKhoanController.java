@@ -23,44 +23,69 @@ public class TaiKhoanController {
 
   //Khách đăng ký
   @PostMapping("/dangky")
-  public boolean dangky(@RequestBody TaiKhoanDTO tk) {
-    return taikhoanBUS.dangKyKhach(tk);
+  public ResponseEntity<?> dangky(@RequestBody TaiKhoanDTO tk) {
+    try {
+      return ResponseEntity.ok(taikhoanBUS.dangKyKhach(tk));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   //Tạo tài khoản cho nhân viên
   @PostMapping("/dangky-nhanvien")
-  public boolean dangkyNV(@RequestBody TaiKhoanDTO tk) {
-    return taikhoanBUS.taoNhanVien(tk);
+  public ResponseEntity<?> dangkyNV(@RequestBody TaiKhoanDTO tk) {
+    try {
+      return ResponseEntity.ok(taikhoanBUS.taoNhanVien(tk));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   //Khách đăng nhập
   @PostMapping("/login-khach")
-  public TaiKhoanDTO loginKhach(@RequestBody TaiKhoanDTO tk) {
-    return taikhoanBUS.dangNhapWebKhach(tk.getTenDangNhap(), tk.getMatKhau());
+  public ResponseEntity<?> loginKhach(@RequestBody TaiKhoanDTO tk) {
+    try {
+      TaiKhoanDTO result = taikhoanBUS.dangNhapWebKhach(
+        tk.getTenDangNhap(),
+        tk.getMatKhau()
+      );
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   //Nhân viên đăng nhập
   @PostMapping("/login-nhanvien")
-  public TaiKhoanDTO loginNhanVien(@RequestBody TaiKhoanDTO tk) {
-    return taikhoanBUS.dangNhapWebNhanVien(
-      tk.getTenDangNhap(),
-      tk.getMatKhau()
-    );
+  public ResponseEntity<?> loginNhanVien(@RequestBody TaiKhoanDTO tk) {
+    try {
+      TaiKhoanDTO result = taikhoanBUS.dangNhapWebNhanVien(
+        tk.getTenDangNhap(),
+        tk.getMatKhau()
+      );
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   //Xóa tài khoản
   @DeleteMapping("/{maTK}")
-  public boolean xoa(@PathVariable String maTk) {
-    return taikhoanBUS.xoaTaiKhoan(maTk);
+  public ResponseEntity<?> xoa(@PathVariable String maTk) {
+    try {
+      return ResponseEntity.ok(taikhoanBUS.xoaTaiKhoan(maTk));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   //Lấy tài khoản all
-    @GetMapping
-    public ResponseEntity<?> getAll(){
-        try{
-            return ResponseEntity.ok(taikhoanBUS.getAllTaiKhoan());
-        }catch(Exception e){
-            return ResponseEntity.status(500).body(e.getMessage());
-        }
+  @GetMapping
+  public ResponseEntity<?> getAll() {
+    try {
+      return ResponseEntity.ok(taikhoanBUS.getAllTaiKhoan());
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(e.getMessage());
     }
+  }
 }
