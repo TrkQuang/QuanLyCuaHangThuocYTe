@@ -566,6 +566,7 @@ function displayKhachHangTable(data) {
                 <td>${hoTen}</td>
                 <td>${kh.gioiTinh}</td>
                 <td>${kh.sdt}</td>
+                <td>${kh.email || ""}</td>
                 <td>${kh.diaChi || ""}</td>
                 <td>
                     <button class="btn btn-edit" onclick="editKhachHang('${kh.maKhachHang}')">
@@ -755,20 +756,20 @@ function showAddThuocModal() {
                 <input type="text" name="tenThuoc" required>
             </div>
             <div class="form-group">
-                <label>Loại thuốc</label>
-                <input type="text" name="loaiThuoc">
-            </div>
-            <div class="form-group">
-                <label>Đơn vị *</label>
-                <input type="text" name="donVi" required placeholder="Viên, Hộp, Chai...">
+                <label>Đơn vị tính *</label>
+                <input type="text" name="donViTinh" required placeholder="Viên, Hộp, Chai...">
             </div>
             <div class="form-group">
                 <label>Giá bán *</label>
-                <input type="number" name="giaBan" required min="0">
+                <input type="number" name="giaBan" required min="0" step="0.01">
             </div>
             <div class="form-group">
-                <label>Số lượng *</label>
-                <input type="number" name="soLuong" required min="0">
+                <label>Số lượng tồn *</label>
+                <input type="number" name="soLuongTon" required min="0">
+            </div>
+            <div class="form-group">
+                <label>Hạn sử dụng</label>
+                <input type="date" name="hsd">
             </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
@@ -783,6 +784,10 @@ function showAddThuocModal() {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData);
+
+      // Convert string to number for numeric fields
+      if (data.giaBan) data.giaBan = parseFloat(data.giaBan);
+      if (data.soLuongTon) data.soLuongTon = parseInt(data.soLuongTon);
 
       await addThuoc(data);
     });
@@ -963,6 +968,22 @@ function displayHoaDonTable(data) {
   data.forEach((hd) => {
     const statusClass =
       hd.trangThai === "Hủy" ? "badge-danger" : "badge-success";
+
+    // Tạo nút hành động dựa trên trạng thái
+    let actionButtons = `<button class="btn btn-view" onclick="viewHoaDon('${hd.maHoaDon}')" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i>
+                        </button>`;
+
+    if (hd.trangThai === "Chưa xác định" || !hd.trangThai) {
+      actionButtons += `
+        <button class="btn btn-success" onclick="confirmThanhToan('${hd.maHoaDon}')" title="Thanh toán">
+            <i class="fas fa-check-circle"></i>
+        </button>
+        <button class="btn btn-delete" onclick="confirmHuyHoaDon('${hd.maHoaDon}')" title="Hủy hóa đơn">
+            <i class="fas fa-times-circle"></i>
+        </button>`;
+    }
+
     html += `
             <tr>
                 <td>${hd.maHoaDon}</td>
@@ -972,9 +993,7 @@ function displayHoaDonTable(data) {
                 <td>${formatCurrency(hd.tongTien)}</td>
                 <td><span class="badge ${statusClass}">${hd.trangThai || "Chưa xác định"}</span></td>
                 <td>
-                    <button class="btn btn-view" onclick="viewHoaDon('${hd.maHoaDon}')">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;
@@ -1171,22 +1190,619 @@ function logout() {
   }
 }
 
-// Placeholder functions (các hàm edit và view sẽ implement sau)
-function editNhanVien(id) {
-  showNotification("Chức năng đang phát triển", "info");
+// ====================
+// CÁC HÀM EDIT VÀ VIEW CHI TIẾT
+// ====================
+
+/**
+ * Chỉnh sửa thông tin nhân viên
+ * @param {string} maNV - Mã nhân viên
+ */
+async function editNhanVien(maNV) {
+  try {
+    // Lấy thông tin nhân viên hiện tại
+    const response = await fetch(`${API_URL}/nhanvien`);
+    const data = await response.json();
+    const nhanvien = data.find((nv) => nv.maNhanVien === maNV);
+
+    if (!nhanvien) {
+      showNotification("Không tìm thấy thông tin nhân viên", "error");
+      return;
+    }
+
+    const hoTen = `${nhanvien.ho || ""} ${nhanvien.ten || ""}`.trim();
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <h2>Chỉnh Sửa Nhân Viên</h2>
+      <form id="editNhanVienForm">
+        <div class="form-group">
+          <label>Mã nhân viên</label>
+          <input type="text" value="${nhanvien.maNhanVien}" disabled>
+        </div>
+        <div class="form-group">
+          <label>Họ tên *</label>
+          <input type="text" name="hoTen" value="${hoTen}" required>
+        </div>
+        <div class="form-group">
+          <label>Giới tính *</label>
+          <select name="gioiTinh" required>
+            <option value="Nam" ${nhanvien.gioiTinh === "Nam" ? "selected" : ""}>Nam</option>
+            <option value="Nữ" ${nhanvien.gioiTinh === "Nữ" ? "selected" : ""}>Nữ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="tel" name="soDienThoai" value="${nhanvien.sdt || nhanvien.SDT || ""}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value="${nhanvien.email || ""}">
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ</label>
+          <input type="text" name="diaChi" value="${nhanvien.diaChi || ""}">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Cập Nhật</button>
+        </div>
+      </form>
+    `;
+
+    document
+      .getElementById("editNhanVienForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        // Split hoTen into ho and ten
+        const nameParts = data.hoTen.trim().split(/\s+/);
+        const ten = nameParts.pop();
+        const ho = nameParts.join(" ");
+
+        const updateData = {
+          maNhanVien: nhanvien.maNhanVien,
+          ho: ho,
+          ten: ten,
+          gioiTinh: data.gioiTinh,
+          sdt: data.soDienThoai,
+          email: data.email,
+          diaChi: data.diaChi,
+          maTaiKhoan: nhanvien.maTaiKhoan,
+        };
+
+        try {
+          const response = await fetch(`${API_URL}/nhanvien`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateData),
+          });
+
+          if (response.ok) {
+            showNotification("Cập nhật nhân viên thành công", "success");
+            closeModal();
+            loadNhanVienData();
+          } else {
+            showNotification("Cập nhật nhân viên thất bại", "error");
+          }
+        } catch (error) {
+          console.error("Lỗi:", error);
+          showNotification("Có lỗi xảy ra", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin nhân viên", "error");
+  }
 }
-function editKhachHang(id) {
-  showNotification("Chức năng đang phát triển", "info");
+
+/**
+ * Chỉnh sửa thông tin khách hàng
+ * @param {string} maKH - Mã khách hàng
+ */
+async function editKhachHang(maKH) {
+  try {
+    // Lấy thông tin khách hàng hiện tại
+    const response = await fetch(`${API_URL}/khachhang`);
+    const data = await response.json();
+    const khachhang = data.find((kh) => kh.maKhachHang === maKH);
+
+    if (!khachhang) {
+      showNotification("Không tìm thấy thông tin khách hàng", "error");
+      return;
+    }
+
+    const hoTen = `${khachhang.ho || ""} ${khachhang.ten || ""}`.trim();
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <h2>Chỉnh Sửa Khách Hàng</h2>
+      <form id="editKhachHangForm">
+        <div class="form-group">
+          <label>Mã khách hàng</label>
+          <input type="text" value="${khachhang.maKhachHang}" disabled>
+        </div>
+        <div class="form-group">
+          <label>Họ tên *</label>
+          <input type="text" name="hoTen" value="${hoTen}" required>
+        </div>
+        <div class="form-group">
+          <label>Giới tính *</label>
+          <select name="gioiTinh" required>
+            <option value="Nam" ${khachhang.gioiTinh === "Nam" ? "selected" : ""}>Nam</option>
+            <option value="Nữ" ${khachhang.gioiTinh === "Nữ" ? "selected" : ""}>Nữ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="tel" name="soDienThoai" value="${khachhang.sdt || ""}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value="${khachhang.email || ""}">
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ</label>
+          <input type="text" name="diaChi" value="${khachhang.diaChi || ""}">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Cập Nhật</button>
+        </div>
+      </form>
+    `;
+
+    document
+      .getElementById("editKhachHangForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        // Split hoTen into ho and ten
+        const nameParts = data.hoTen.trim().split(/\s+/);
+        const ten = nameParts.pop();
+        const ho = nameParts.join(" ");
+
+        const updateData = {
+          maKhachHang: khachhang.maKhachHang,
+          ho: ho,
+          ten: ten,
+          gioiTinh: data.gioiTinh,
+          sdt: data.soDienThoai,
+          email: data.email,
+          diaChi: data.diaChi,
+        };
+
+        try {
+          const response = await fetch(`${API_URL}/khachhang`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateData),
+          });
+
+          if (response.ok) {
+            showNotification("Cập nhật khách hàng thành công", "success");
+            closeModal();
+            loadKhachHangData();
+          } else {
+            showNotification("Cập nhật khách hàng thất bại", "error");
+          }
+        } catch (error) {
+          console.error("Lỗi:", error);
+          showNotification("Có lỗi xảy ra", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin khách hàng", "error");
+  }
 }
-function viewThuoc(id) {
-  showNotification("Chức năng đang phát triển", "info");
+
+/**
+ * Xem chi tiết thuốc
+ * @param {string} maThuoc - Mã thuốc
+ */
+async function viewThuoc(maThuoc) {
+  try {
+    const response = await fetch(`${API_URL}/thuoc/${maThuoc}`);
+
+    if (!response.ok) {
+      showNotification("Không thể tải thông tin thuốc", "error");
+      return;
+    }
+
+    const thuoc = await response.json();
+
+    if (!thuoc) {
+      showNotification("Không tìm thấy thông tin thuốc", "error");
+      return;
+    }
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <div style="max-width: 600px; margin: 0 auto;">
+        <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">
+          <i class="fas fa-pills"></i> Chi Tiết Thuốc
+        </h2>
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; text-align: center; margin-bottom: 30px;">
+          <div style="width: 100px; height: 100px; border-radius: 50%; background: white; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-pills" style="font-size: 50px; color: #667eea;"></i>
+          </div>
+          <h3 style="margin: 0; font-size: 24px;">${thuoc.tenThuoc}</h3>
+          <p style="margin: 5px 0 0; opacity: 0.9;">${thuoc.maThuoc}</p>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px;">
+          <div style="display: grid; gap: 20px;">
+            
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                <i class="fas fa-box" style="color: #667eea; width: 20px;"></i>
+                <strong>Đơn vị tính:</strong>
+              </div>
+              <div style="padding-left: 30px; color: #555;">${thuoc.donViTinh || "Chưa cập nhật"}</div>
+            </div>
+
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                <i class="fas fa-money-bill-wave" style="color: #667eea; width: 20px;"></i>
+                <strong>Giá bán:</strong>
+              </div>
+              <div style="padding-left: 30px; color: #555;">${formatCurrency(thuoc.giaBan)}</div>
+            </div>
+
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                <i class="fas fa-warehouse" style="color: #667eea; width: 20px;"></i>
+                <strong>Số lượng tồn:</strong>
+              </div>
+              <div style="padding-left: 30px; color: #555;">${thuoc.soLuongTon || 0} ${thuoc.donViTinh || ""}</div>
+            </div>
+
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                <i class="fas fa-calendar-alt" style="color: #667eea; width: 20px;"></i>
+                <strong>Hạn sử dụng:</strong>
+              </div>
+              <div style="padding-left: 30px; color: #555;">${thuoc.hsd ? formatDate(thuoc.hsd) : "Chưa cập nhật"}</div>
+            </div>
+
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                <i class="fas fa-industry" style="color: #667eea; width: 20px;"></i>
+                <strong>Nhà sản xuất:</strong>
+              </div>
+              <div style="padding-left: 30px; color: #555;">${thuoc.nsx || "Chưa cập nhật"}</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="btn btn-primary" onclick="closeModal()">Đóng</button>
+        </div>
+      </div>
+    `;
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin thuốc", "error");
+  }
 }
-function editThuoc(id) {
-  showNotification("Chức năng đang phát triển", "info");
+
+/**
+ * Chỉnh sửa thông tin thuốc
+ * @param {string} maThuoc - Mã thuốc
+ */
+async function editThuoc(maThuoc) {
+  try {
+    const response = await fetch(`${API_URL}/thuoc/${maThuoc}`);
+    const thuoc = await response.json();
+
+    if (!thuoc) {
+      showNotification("Không tìm thấy thông tin thuốc", "error");
+      return;
+    }
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <h2>Chỉnh Sửa Thuốc</h2>
+      <form id="editThuocForm">
+        <div class="form-group">
+          <label>Mã thuốc</label>
+          <input type="text" value="${thuoc.maThuoc}" disabled>
+        </div>
+        <div class="form-group">
+          <label>Tên thuốc *</label>
+          <input type="text" name="tenThuoc" value="${thuoc.tenThuoc}" required>
+        </div>
+        <div class="form-group">
+          <label>Đơn vị tính *</label>
+          <input type="text" name="donViTinh" value="${thuoc.donViTinh || ""}" required placeholder="Viên, Hộp, Chai...">
+        </div>
+        <div class="form-group">
+          <label>Giá bán *</label>
+          <input type="number" name="giaBan" value="${thuoc.giaBan}" required min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Số lượng tồn *</label>
+          <input type="number" name="soLuongTon" value="${thuoc.soLuongTon || 0}" required min="0">
+        </div>
+        <div class="form-group">
+          <label>Hạn sử dụng</label>
+          <input type="date" name="hsd" value="${thuoc.hsd ? thuoc.hsd.split("T")[0] : ""}">
+        </div>
+        <div class="form-group">
+          <label>Nhà sản xuất</label>
+          <input type="text" name="nsx" value="${thuoc.nsx || ""}">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Cập Nhật</button>
+        </div>
+      </form>
+    `;
+
+    document
+      .getElementById("editThuocForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        // Convert string to number for numeric fields
+        if (data.giaBan) data.giaBan = parseFloat(data.giaBan);
+        if (data.soLuongTon) data.soLuongTon = parseInt(data.soLuongTon);
+
+        const updateData = {
+          maThuoc: thuoc.maThuoc,
+          tenThuoc: data.tenThuoc,
+          donViTinh: data.donViTinh,
+          giaBan: data.giaBan,
+          soLuongTon: data.soLuongTon,
+          hsd: data.hsd,
+          nsx: data.nsx,
+          maNhaCungCap: thuoc.maNhaCungCap || "",
+        };
+
+        try {
+          const response = await fetch(`${API_URL}/thuoc`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateData),
+          });
+
+          if (response.ok) {
+            showNotification("Cập nhật thuốc thành công", "success");
+            closeModal();
+            loadThuocData();
+          } else {
+            showNotification("Cập nhật thuốc thất bại", "error");
+          }
+        } catch (error) {
+          console.error("Lỗi:", error);
+          showNotification("Có lỗi xảy ra", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin thuốc", "error");
+  }
 }
-function viewPhieuNhap(id) {
-  showNotification("Chức năng đang phát triển", "info");
+
+/**
+ * Xem chi tiết phiếu nhập
+ * @param {string} maPhieuNhap - Mã phiếu nhập
+ */
+async function viewPhieuNhap(maPhieuNhap) {
+  try {
+    const response = await fetch(`${API_URL}/phieunhap/${maPhieuNhap}`);
+
+    if (!response.ok) {
+      showNotification("Không thể tải thông tin phiếu nhập", "error");
+      return;
+    }
+
+    const phieuNhap = await response.json();
+
+    if (!phieuNhap) {
+      showNotification("Không tìm thấy thông tin phiếu nhập", "error");
+      return;
+    }
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <div style="max-width: 700px; margin: 0 auto;">
+        <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">
+          <i class="fas fa-file-import"></i> Chi Tiết Phiếu Nhập
+        </h2>
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; margin-bottom: 30px;">
+          <h3 style="margin: 0; font-size: 24px; text-align: center;">${phieuNhap.maPhieuNhap}</h3>
+          <p style="margin: 10px 0 0; text-align: center; opacity: 0.9;">Ngày nhập: ${formatDate(phieuNhap.ngayNhap)}</p>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="display: grid; gap: 15px;">
+            
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-truck" style="color: #667eea; width: 20px;"></i>
+                <strong>Nhà cung cấp:</strong>
+                <span style="margin-left: auto; color: #555;">${phieuNhap.maNhaCungCap || "N/A"}</span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-user" style="color: #667eea; width: 20px;"></i>
+                <strong>Nhân viên nhập:</strong>
+                <span style="margin-left: auto; color: #555;">${phieuNhap.maNhanVien || "N/A"}</span>
+              </div>
+            </div>
+
+            <div class="info-row" style="border-top: 2px solid #dee2e6; padding-top: 15px; margin-top: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-money-bill-wave" style="color: #28a745; width: 20px;"></i>
+                <strong style="font-size: 18px;">Tổng tiền:</strong>
+                <span style="margin-left: auto; color: #28a745; font-size: 20px; font-weight: bold;">${formatCurrency(phieuNhap.tongTien)}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="btn btn-primary" onclick="closeModal()">Đóng</button>
+        </div>
+      </div>
+    `;
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin phiếu nhập", "error");
+  }
 }
-function viewHoaDon(id) {
-  showNotification("Chức năng đang phát triển", "info");
+
+/**
+ * Xem chi tiết hóa đơn
+ * @param {string} maHoaDon - Mã hóa đơn
+ */
+async function viewHoaDon(maHoaDon) {
+  try {
+    const response = await fetch(`${API_URL}/hoadon`);
+    const data = await response.json();
+    const hoaDon = data.find((hd) => hd.maHoaDon === maHoaDon);
+
+    if (!hoaDon) {
+      showNotification("Không tìm thấy thông tin hóa đơn", "error");
+      return;
+    }
+
+    const statusColor = hoaDon.trangThai === "Hủy" ? "#dc3545" : "#28a745";
+    const statusIcon =
+      hoaDon.trangThai === "Hủy" ? "fa-times-circle" : "fa-check-circle";
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <div style="max-width: 700px; margin: 0 auto;">
+        <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">
+          <i class="fas fa-receipt"></i> Chi Tiết Hóa Đơn
+        </h2>
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; margin-bottom: 30px;">
+          <h3 style="margin: 0; font-size: 24px; text-align: center;">${hoaDon.maHoaDon}</h3>
+          <p style="margin: 10px 0 0; text-align: center; opacity: 0.9;">Ngày lập: ${formatDate(hoaDon.ngayLap)}</p>
+          <div style="text-align: center; margin-top: 15px;">
+            <span style="background: ${statusColor}; padding: 8px 20px; border-radius: 20px; font-weight: bold;">
+              <i class="fas ${statusIcon}"></i> ${hoaDon.trangThai || "Chưa xác định"}
+            </span>
+          </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="display: grid; gap: 15px;">
+            
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-user-friends" style="color: #667eea; width: 20px;"></i>
+                <strong>Khách hàng:</strong>
+                <span style="margin-left: auto; color: #555;">${hoaDon.maKhachHang || "Khách lẻ"}</span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-user" style="color: #667eea; width: 20px;"></i>
+                <strong>Nhân viên:</strong>
+                <span style="margin-left: auto; color: #555;">${hoaDon.maNhanVien || "N/A"}</span>
+              </div>
+            </div>
+
+            <div class="info-row" style="border-top: 2px solid #dee2e6; padding-top: 15px; margin-top: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-money-bill-wave" style="color: #28a745; width: 20px;"></i>
+                <strong style="font-size: 18px;">Tổng tiền:</strong>
+                <span style="margin-left: auto; color: #28a745; font-size: 20px; font-weight: bold;">${formatCurrency(hoaDon.tongTien)}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="btn btn-primary" onclick="closeModal()">Đóng</button>
+        </div>
+      </div>
+    `;
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin hóa đơn", "error");
+  }
+}
+
+/**
+ * Xác nhận thanh toán hóa đơn
+ * @param {string} maHoaDon - Mã hóa đơn
+ */
+async function confirmThanhToan(maHoaDon) {
+  if (!confirm("Xác nhận thanh toán hóa đơn này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/hoadon/thanhtoan`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maHoaDon: maHoaDon }),
+    });
+
+    if (response.ok) {
+      showNotification("Thanh toán hóa đơn thành công", "success");
+      loadHoaDonData();
+    } else {
+      showNotification("Thanh toán hóa đơn thất bại", "error");
+    }
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+/**
+ * Xác nhận hủy hóa đơn
+ * @param {string} maHoaDon - Mã hóa đơn
+ */
+async function confirmHuyHoaDon(maHoaDon) {
+  if (!confirm("Bạn có chắc muốn hủy hóa đơn này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/hoadon/huy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maHoaDon: maHoaDon }),
+    });
+
+    if (response.ok) {
+      showNotification("Đã hủy hóa đơn", "success");
+      loadHoaDonData();
+    } else {
+      showNotification("Hủy hóa đơn thất bại", "error");
+    }
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
 }

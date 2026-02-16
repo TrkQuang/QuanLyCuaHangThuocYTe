@@ -15,13 +15,10 @@ registerForm.addEventListener("submit", async (e) => {
   const confirmPassword = document
     .getElementById("confirmPassword")
     .value.trim();
-  const fullName =
-    document.getElementById("fullName")?.value.trim() || username;
-  const phone = document.getElementById("phone")?.value.trim() || "";
-  const email = document.getElementById("email")?.value.trim() || "";
+  const email = document.getElementById("email").value.trim();
 
   // Validate
-  if (!username || !password || !confirmPassword) {
+  if (!username || !password || !confirmPassword || !email) {
     showError("Vui lòng nhập đầy đủ thông tin!");
     return;
   }
@@ -36,20 +33,27 @@ registerForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  await registerUser(username, password, fullName, phone, email);
+  // Validate email format
+  const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    showError("Email không hợp lệ!");
+    return;
+  }
+
+  await registerUser(username, password, email);
 });
 
 // Đăng ký user qua API
-async function registerUser(username, password, fullName, phone, email) {
+async function registerUser(username, password, email) {
   try {
-    // Tạo tài khoản
+    // Tạo tài khoản khách hàng
     const taiKhoanData = {
       tenDangNhap: username,
       matKhau: password,
-      loaiTaiKhoan: "KhachHang",
+      email: email,
     };
 
-    const taiKhoanResponse = await fetch(`${API_URL}/taikhoan/dangky`, {
+    const response = await fetch(`${API_URL}/taikhoan/dangky`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,29 +61,13 @@ async function registerUser(username, password, fullName, phone, email) {
       body: JSON.stringify(taiKhoanData),
     });
 
-    if (!taiKhoanResponse.ok) {
-      showError("Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.");
+    if (!response.ok) {
+      const errorText = await response.text();
+      showError(errorText || "Đăng ký thất bại! Vui lòng thử lại.");
       return;
     }
 
-    // Tạo thông tin khách hàng
-    const khachHangData = {
-      tenKhachHang: fullName,
-      soDienThoai: phone,
-      email: email,
-      diaChi: "",
-      ngayTao: new Date().toISOString(),
-    };
-
-    await fetch(`${API_URL}/khachhang`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(khachHangData),
-    });
-
-    showSuccess("Đăng ký thành công! Bạn có thể đăng nhập.");
+    showSuccess("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
 
     // Reset form
     registerForm.reset();

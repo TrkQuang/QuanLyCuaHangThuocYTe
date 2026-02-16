@@ -179,13 +179,19 @@ public class TaiKhoanDAO {
     ) {
       if (rs.next()) {
         String lastMa = rs.getString("MaTK");
-        // Lấy số từ mã cuối (VD: TK001 -> 001)
-        int number = Integer.parseInt(lastMa.substring(2));
-        number++;
-        // Format lại thành TK + 3 chữ số
-        return String.format("TK%03d", number);
+        try {
+          // Lấy số từ mã cuối (VD: TK001 -> 001)
+          String numberPart = lastMa.substring(2);
+          long number = Long.parseLong(numberPart);
+          number++;
+          // Format lại thành TK + số với độ dài tương tự
+          int length = Math.max(3, numberPart.length());
+          return String.format("TK%0" + length + "d", number);
+        } catch (NumberFormatException e) {
+          // Nếu parse thất bại, dùng timestamp
+          return "TK" + System.currentTimeMillis();
+        }
       } else {
-        // Nếu chưa có tài khoản nào
         return "TK001";
       }
     } catch (SQLException e) {

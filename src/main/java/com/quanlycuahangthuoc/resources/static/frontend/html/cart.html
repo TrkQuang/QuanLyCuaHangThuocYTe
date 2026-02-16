@@ -1,43 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>Giỏ hàng</title>
-  <link rel="stylesheet" href="../css/cart.css">
-</head>
-<body>
-
-<div class="cart-wrapper">
-  <h2>🛒 Giỏ hàng của bạn</h2>
-
-  <div class="cart-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Sản phẩm</th>
-          <th>Giá</th>
-          <th>Số lượng</th>
-          <th>Thành tiền</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="cart-items"></tbody>
-    </table>
-
-    <div class="cart-footer">
-      <div class="total-box">
-        <span>Tổng thanh toán</span>
-        <strong><span id="total-price">0</span> VNĐ</strong>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Giỏ hàng</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/cart.css" />
+  </head>
+  <body>
+    <!--Header-->
+    <header class="header">
+      <div class="header-top">
+        <div class="container">
+          Hotline: 19001514 | Giao hàng miễn phí từ 200k
+        </div>
       </div>
+      <div class="header-main">
+        <div class="container">
+          <div class="content">
+            <a href="index.html" class="logo">🏥 Nhà Thuốc</a>
+            <div class="search-box">
+              <input type="text" placeholder="Tìm kiếm thuốc......." />
+            </div>
+            <div class="menu">
+              <a href="profile.html">👤 Tài khoản</a>
+              <a href="cart.html"
+                >🛒 Giỏ hàng (<span id="cartCount">0</span>)</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-      <div class="cart-actions">
-        <a href="index.html" class="btn secondary">⬅ Tiếp tục mua sắm</a>
-        <a href="checkout.html" class="btn primary">Thanh toán</a>
+    <!--Navigation-->
+    <nav class="nav">
+      <div class="container">
+        <ul>
+          <li><a href="index.html">🏠 Trang chủ</a></li>
+          <li><a href="shop.html">💊 Sản phẩm</a></li>
+          <li><a href="cart.html" class="active">🛒 Giỏ hàng</a></li>
+          <li><a href="order-history.html">📋 Đơn hàng</a></li>
+          <li><a href="profile.html">👤 Tài khoản</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="cart-wrapper">
+      <h2>🛒 Giỏ hàng của bạn</h2>
+
+      <div class="cart-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Giá</th>
+              <th>Số lượng</th>
+              <th>Thành tiền</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cart-items"></tbody>
+        </table>
+
+        <div class="cart-footer">
+          <div class="total-box">
+            <span>Tổng thanh toán</span>
+            <strong><span id="total-price">0</span> VNĐ</strong>
+          </div>
+
+          <div class="cart-actions">
+            <a href="shop.html" class="btn secondary">⬅ Tiếp tục mua sắm</a>
+            <a href="checkout.html" class="btn primary">Thanh toán →</a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script src="../js/add-cart.js"></script>
-</body>
+    <!--Footer-->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>Nhà Thuốc</h3>
+            <p>Cửa hàng thuốc trực tuyến uy tín</p>
+            <p>📞 Hotline: 19001514</p>
+            <p>📧 Email: nhathuocyte@gmail.com</p>
+          </div>
+          <div class="footer-section">
+            <h3>Liên kết nhanh</h3>
+            <ul>
+              <li><a href="#">Về chúng tôi</a></li>
+              <li><a href="#">Chính sách bảo mật</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h3>Hỗ trợ khách hàng</h3>
+            <ul>
+              <li><a href="#">Câu hỏi thường gặp</a></li>
+              <li><a href="#">Liên hệ</a></li>
+            </ul>
+          </div>
+        </div>
+        <div
+          style="
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          "
+        >
+          <p>&copy; 2026 Nhà Thuốc. Tất cả quyền được bảo lưu.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="../js/add-cart.js"></script>
+  </body>
 </html>

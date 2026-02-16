@@ -96,6 +96,9 @@ public class NhanVienBUS {
     nhanVien.setMaTaiKhoan(maTK);
     nhanVien.setHo(ho);
     nhanVien.setTen(ten);
+    nhanVien.setGioiTinh(
+      request.getGioiTinh() != null ? request.getGioiTinh() : ""
+    );
     nhanVien.setSDT(request.getSoDienThoai());
     nhanVien.setDiaChi(request.getDiaChi() != null ? request.getDiaChi() : "");
 
