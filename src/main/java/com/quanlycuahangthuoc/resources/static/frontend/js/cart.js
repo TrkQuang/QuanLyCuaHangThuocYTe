@@ -15,7 +15,7 @@ function getSessionId() {
 // Lấy giỏ hàng từ API
 async function getCart() {
   try {
-    const response = await fetch(`${API_URL}/cart`, {
+    const response = await fetch(`${API_URL}/cart/add`, {
       headers: {
         "Session-Id": getSessionId(),
       },
@@ -27,15 +27,17 @@ async function getCart() {
   }
 }
 
-// Thêm vào giỏ (được gọi từ onclick)
-async function addToCart(name, price) {
+// Thêm vào giỏ
+async function addToCart(productID) {
   let button = event.target;
   let productItem = button.closest(".product-item");
 
   // Lấy thông tin từ HTML
-  let id = button.dataset.id;
+  let id = productID;
   let title = productItem.querySelector("h3").innerText;
   let image = productItem.querySelector("img").src;
+  let priceText = productItem.querySelector(".product-price").innerText;
+  let price = parseInt(priceText.replace(/[^0-9]/g, '')) || 0;
 
   try {
     const response = await fetch(`${API_URL}/cart/add`, {
@@ -46,7 +48,6 @@ async function addToCart(name, price) {
       },
       body: JSON.stringify({
         id: id,
-        name: name,
         title: title,
         price: price,
         image: image,
@@ -54,12 +55,21 @@ async function addToCart(name, price) {
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log("Lỗi server:", errorText);
+      throw new Error(`Server error ${response.status}: ${errorText}`);
+    }
+
     const result = await response.json();
 
     if (result.success) {
       updateCartCount();
       alert(`✅ Đã thêm "${title}" vào giỏ hàng`);
+    } else {
+      alert("⚠️ " + (result.message || "Thêm thất bại"));
     }
+
   } catch (error) {
     console.error("Lỗi khi thêm vào giỏ:", error);
     alert("❌ Không thể thêm vào giỏ hàng!");
@@ -87,3 +97,34 @@ async function updateCartCount() {
 
 // Load khi refresh
 document.addEventListener("DOMContentLoaded", updateCartCount);
+
+// Search
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+
+    if (!searchInput || !searchForm) return;
+
+    // Xử lý khi bấm Enter trong input
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault(); // Ngăn submit mặc định (để kiểm soát)
+
+        const keyword = this.value.trim();
+        if (keyword.length > 0) {
+          // Chuyển hướng đến search.html?q=...
+          window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
+        }
+        // Nếu rỗng thì không làm gì (hoặc có thể reload trang hiện tại nếu muốn)
+      }
+    });
+
+    // Vẫn hỗ trợ submit bằng nút tìm kiếm (nếu người dùng bấm nút thay vì Enter)
+    searchForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const keyword = searchInput.value.trim();
+      if (keyword.length > 0) {
+        window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
+      }
+    });
+  });
