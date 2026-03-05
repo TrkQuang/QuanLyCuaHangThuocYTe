@@ -128,3 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  async function checkout() {
+  const total = document.getElementById("totalPrice").innerText.replace(/,/g,"");
+  await createOrder(Number(total));
+  alert("Đặt hàng thành công");
+  window.location.href = "order-history.html";
+}
