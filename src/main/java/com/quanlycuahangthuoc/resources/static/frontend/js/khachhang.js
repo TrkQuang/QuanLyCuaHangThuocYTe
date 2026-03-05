@@ -352,3 +352,135 @@ loadProducts();
 updateCartCount();
 loadCart();
 loadOrders();
+
+//filter product
+products = [
+  {
+    id: "T1",
+    name: "Panadol Extra",
+    price: 20000,
+    category: "thuoc-dau",
+    image: "OIP (2).jpg",
+    description: "Hộp 24 viên - Giảm đau, hạ sốt"
+  },
+  {
+    id: "T2",
+    name: "Vitamin C 1000mg",
+    price: 70000,
+    category: "vitamin",
+    image: "thuoc-vitamin-c-tw3-500mg-dieu-tri-thieu-hut-vitamin-c-65f15f008f538.jpg",
+    description: "Hộp 30 viên - Tăng sức đề kháng"
+  },
+  {
+    id: "T3",
+    name: "Amoxicillin",
+    price: 25000,
+    category: "khang-sinh",
+    image: "OIP.jpg",
+    description: "Hộp 20 viên - Kháng sinh"
+  },
+  {
+    id: "T4",
+    name: "Kem chống nắng La Roche",
+    price: 400000,
+    category: "lam-dep",
+    image: "36dea234165d80e3db8d4ec7a12be007.jpg",
+    description: "SPF 60+ PA++++"
+  },
+  {
+    id: "T5",
+    name: "Dầu gội Head & Shoulder",
+    price: 90000,
+    category: "lam-dep",
+    image: "OIP (1).jpg",
+    description: "Chai 500ml - Trị gàu"
+  },
+];
+
+function renderProducts(filteredProducts) {
+  const container = document.getElementById("productsList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (filteredProducts.length === 0) {
+    container.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; padding: 60px; color:#718096;">
+      Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
+    </p>`;
+    return;
+  }
+
+  filteredProducts.forEach(product => {
+    const item = document.createElement("div");
+    item.className = "product-item";
+    item.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" />
+      <h3>${product.name}</h3>
+      <div class="product-price">${product.price.toLocaleString('vi-VN')}đ</div>
+      <p>${product.description}</p>
+      <button class="btn-primary" onclick="addToCart('${product.id}', ${product.price})">
+        Thêm giỏ hàng
+      </button>
+    `;
+    container.appendChild(item);
+  });
+}
+
+//filter + arrange
+function filterAndSortProducts() {
+  let result = [...products];
+
+  //category
+  const category = document.getElementById("categoryFilter")?.value;
+  if (category) {
+    result = result.filter(p => p.category === category);
+  }
+
+  //price
+  const priceRange = document.getElementById("priceFilter")?.value;
+  if (priceRange) {
+    const [minStr, maxStr] = priceRange.split("-");
+    const min = parseInt(minStr) || 0;
+    const max = maxStr === "+" ? Infinity : parseInt(maxStr) || Infinity;
+
+    result = result.filter(p => p.price >= min && p.price <= max);
+  }
+
+  //arrange
+  const sortValue = document.getElementById("sortBy")?.value;
+  switch (sortValue) {
+    case "name":
+      result.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case "price-low":
+      result.sort((a, b) => a.price - b.price);
+      break;
+    case "price-high":
+      result.sort((a, b) => b.price - a.price);
+      break;
+    case "popular":
+      result.sort((a, b) => b.price - a.price);
+      break;
+    default:
+      result.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  renderProducts(result);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts(products);
+
+  const filters = ["categoryFilter", "priceFilter", "sortBy"];
+  filters.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("change", filterAndSortProducts);
+    }
+  });
+
+  const btn = document.getElementById("applyFilterBtn");
+  if (btn) {
+    btn.addEventListener("click", filterAndSortProducts);
+  }
+});
