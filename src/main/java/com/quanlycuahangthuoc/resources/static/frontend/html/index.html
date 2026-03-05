@@ -19,11 +19,16 @@
           <div class="content">
             <a href="index.html" class="logo">🏥 Nhà Thuốc</a>
             <div class="search-box">
-              <input
-                type="text"
-                id="searchInput"
-                placeholder="Tìm kiếm thuốc......."
-              />
+              <form id="searchForm" action="search.html" method="get">
+                <input
+                  type="text"
+                  id="searchInput"
+                  name="q"
+                  placeholder="Tìm kiếm thuốc......."
+                  autocomplete="off"
+                />
+                <button type="submit" class="search-btn">🔍 Tìm</button>
+              </form>
             </div>
             <div class="menu">
               <a href="login.html" id="loginLink"
@@ -130,7 +135,7 @@
             <button
               class="btn-primary"
               data-id="T1"
-              onclick="addToCart('panadol', 20000)"
+              onclick="addToCart('T1')"
             >
               Thêm giỏ hàng
             </button>
@@ -146,7 +151,7 @@
             <button
               class="btn-primary"
               data-id="T2"
-              onclick="addToCart('vitamin c', 70000)"
+              onclick="addToCart('T2')"
             >
               Thêm giỏ hàng
             </button>
@@ -159,7 +164,7 @@
             <button
               class="btn-primary"
               data-id="T3"
-              onclick="addToCart('amoxicillin', 25000)"
+              onclick="addToCart('T3')"
             >
               Thêm giỏ hàng
             </button>

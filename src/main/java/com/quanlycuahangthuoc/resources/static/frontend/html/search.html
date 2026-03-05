@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kết quả tìm kiếm - Nhà Thuốc</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header class="search-header">
+    <div class="search-container">
+      <a href="../index.html" class="logo">🏥 Nhà Thuốc</a>
+
+      <div class="search-box">
+        <form id="searchForm" action="search.html" method="get">
+          <input
+            type="text"
+            id="searchInput"
+            name="q"
+            placeholder="Tìm kiếm thuốc......."
+            autocomplete="off"
+            value=""
+          />
+          <button type="submit" class="search-btn">🔍</button>
+        </form>
+      </div>
+
+      <footer class="back-home-footer">
+        <a href="index.html" class="home-btn">← Về Trang Chủ</a>
+      </footer>
+    </div>
+  </header>
+
+  <section style="padding: 40px 0;">
+    <div class="container">
+      <h1>Kết quả tìm kiếm cho: <span id="searchKeyword"></span></h1>
+      
+      <div class="products-grid" id="searchResults"></div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const keyword = urlParams.get('q') || '';
+      
+      document.getElementById('searchKeyword').textContent = keyword || 'Tất cả';
+
+      // Danh sách sản phẩm
+      const allProducts = [
+        { id: 'T1', name: 'Panadol Extra', price: '20.000đ', desc: 'Hộp 24 viên - Giảm đau, hạ sốt', img: 'OIP (2).jpg' },
+        { id: 'T2', name: 'Vitamin C 1000mg', price: '70.000đ', desc: 'Hộp 30 viên - Tăng sức đề kháng', img: 'thuoc-vitamin-c-tw3-500mg-dieu-tri-thieu-hut-vitamin-c-65f15f008f538.jpg' },
+        { id: 'T3', name: 'Amoxicillin', price: '25.000đ', desc: 'Hộp 20 viên - Kháng sinh', img: 'OIP.jpg' },
+        { id: 'laroche', name: 'Kem chống nắng La Roche', price: '400.000đ', desc: 'SPF 60+ PA++++', img: '36dea234165d80e3db8d4ec7a12be007.jpg' },
+        { id: 'head&shoulder', name: 'Dầu gội Head & Shoulder', price: '90.000đ', desc: 'Chai 500ml - Trị gàu', img: 'OIP (1).jpg' },
+      ];
+
+      const resultsContainer = document.getElementById('searchResults');
+      const lowerKeyword = keyword.toLowerCase().trim();
+
+      const filtered = allProducts.filter(p => 
+        p.name.toLowerCase().includes(lowerKeyword) || 
+        p.desc.toLowerCase().includes(lowerKeyword)
+      );
+
+      if (filtered.length === 0) {
+        resultsContainer.innerHTML = '<p style="text-align:center; font-size:18px; color:#718096;">Không tìm thấy sản phẩm nào phù hợp.</p>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'product-item';
+        item.innerHTML = `
+          <img src="${p.img}" alt="${p.name}" />
+          <h3>${p.name}</h3>
+          <div class="product-price">${p.price}</div>
+          <p>${p.desc}</p>
+          <button class="btn-primary" onclick="addToCart('${p.id}')">Thêm giỏ hàng</button>
+        `;
+        resultsContainer.appendChild(item);
+      });
+    });
+  </script>
+
+  <script src="../js/cart.js"></script>
+</body>
+</html>
