@@ -108,18 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Xử lý khi bấm Enter trong input
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        e.preventDefault(); // Ngăn submit mặc định (để kiểm soát)
+        e.preventDefault();
 
         const keyword = this.value.trim();
         if (keyword.length > 0) {
-          // Chuyển hướng đến search.html?q=...
           window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
         }
-        // Nếu rỗng thì không làm gì (hoặc có thể reload trang hiện tại nếu muốn)
       }
     });
 
-    // Vẫn hỗ trợ submit bằng nút tìm kiếm (nếu người dùng bấm nút thay vì Enter)
     searchForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const keyword = searchInput.value.trim();
