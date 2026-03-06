@@ -58,6 +58,7 @@ async function loadOrders() {
     if (!response.ok) throw new Error("HTTP " + response.status);
 
     let orders = await response.json();
+    console.log("Orders từ API:", orders);
 
     // Lọc theo khách hàng đang đăng nhập (key "currentUser" — nhất quán toàn dự án)
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
@@ -94,7 +95,10 @@ function showOrders(orders) {
   }
 
   // Sắp xếp mới nhất lên đầu — field đúng theo API là ngayLap
-  orders.sort((a, b) => new Date(b.ngayLap) - new Date(a.ngayLap));
+  orders.sort((a, b) =>
+  new Date(b.ngayLap || b.ngayTao) -
+  new Date(a.ngayLap || a.ngayTao)
+);
 
   let html = "";
   orders.forEach((order) => {
