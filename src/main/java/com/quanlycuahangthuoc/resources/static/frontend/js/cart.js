@@ -15,7 +15,7 @@ function getSessionId() {
 // Lấy giỏ hàng từ API
 async function getCart() {
   try {
-    const response = await fetch(`${API_URL}/cart/add`, {
+    const response = await fetch(`${API_URL}/cart`, {
       headers: {
         "Session-Id": getSessionId(),
       },
