@@ -252,7 +252,7 @@ async function updateCartCount() {
 // ================= ORDERS =================
 
 async function loadOrders() {
-  const box = document.getElementById("orderList");
+  const box = document.getElementById("ordersList");
   if (!box) return;
 
   try {
