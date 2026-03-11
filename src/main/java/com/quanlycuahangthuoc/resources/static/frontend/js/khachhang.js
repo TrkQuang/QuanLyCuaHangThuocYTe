@@ -354,133 +354,94 @@ loadCart();
 loadOrders();
 
 //filter product
-products = [
-  {
-    id: "T1",
-    name: "Panadol Extra",
-    price: 20000,
-    category: "thuoc-dau",
-    image: "OIP (2).jpg",
-    description: "Hộp 24 viên - Giảm đau, hạ sốt"
-  },
-  {
-    id: "T2",
-    name: "Vitamin C 1000mg",
-    price: 70000,
-    category: "vitamin",
-    image: "thuoc-vitamin-c-tw3-500mg-dieu-tri-thieu-hut-vitamin-c-65f15f008f538.jpg",
-    description: "Hộp 30 viên - Tăng sức đề kháng"
-  },
-  {
-    id: "T3",
-    name: "Amoxicillin",
-    price: 25000,
-    category: "khang-sinh",
-    image: "OIP.jpg",
-    description: "Hộp 20 viên - Kháng sinh"
-  },
-  {
-    id: "T4",
-    name: "Kem chống nắng La Roche",
-    price: 400000,
-    category: "lam-dep",
-    image: "36dea234165d80e3db8d4ec7a12be007.jpg",
-    description: "SPF 60+ PA++++"
-  },
-  {
-    id: "T5",
-    name: "Dầu gội Head & Shoulder",
-    price: 90000,
-    category: "lam-dep",
-    image: "OIP (1).jpg",
-    description: "Chai 500ml - Trị gàu"
-  },
-];
+const categoryFilter = document.getElementById("categoryFilter");
+const priceFilter = document.getElementById("priceFilter");
+const sortBy = document.getElementById("sortBy");
 
-function renderProducts(filteredProducts) {
-  const container = document.getElementById("productsList");
-  if (!container) return;
+const productsContainer = document.querySelectorAll(".products-grid");
 
-  container.innerHTML = "";
-
-  if (filteredProducts.length === 0) {
-    container.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; padding: 60px; color:#718096;">
-      Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
-    </p>`;
-    return;
-  }
-
-  filteredProducts.forEach(product => {
-    const item = document.createElement("div");
-    item.className = "product-item";
-    item.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" />
-      <h3>${product.name}</h3>
-      <div class="product-price">${product.price.toLocaleString('vi-VN')}đ</div>
-      <p>${product.description}</p>
-      <button class="btn-primary" onclick="addToCart('${product.id}', ${product.price})">
-        Thêm giỏ hàng
-      </button>
-    `;
-    container.appendChild(item);
-  });
+/* Lấy giá từ text */
+function getPrice(text) {
+  return parseInt(text.replace(/[^\d]/g, ""));
 }
 
-//filter + arrange
-function filterAndSortProducts() {
-  let result = [...products];
+/* Bộ lọc chính */
+function filterProducts() {
+  const category = categoryFilter.value;
+  const price = priceFilter.value;
 
-  //category
-  const category = document.getElementById("categoryFilter")?.value;
-  if (category) {
-    result = result.filter(p => p.category === category);
-  }
+  const products = document.querySelectorAll(".product-item");
 
-  //price
-  const priceRange = document.getElementById("priceFilter")?.value;
-  if (priceRange) {
-    const [minStr, maxStr] = priceRange.split("-");
-    const min = parseInt(minStr) || 0;
-    const max = maxStr === "+" ? Infinity : parseInt(maxStr) || Infinity;
+  products.forEach(product => {
+    let show = true;
 
-    result = result.filter(p => p.price >= min && p.price <= max);
-  }
+    const name = product.querySelector("h3").innerText.toLowerCase();
 
-  //arrange
-  const sortValue = document.getElementById("sortBy")?.value;
-  switch (sortValue) {
-    case "name":
-      result.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "price-low":
-      result.sort((a, b) => a.price - b.price);
-      break;
-    case "price-high":
-      result.sort((a, b) => b.price - a.price);
-      break;
-    case "popular":
-      result.sort((a, b) => b.price - a.price);
-      break;
-    default:
-      result.sort((a, b) => a.name.localeCompare(b.name));
-  }
+    let priceText =
+      product.querySelector(".product-price") ||
+      product.querySelector(".new-price");
 
-  renderProducts(result);
-}
+    const productPrice = getPrice(priceText.innerText);
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts(products);
-
-  const filters = ["categoryFilter", "priceFilter", "sortBy"];
-  filters.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("change", filterAndSortProducts);
+    /* FILTER CATEGORY */
+    if (category) {
+      if (!name.includes(category.replace("-", " "))) {
+        show = false;
+      }
     }
+
+    /* FILTER PRICE */
+    if (price) {
+      if (price === "0-100000" && productPrice > 100000) show = false;
+
+      if (price === "100000-500000" &&
+        (productPrice < 100000 || productPrice > 500000)) show = false;
+
+      if (price === "500000-1000000" &&
+        (productPrice < 500000 || productPrice > 1000000)) show = false;
+
+      if (price === "1000000+" && productPrice < 1000000) show = false;
+    }
+
+    product.style.display = show ? "block" : "none";
   });
 
-  const btn = document.getElementById("applyFilterBtn");
-  if (btn) {
-    btn.addEventListener("click", filterAndSortProducts);
-  }
-});
+  sortProducts();
+}
+
+/* Sắp xếp */
+function sortProducts() {
+  const sort = sortBy.value;
+
+  document.querySelectorAll(".products-grid").forEach(grid => {
+    let items = Array.from(grid.querySelectorAll(".product-item"));
+
+    items.sort((a, b) => {
+      const nameA = a.querySelector("h3").innerText;
+      const nameB = b.querySelector("h3").innerText;
+
+      const priceA = getPrice(
+        (a.querySelector(".product-price") || a.querySelector(".new-price")).innerText
+      );
+
+      const priceB = getPrice(
+        (b.querySelector(".product-price") || b.querySelector(".new-price")).innerText
+      );
+
+      if (sort === "name") return nameA.localeCompare(nameB);
+
+      if (sort === "price-low") return priceA - priceB;
+
+      if (sort === "price-high") return priceB - priceA;
+
+      return 0;
+    });
+
+    items.forEach(item => grid.appendChild(item));
+  });
+}
+
+/* EVENT */
+categoryFilter.addEventListener("change", filterProducts);
+priceFilter.addEventListener("change", filterProducts);
+sortBy.addEventListener("change", filterProducts);
