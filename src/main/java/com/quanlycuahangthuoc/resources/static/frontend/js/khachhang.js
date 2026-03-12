@@ -364,6 +364,7 @@ async function loadOrders() {
   }
 }
 
+<<<<<<< HEAD
 // ================= KHỞI TẠO =================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -382,3 +383,104 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterBtn = document.getElementById("applyFilterBtn");
   if (filterBtn) filterBtn.addEventListener("click", filterAndSortProducts);
 });
+=======
+// ================= INIT =================
+
+loadProducts();
+updateCartCount();
+loadCart();
+loadOrders();
+
+//filter product
+const categoryFilter = document.getElementById("categoryFilter");
+const priceFilter = document.getElementById("priceFilter");
+const sortBy = document.getElementById("sortBy");
+
+const productsContainer = document.querySelectorAll(".products-grid");
+
+/* Lấy giá từ text */
+function getPrice(text) {
+  return parseInt(text.replace(/[^\d]/g, ""));
+}
+
+/* Bộ lọc chính */
+function filterProducts() {
+  const category = categoryFilter.value;
+  const price = priceFilter.value;
+
+  const products = document.querySelectorAll(".product-item");
+
+  products.forEach(product => {
+    let show = true;
+
+    const name = product.querySelector("h3").innerText.toLowerCase();
+
+    let priceText =
+      product.querySelector(".product-price") ||
+      product.querySelector(".new-price");
+
+    const productPrice = getPrice(priceText.innerText);
+
+    /* FILTER CATEGORY */
+    if (category) {
+      if (!name.includes(category.replace("-", " "))) {
+        show = false;
+      }
+    }
+
+    /* FILTER PRICE */
+    if (price) {
+      if (price === "0-100000" && productPrice > 100000) show = false;
+
+      if (price === "100000-500000" &&
+        (productPrice < 100000 || productPrice > 500000)) show = false;
+
+      if (price === "500000-1000000" &&
+        (productPrice < 500000 || productPrice > 1000000)) show = false;
+
+      if (price === "1000000+" && productPrice < 1000000) show = false;
+    }
+
+    product.style.display = show ? "block" : "none";
+  });
+
+  sortProducts();
+}
+
+/* Sắp xếp */
+function sortProducts() {
+  const sort = sortBy.value;
+
+  document.querySelectorAll(".products-grid").forEach(grid => {
+    let items = Array.from(grid.querySelectorAll(".product-item"));
+
+    items.sort((a, b) => {
+      const nameA = a.querySelector("h3").innerText;
+      const nameB = b.querySelector("h3").innerText;
+
+      const priceA = getPrice(
+        (a.querySelector(".product-price") || a.querySelector(".new-price")).innerText
+      );
+
+      const priceB = getPrice(
+        (b.querySelector(".product-price") || b.querySelector(".new-price")).innerText
+      );
+
+      if (sort === "name") return nameA.localeCompare(nameB);
+
+      if (sort === "price-low") return priceA - priceB;
+
+      if (sort === "price-high") return priceB - priceA;
+
+      return 0;
+    });
+
+    items.forEach(item => grid.appendChild(item));
+  });
+}
+
+/* EVENT */
+categoryFilter.addEventListener("change", filterProducts);
+priceFilter.addEventListener("change", filterProducts);
+sortBy.addEventListener("change", filterProducts);
+>>>>>>> cedead8a53507e70439508ce3db0d471c58aec55
