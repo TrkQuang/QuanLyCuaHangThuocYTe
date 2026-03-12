@@ -1,145 +1,126 @@
-var API_URL = "http://localhost:8080/api";
+// ======================================================
+// ORDER HISTORY - LỊCH SỬ ĐƠN HÀNG
+// ======================================================
 
-// Load lịch sử đơn hàng
-async function loadOrders() {
+document.addEventListener("DOMContentLoaded", loadOrderHistory);
 
-  const container = document.getElementById("ordersList");
-  container.innerHTML = "Đang tải đơn hàng...";
+async function loadOrderHistory() {
+
+  const orderContainer = document.getElementById("ordersList");
+  if (!orderContainer) return;
+
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  console.log("Current User:", currentUser);
+
+  // chưa đăng nhập
+  if (!currentUser) {
+    orderContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🔒</div>
+        <h3>Bạn chưa đăng nhập</h3>
+        <p>Vui lòng đăng nhập để xem lịch sử đơn hàng</p>
+        <a href="login.html" class="btn-primary">Đăng nhập</a>
+      </div>
+    `;
+    return;
+  }
+
+  orderContainer.innerHTML = `<p>Đang tải đơn hàng...</p>`;
 
   try {
 
-    const res = await fetch(API_URL + "/hoadon");
-    const orders = await res.json();
+    const response = await fetch(API_URL + "/hoadon");
 
-    console.log("Orders:", orders);
+    if (!response.ok) {
+      throw new Error("Không lấy được dữ liệu hóa đơn");
+    }
+
+    const orders = await response.json();
+    console.log("Orders từ API:", orders);
+
+    orderContainer.innerHTML = "";
 
     if (!orders || orders.length === 0) {
-      container.innerHTML = "Bạn chưa có đơn hàng nào";
+      orderContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📦</div>
+          <h3>Chưa có đơn hàng</h3>
+          <p>Bạn chưa thực hiện đơn hàng nào</p>
+        </div>
+      `;
       return;
     }
 
-    let html = "";
+    // sắp xếp đơn mới nhất lên trước
+    orders.sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao));
 
     orders.forEach(order => {
 
-      let status = "Đang xử lý";
-      if (order.trangThai == 1) status = "Đã thanh toán";
-      if (order.trangThai == 2) status = "Đã hủy";
+      let statusClass = "status-pending";
 
-      html += `
-      <div class="order-card">
+      if (order.trangThai === "Hoàn thành")
+        statusClass = "status-completed";
 
-        <p><b>Mã đơn:</b> ${order.maHoaDon}</p>
+      if (order.trangThai === "Đã hủy")
+        statusClass = "status-cancelled";
 
-        <p><b>Ngày:</b>
-        ${order.ngayLap ? new Date(order.ngayLap).toLocaleDateString() : ""}
-        </p>
+      const orderHTML = `
+        <div class="order-item">
 
-        <p><b>Tổng tiền:</b>
-        ${order.tongTien ? Number(order.tongTien).toLocaleString() : 0} đ
-        </p>
+          <div class="order-header">
+            <div class="order-id">
+              🧾 ${order.maHoaDon}
+            </div>
 
-        <p><b>Trạng thái:</b> ${status}</p>
+            <div class="order-status ${statusClass}">
+              ${order.trangThai || "Đang xử lý"}
+            </div>
+          </div>
 
-        <button onclick="xemChiTiet('${order.maHoaDon}')">
-        Xem chi tiết
-        </button>
+          <div class="order-details">
 
-        ${
-          order.trangThai == 0
-            ? `<button onclick="huyDon('${order.maHoaDon}')">
-                Hủy đơn
-              </button>`
-            : ""
-        }
+            <div class="detail-item">
+              <div class="detail-label">Ngày tạo</div>
+              <div class="detail-value">
+                ${order.ngayTao}
+              </div>
+            </div>
 
-      </div>
+            <div class="detail-item">
+              <div class="detail-label">Nhân viên</div>
+              <div class="detail-value">
+                ${order.maNhanVien || "-"}
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-label">Tổng tiền</div>
+              <div class="detail-value">
+                ${Number(order.tongTien).toLocaleString()} đ
+              </div>
+            </div>
+
+          </div>
+
+        </div>
       `;
-    });
 
-    container.innerHTML = html;
-
-  } catch (error) {
-
-    console.error(error);
-    container.innerHTML = "Không thể tải đơn hàng";
-
-  }
-}
-
-
-// Xem chi tiết hóa đơn
-async function xemChiTiet(maHoaDon) {
-
-  try {
-
-    const res = await fetch(API_URL + "/cthoadon/" + maHoaDon);
-    const data = await res.json();
-
-    if (!data || data.length === 0) {
-      alert("Không có chi tiết đơn hàng");
-      return;
-    }
-
-    let text = "Chi tiết đơn hàng:\n\n";
-
-    data.forEach(item => {
-
-      text += `
-Mã thuốc: ${item.maThuoc}
-Số lượng: ${item.soLuong}
-Đơn giá: ${item.donGia}
-Thành tiền: ${item.thanhTien}
-
-`;
+      orderContainer.innerHTML += orderHTML;
 
     });
 
-    alert(text);
-
   } catch (error) {
 
-    console.error(error);
-    alert("Không thể tải chi tiết đơn hàng");
+    console.error("Lỗi load đơn hàng:", error);
 
-  }
-}
-
-
-// Hủy đơn hàng (PUT API)
-async function huyDon(maHoaDon) {
-
-  const confirmCancel = confirm("Bạn có chắc muốn hủy đơn hàng?");
-  if (!confirmCancel) return;
-
-  try {
-
-    const res = await fetch(API_URL + "/hoadon/huy", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        maHoaDon: maHoaDon
-      })
-    });
-
-    const result = await res.json();
-
-    if (result) {
-      alert("Đã hủy đơn hàng");
-      loadOrders();
-    } else {
-      alert("Hủy thất bại");
-    }
-
-  } catch (error) {
-
-    console.error(error);
-    alert("Không thể hủy đơn hàng");
+    orderContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <h3>Lỗi tải dữ liệu</h3>
+        <p>Không thể tải lịch sử đơn hàng</p>
+      </div>
+    `;
 
   }
 
 }
-
-window.onload = loadOrders;

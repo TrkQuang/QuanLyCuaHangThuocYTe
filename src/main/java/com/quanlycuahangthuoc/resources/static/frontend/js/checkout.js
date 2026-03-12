@@ -1,32 +1,15 @@
-// API Configuration
-const API_URL = "http://localhost:8080/api";
+// ============================================================
+// checkout.js — Trang thanh toán: xem giỏ, nhập thông tin, đặt hàng
+// Yêu cầu: config.js được nhúng trước
+// ============================================================
 
-// Lấy session ID
-function getSessionId() {
-  let sessionId = localStorage.getItem("sessionId");
-  if (!sessionId) {
-    sessionId =
-      "session-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("sessionId", sessionId);
-  }
-  return sessionId;
-}
-
-// ===== KIỂM TRA ĐĂNG NHẬP =====
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-if (!currentUser) {
-  alert("Vui lòng đăng nhập để thanh toán!");
-  window.location.href = "login.html";
-}
-
-// ===== CART API =====
+// Lấy danh sách giỏ hàng
 async function getCart() {
   try {
     const response = await fetch(`${API_URL}/cart`, {
-      headers: {
-        "Session-Id": getSessionId(),
-      },
+      headers: { "Session-Id": getSessionId() },
     });
+    if (!response.ok) throw new Error("Lấy giỏ hàng thất bại");
     return await response.json();
   } catch (error) {
     console.error("Lỗi khi lấy giỏ hàng:", error);
@@ -34,44 +17,47 @@ async function getCart() {
   }
 }
 
+// Xóa toàn bộ giỏ hàng sau khi đặt hàng thành công
 async function clearCart() {
   try {
     await fetch(`${API_URL}/cart`, {
       method: "DELETE",
-      headers: {
-        "Session-Id": getSessionId(),
-      },
+      headers: { "Session-Id": getSessionId() },
     });
   } catch (error) {
     console.error("Lỗi khi xóa giỏ hàng:", error);
   }
 }
 
-// ===== RENDER CHECKOUT =====
+// Render danh sách sản phẩm trên trang checkout
 async function renderCheckout() {
   const cart = await getCart();
   const checkoutItems = document.getElementById("checkoutItems");
   const totalPriceEl = document.getElementById("totalPrice");
+
+  if (!checkoutItems || !totalPriceEl) return;
 
   checkoutItems.innerHTML = "";
   let total = 0;
 
   if (cart.length === 0) {
     checkoutItems.innerHTML = "<p>🛒 Giỏ hàng trống</p>";
-    totalPriceEl.textContent = 0;
+    totalPriceEl.textContent = "0";
     return;
   }
 
-  cart.forEach((item, index) => {
+  cart.forEach((item) => {
     total += item.price * item.quantity;
+    const safeTitle = escapeHtml(item.title || item.name);
+    const safeId = escapeHtml(String(item.id));
 
     checkoutItems.innerHTML += `
       <div class="checkout-item">
         <div class="checkout-info">
-          <h4>${item.title || item.name}</h4>
+          <h4>${safeTitle}</h4>
           <p>${item.quantity} × ${item.price.toLocaleString()}đ</p>
         </div>
-        <button class="btn-remove" onclick="removeItem('${item.id}')">❌ Bỏ</button>
+        <button class="btn-remove" onclick="removeCheckoutItem('${safeId}')">❌ Bỏ</button>
       </div>
     `;
   });
@@ -79,14 +65,12 @@ async function renderCheckout() {
   totalPriceEl.textContent = total.toLocaleString();
 }
 
-// ===== XOÁ SẢN PHẨM =====
-async function removeItem(productId) {
+// Xóa 1 sản phẩm khỏi giỏ ngay trên trang checkout
+async function removeCheckoutItem(productId) {
   try {
     await fetch(`${API_URL}/cart/${productId}`, {
       method: "DELETE",
-      headers: {
-        "Session-Id": getSessionId(),
-      },
+      headers: { "Session-Id": getSessionId() },
     });
     renderCheckout();
   } catch (error) {
@@ -94,28 +78,38 @@ async function removeItem(productId) {
   }
 }
 
-// ===== THANH TOÁN =====
+// Xử lý thanh toán
 async function handleCheckout() {
-  const fullName = document.getElementById("fullName").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
-  const paymentMethod = document.getElementById("paymentMethod").value;
+  const fullName = document.getElementById("fullName")?.value.trim();
+  const phone = document.getElementById("phone")?.value.trim();
+  const address = document.getElementById("address")?.value.trim();
+  const paymentMethod = document.getElementById("paymentMethod")?.value;
 
+  // Validate thông tin
   if (!fullName || !phone || !address || !paymentMethod) {
     alert("❌ Vui lòng nhập đầy đủ thông tin thanh toán!");
     return;
   }
 
-  const cart = await getCart();
+  // Validate định dạng số điện thoại Việt Nam
+  const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+  if (!phoneRegex.test(phone)) {
+    alert("❌ Số điện thoại không hợp lệ! (VD: 0912345678)");
+    return;
+  }
 
+  const cart = await getCart();
   if (cart.length === 0) {
     alert("❌ Giỏ hàng trống!");
     return;
   }
 
+  // Lấy thông tin user từ localStorage
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
   // Tạo đơn hàng
   const order = {
-    maKhachHang: currentUser.maKhachHang || "KH" + Date.now(),
+    maKhachHang: currentUser?.maKhachHang || null,
     tenNguoiNhan: fullName,
     soDienThoai: phone,
     diaChi: address,
@@ -126,24 +120,19 @@ async function handleCheckout() {
   };
 
   try {
-    // Gọi API tạo hóa đơn
     const response = await fetch(`${API_URL}/hoadon`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(order),
     });
 
     if (response.ok) {
       alert("✅ Đặt hàng thành công!\nĐơn hàng đang được xử lý.");
-
-      // Xóa giỏ hàng
       await clearCart();
-
-      window.location.href = "index.html";
+      window.location.href = "order-history.html";
     } else {
-      alert("❌ Đặt hàng thất bại! Vui lòng thử lại.");
+      const errText = await response.text();
+      alert("❌ Đặt hàng thất bại! " + errText);
     }
   } catch (error) {
     console.error("Lỗi khi đặt hàng:", error);
@@ -151,5 +140,15 @@ async function handleCheckout() {
   }
 }
 
-// INIT
-renderCheckout();
+// ===== KHỞI TẠO =====
+document.addEventListener("DOMContentLoaded", () => {
+  // Kiểm tra đăng nhập trước khi làm gì
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  if (!currentUser) {
+    alert("Vui lòng đăng nhập để thanh toán!");
+    window.location.href = "login.html";
+    return;
+  }
+
+  renderCheckout();
+});

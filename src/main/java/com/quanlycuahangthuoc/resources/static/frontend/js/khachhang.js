@@ -1,102 +1,122 @@
-const API_URL = "http://localhost:8080/api";
+// ============================================================
+// khachhang.js — Trang shop khách hàng: sản phẩm, giỏ hàng, đơn hàng
+// Yêu cầu: config.js và cart.js được nhúng trước
+// ============================================================
 
-// Lấy session ID
-function getSessionId() {
-  let sessionId = localStorage.getItem("sessionId");
-  if (!sessionId) {
-    sessionId =
-      "session-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("sessionId", sessionId);
-  }
-  return sessionId;
-}
-
-// XSS Protection - Sanitize HTML
-function escapeHtml(unsafe) {
-  if (unsafe == null) return "";
-  return unsafe
-    .toString()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// ================= PRODUCTS =================
-
+// ================= STATE =================
 let products = [];
 let currentPage = 1;
-const itemsPerPage = 4;
+const ITEMS_PER_PAGE = 8;
 
+// ================= SẢN PHẨM =================
+
+/**
+ * Load danh sách thuốc từ API
+ */
 async function loadProducts() {
   try {
-    const res = await fetch(API_URL + "/thuoc");
+    const res = await fetch(`${API_URL}/thuoc`);
+    if (!res.ok) throw new Error("Không thể tải danh sách thuốc");
     const data = await res.json();
 
-    // Chuyển đổi dữ liệu thuốc sang format product
+    // Chuẩn hóa dữ liệu thuốc về format sản phẩm
     products = data.map((thuoc) => ({
       id: thuoc.maThuoc,
       name: thuoc.tenThuoc,
-      price: thuoc.donGia,
+      price: thuoc.donGia || thuoc.giaBan || 0,
       description: thuoc.moTa || "Thuốc chất lượng cao",
       image: thuoc.hinhAnh || "https://via.placeholder.com/200",
-      category: thuoc.nsx || "Khác",
+      category: thuoc.loaiThuoc || thuoc.nsx || "Khác",
       popular: thuoc.soLuongTon || 0,
     }));
 
+    currentPage = 1;
     renderProducts(products);
   } catch (e) {
     console.error("Load products error:", e);
+    const box = document.getElementById("productsList");
+    if (box) box.innerHTML = "<p style='text-align:center;color:#e53e3e;padding:40px;'>⚠️ Không thể tải sản phẩm. Vui lòng thử lại.</p>";
   }
 }
 
+/**
+ * Render danh sách sản phẩm ra DOM
+ * @param {Array} list - Danh sách sản phẩm cần hiển thị
+ */
 function renderProducts(list) {
   const box = document.getElementById("productsList");
   if (!box) return;
 
-  const start = (currentPage - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
+  // Phân trang
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = list.slice(start, start + ITEMS_PER_PAGE);
 
-  const pageItems = list.slice(start, end);
+  if (pageItems.length === 0) {
+    box.innerHTML = `
+      <p style="text-align:center;grid-column:1/-1;padding:60px;color:#718096;">
+        Không tìm thấy sản phẩm nào phù hợp.
+      </p>`;
+    return;
+  }
 
   let html = "";
-
   pageItems.forEach((p) => {
-    // Sanitize all user-generated content
     const safeName = escapeHtml(p.name);
-    const safeDescription = escapeHtml(p.description);
+    const safeDesc = escapeHtml(p.description);
     const safeImage = escapeHtml(p.image);
-    const safeId = escapeHtml(p.id);
+    const safeId = escapeHtml(String(p.id));
 
     html += `
       <div class="product-item">
-        <img src="${safeImage}" alt="${safeName}" onerror="this.src='https://via.placeholder.com/200'">
+        <img src="${safeImage}" alt="${safeName}"
+             onerror="this.src='https://via.placeholder.com/200'">
         <h3>${safeName}</h3>
-        <div class="product-price">${p.price.toLocaleString()}đ</div>
-        <p>${safeDescription}</p>
-        <button class="btn-primary" data-id="${safeId}" onclick="addToCart('${safeName.replace(/'/g, "\\'")}', ${p.price})">
-          Thêm giỏ hàng
+        <div class="product-price" data-price="${p.price}">
+          ${p.price.toLocaleString("vi-VN")}đ
+        </div>
+        <p>${safeDesc}</p>
+        <button class="btn-primary" onclick="addToCart(event, '${safeId}')">
+          🛒 Thêm giỏ hàng
         </button>
       </div>
     `;
   });
 
   box.innerHTML = html;
+  renderPagination(list.length);
 }
 
-function loadMore() {
-  currentPage++;
+/**
+ * Render phân trang
+ */
+function renderPagination(totalItems) {
+  const paginationBox = document.getElementById("pagination");
+  if (!paginationBox) return;
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (totalPages <= 1) {
+    paginationBox.innerHTML = "";
+    return;
+  }
+
+  let html = "";
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'page-btn active' : 'page-btn'}">${i}</button>`;
+  }
+  paginationBox.innerHTML = html;
+}
+
+function goToPage(page) {
+  currentPage = page;
   renderProducts(products);
 }
 
-// ================= SEARCH =================
+// ================= TÌM KIẾM =================
 
 function searchProduct(keyword) {
   const result = products.filter((p) =>
-    p.name.toLowerCase().includes(keyword.toLowerCase()),
+    p.name.toLowerCase().includes(keyword.toLowerCase())
   );
-
   currentPage = 1;
   renderProducts(result);
 }
@@ -104,46 +124,60 @@ function searchProduct(keyword) {
 const searchBox = document.getElementById("searchInput");
 if (searchBox) {
   searchBox.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      searchProduct(searchBox.value);
-    }
+    if (e.key === "Enter") searchProduct(searchBox.value);
   });
 }
 
-// ================= FILTER =================
+// ================= LỌC & SẮP XẾP =================
 
-function applyFilter() {
-  const cat = document.getElementById("categoryFilter")?.value;
-  const sort = document.getElementById("sortBy")?.value;
-
+function filterAndSortProducts() {
   let list = [...products];
 
+  // Lọc theo danh mục
+  const cat = document.getElementById("categoryFilter")?.value;
   if (cat) {
     list = list.filter((p) => p.category === cat);
   }
 
-  if (sort === "price-low") {
-    list.sort((a, b) => a.price - b.price);
-  } else if (sort === "price-high") {
-    list.sort((a, b) => b.price - a.price);
-  } else if (sort === "popular") {
-    list.sort((a, b) => b.popular - a.popular);
-  } else {
-    list.sort((a, b) => a.name.localeCompare(b.name));
+  // Lọc theo khoảng giá
+  const priceRange = document.getElementById("priceFilter")?.value;
+  if (priceRange) {
+    const [minStr, maxStr] = priceRange.split("-");
+    const min = parseInt(minStr) || 0;
+    const max = maxStr === "+" ? Infinity : parseInt(maxStr) || Infinity;
+    list = list.filter((p) => p.price >= min && p.price <= max);
+  }
+
+  // Sắp xếp
+  const sortValue = document.getElementById("sortBy")?.value;
+  switch (sortValue) {
+    case "name":
+      list.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case "price-low":
+      list.sort((a, b) => a.price - b.price);
+      break;
+    case "price-high":
+      list.sort((a, b) => b.price - a.price);
+      break;
+    case "popular":
+      // Sắp xếp theo lượt tồn kho (popular = nhiều người mua = ít tồn)
+      list.sort((a, b) => a.popular - b.popular);
+      break;
+    default:
+      list.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   currentPage = 1;
   renderProducts(list);
 }
 
-// ================= CART =================
+// ================= GIỎ HÀNG SIDEBAR =================
 
 async function loadCart() {
   try {
-    const res = await fetch(API_URL + "/cart", {
-      headers: {
-        "Session-Id": getSessionId(),
-      },
+    const res = await fetch(`${API_URL}/cart`, {
+      headers: { "Session-Id": getSessionId() },
     });
     const cart = await res.json();
     showCart(cart);
@@ -157,7 +191,6 @@ function showCart(cart) {
   const totalBox = document.getElementById("totalPrice");
   if (!box) return;
 
-  let html = "";
   let total = 0;
 
   if (cart.length === 0) {
@@ -166,22 +199,29 @@ function showCart(cart) {
     return;
   }
 
+  let html = "";
   cart.forEach((item) => {
     const sum = item.price * item.quantity;
     total += sum;
+    const safeTitle = escapeHtml(item.title || item.name);
+    const safeId = escapeHtml(String(item.id));
+    const safeImage = escapeHtml(item.image);
 
     html += `
       <div class="cart-row">
-        <img src="${item.image}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:10px;">
+        <img src="${safeImage}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:10px;"
+             onerror="this.src='https://via.placeholder.com/60'">
         <div style="flex:1;">
-          <strong>${item.title || item.name}</strong><br>
-          <span style="color:#667eea;font-weight:600;">${item.quantity} × ${item.price.toLocaleString()}đ = ${sum.toLocaleString()}đ</span>
+          <strong>${safeTitle}</strong><br>
+          <span style="color:#667eea;font-weight:600;">
+            ${item.quantity} × ${item.price.toLocaleString()}đ = ${sum.toLocaleString()}đ
+          </span>
         </div>
         <div style="display:flex;gap:5px;align-items:center;">
-          <button class="btn-sm" onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
+          <button class="btn-sm" onclick="updateQuantity('${safeId}', ${item.quantity - 1})">-</button>
           <span style="padding:0 10px;font-weight:bold;">${item.quantity}</span>
-          <button class="btn-sm" onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
-          <button class="btn-danger-sm" onclick="removeItem('${item.id}')">❌</button>
+          <button class="btn-sm" onclick="updateQuantity('${safeId}', ${item.quantity + 1})">+</button>
+          <button class="btn-danger-sm" onclick="removeCartItem('${safeId}')">❌</button>
         </div>
       </div>
     `;
@@ -193,21 +233,18 @@ function showCart(cart) {
 
 async function updateQuantity(productId, qty) {
   if (qty <= 0) {
-    removeItem(productId);
+    removeCartItem(productId);
     return;
   }
 
   try {
-    await fetch(API_URL + "/cart/update", {
+    await fetch(`${API_URL}/cart/update`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         "Session-Id": getSessionId(),
       },
-      body: JSON.stringify({
-        id: productId,
-        quantity: qty,
-      }),
+      body: JSON.stringify({ id: productId, quantity: qty }),
     });
 
     loadCart();
@@ -217,13 +254,11 @@ async function updateQuantity(productId, qty) {
   }
 }
 
-async function removeItem(productId) {
+async function removeCartItem(productId) {
   try {
-    await fetch(API_URL + "/cart/" + productId, {
+    await fetch(`${API_URL}/cart/${productId}`, {
       method: "DELETE",
-      headers: {
-        "Session-Id": getSessionId(),
-      },
+      headers: { "Session-Id": getSessionId() },
     });
 
     loadCart();
@@ -233,49 +268,33 @@ async function removeItem(productId) {
   }
 }
 
-async function updateCartCount() {
-  try {
-    const res = await fetch(API_URL + "/cart/count", {
-      headers: {
-        "Session-Id": getSessionId(),
-      },
-    });
-    const data = await res.json();
-
-    const box = document.getElementById("cartCount");
-    if (box) box.innerText = data.count || 0;
-  } catch (e) {
-    console.error("Update cart count error:", e);
-  }
-}
-
-// ================= ORDERS =================
+// ================= ĐƠN HÀNG =================
 
 async function loadOrders() {
   const box = document.getElementById("ordersList");
   if (!box) return;
 
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!currentUser || !currentUser.maKhachHang) {
+    box.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🔒</div>
+        <h3>Vui lòng đăng nhập</h3>
+        <p>Bạn cần đăng nhập để xem lịch sử đơn hàng</p>
+        <a href="login.html" class="btn-primary">Đăng nhập ngay</a>
+      </div>
+    `;
+    return;
+  }
+
   try {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-    if (!currentUser || !currentUser.maKhachHang) {
-      box.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">🔒</div>
-          <h3>Vui lòng đăng nhập</h3>
-          <p>Bạn cần đăng nhập để xem lịch sử đơn hàng</p>
-          <a href="login.html" class="btn-primary">Đăng nhập ngay</a>
-        </div>
-      `;
-      return;
-    }
-
-    const res = await fetch(API_URL + "/hoadon");
+    const res = await fetch(`${API_URL}/hoadon`);
     const allOrders = await res.json();
 
     // Lọc đơn hàng của khách hàng hiện tại
     const orders = allOrders.filter(
-      (o) => o.maKhachHang === currentUser.maKhachHang,
+      (o) => o.maKhachHang === currentUser.maKhachHang
     );
 
     if (orders.length === 0) {
@@ -290,43 +309,42 @@ async function loadOrders() {
       return;
     }
 
+    orders.sort((a, b) => new Date(b.ngayTao || b.ngayLap) - new Date(a.ngayTao || a.ngayLap));
+
     let html = "";
-
-    orders.sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao));
-
     orders.forEach((o) => {
       const statusClass =
-        o.trangThai === "Hoàn thành"
-          ? "status-completed"
-          : o.trangThai === "Đã hủy"
-            ? "status-cancelled"
-            : "status-pending";
+        o.trangThai === "Hoàn thành" ? "status-completed" :
+        o.trangThai === "Đã hủy"     ? "status-cancelled" :
+                                        "status-pending";
 
       html += `
         <div class="order-item">
           <div class="order-header">
             <div>
-              <div class="order-id">Đơn hàng #${o.maHoaDon}</div>
-              <small style="color:#999;">🕒 ${new Date(o.ngayTao).toLocaleString("vi-VN")}</small>
+              <div class="order-id">Đơn hàng #${escapeHtml(String(o.maHoaDon))}</div>
+              <small style="color:#999;">🕒 ${formatDateTime(o.ngayTao || o.ngayLap)}</small>
             </div>
-            <span class="order-status ${statusClass}">${o.trangThai}</span>
+            <span class="order-status ${statusClass}">${escapeHtml(o.trangThai || "Đang xử lý")}</span>
           </div>
           <div class="order-details">
             <div class="detail-item">
               <span class="detail-label">Người nhận</span>
-              <span class="detail-value">${o.tenNguoiNhan || "N/A"}</span>
+              <span class="detail-value">${escapeHtml(o.tenNguoiNhan || "N/A")}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Số điện thoại</span>
-              <span class="detail-value">${o.soDienThoai || "N/A"}</span>
+              <span class="detail-value">${escapeHtml(o.soDienThoai || "N/A")}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Địa chỉ</span>
-              <span class="detail-value">${o.diaChi || "N/A"}</span>
+              <span class="detail-value">${escapeHtml(o.diaChi || "N/A")}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Tổng tiền</span>
-              <span class="detail-value" style="color:#667eea;font-size:18px;">${(o.tongTien || 0).toLocaleString()}đ</span>
+              <span class="detail-value" style="color:#667eea;font-size:18px;">
+                ${(o.tongTien || 0).toLocaleString()}đ
+              </span>
             </div>
           </div>
         </div>
@@ -346,141 +364,21 @@ async function loadOrders() {
   }
 }
 
-// ================= INIT =================
-
-loadProducts();
-updateCartCount();
-loadCart();
-loadOrders();
-
-//filter product
-products = [
-  {
-    id: "T1",
-    name: "Panadol Extra",
-    price: 20000,
-    category: "thuoc-dau",
-    image: "OIP (2).jpg",
-    description: "Hộp 24 viên - Giảm đau, hạ sốt"
-  },
-  {
-    id: "T2",
-    name: "Vitamin C 1000mg",
-    price: 70000,
-    category: "vitamin",
-    image: "thuoc-vitamin-c-tw3-500mg-dieu-tri-thieu-hut-vitamin-c-65f15f008f538.jpg",
-    description: "Hộp 30 viên - Tăng sức đề kháng"
-  },
-  {
-    id: "T3",
-    name: "Amoxicillin",
-    price: 25000,
-    category: "khang-sinh",
-    image: "OIP.jpg",
-    description: "Hộp 20 viên - Kháng sinh"
-  },
-  {
-    id: "T4",
-    name: "Kem chống nắng La Roche",
-    price: 400000,
-    category: "lam-dep",
-    image: "36dea234165d80e3db8d4ec7a12be007.jpg",
-    description: "SPF 60+ PA++++"
-  },
-  {
-    id: "T5",
-    name: "Dầu gội Head & Shoulder",
-    price: 90000,
-    category: "lam-dep",
-    image: "OIP (1).jpg",
-    description: "Chai 500ml - Trị gàu"
-  },
-];
-
-function renderProducts(filteredProducts) {
-  const container = document.getElementById("productsList");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  if (filteredProducts.length === 0) {
-    container.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; padding: 60px; color:#718096;">
-      Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
-    </p>`;
-    return;
-  }
-
-  filteredProducts.forEach(product => {
-    const item = document.createElement("div");
-    item.className = "product-item";
-    item.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" />
-      <h3>${product.name}</h3>
-      <div class="product-price">${product.price.toLocaleString('vi-VN')}đ</div>
-      <p>${product.description}</p>
-      <button class="btn-primary" onclick="addToCart('${product.id}', ${product.price})">
-        Thêm giỏ hàng
-      </button>
-    `;
-    container.appendChild(item);
-  });
-}
-
-//filter + arrange
-function filterAndSortProducts() {
-  let result = [...products];
-
-  //category
-  const category = document.getElementById("categoryFilter")?.value;
-  if (category) {
-    result = result.filter(p => p.category === category);
-  }
-
-  //price
-  const priceRange = document.getElementById("priceFilter")?.value;
-  if (priceRange) {
-    const [minStr, maxStr] = priceRange.split("-");
-    const min = parseInt(minStr) || 0;
-    const max = maxStr === "+" ? Infinity : parseInt(maxStr) || Infinity;
-
-    result = result.filter(p => p.price >= min && p.price <= max);
-  }
-
-  //arrange
-  const sortValue = document.getElementById("sortBy")?.value;
-  switch (sortValue) {
-    case "name":
-      result.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "price-low":
-      result.sort((a, b) => a.price - b.price);
-      break;
-    case "price-high":
-      result.sort((a, b) => b.price - a.price);
-      break;
-    case "popular":
-      result.sort((a, b) => b.price - a.price);
-      break;
-    default:
-      result.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  renderProducts(result);
-}
+// ================= KHỞI TẠO =================
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderProducts(products);
+  // Load dữ liệu
+  loadProducts();
+  updateCartCount();
+  loadCart();
+  loadOrders();
 
-  const filters = ["categoryFilter", "priceFilter", "sortBy"];
-  filters.forEach(id => {
+  // Gắn sự kiện bộ lọc
+  ["categoryFilter", "priceFilter", "sortBy"].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("change", filterAndSortProducts);
-    }
+    if (el) el.addEventListener("change", filterAndSortProducts);
   });
 
-  const btn = document.getElementById("applyFilterBtn");
-  if (btn) {
-    btn.addEventListener("click", filterAndSortProducts);
-  }
+  const filterBtn = document.getElementById("applyFilterBtn");
+  if (filterBtn) filterBtn.addEventListener("click", filterAndSortProducts);
 });

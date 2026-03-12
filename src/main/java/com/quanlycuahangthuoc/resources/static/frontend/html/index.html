@@ -135,7 +135,7 @@
             <button
               class="btn-primary"
               data-id="T1"
-              onclick="addToCart('T1')"
+              onclick="addToCart(event,'T1')"
             >
               Thêm giỏ hàng
             </button>
@@ -151,7 +151,7 @@
             <button
               class="btn-primary"
               data-id="T2"
-              onclick="addToCart('T2')"
+              onclick="addToCart(event,'T2')"
             >
               Thêm giỏ hàng
             </button>
@@ -164,7 +164,7 @@
             <button
               class="btn-primary"
               data-id="T3"
-              onclick="addToCart('T3')"
+              onclick="addToCart(event,'T3')"
             >
               Thêm giỏ hàng
             </button>
@@ -172,30 +172,30 @@
           <div class="product-item">
             <img src="hoat-huyet-thong-mach.png" alt="Hoạt huyết thông mạch"/>
             <h3>Hoạt huyết thông mạch</h3>
-            <div class="produce-price">120.000đ</div>
+            <div class="product-price">120.000đ</div>
             <p>Hộp 30 viên - Lưu thông máu, bổ máu</p>
-            <button class="btn-primary" data-id="T4" onclick="addToCart('T4')">Thêm giỏ hàng</button>
+            <button class="btn-primary" data-id="T4" onclick="addToCart(event,'T4')">Thêm giỏ hàng</button>
           </div>
           <div class="product-item">
             <img src="mieng-dan-ha-sot-aikido-631ef9b54368a.jpg" alt="Miếng dán hạ sốt"/>
             <h3>Miếng dán hạ sốt Aikido</h3>
             <div class="product-price">15.000đ</div>
             <p>Hộp 10 viên - Hạ sốt, giảm đau</p>
-            <button class="btn-primary" data-id="T5" onclick="addToCart('T5')">Thêm giỏ hàng</button>
+            <button class="btn-primary" data-id="T5" onclick="addToCart(event,'T5')">Thêm giỏ hàng</button>
           </div>
           <div class="product-item">
             <img src="P00245H_1_l.jpg" alt="Thuốc tẩy giun">
             <h3>Thuốc tẩy giun</h3>
             <div class="product-price">30.000đ</div>
             <p>Hộp 10 viên - Điều trị nhiễm giun</p>
-            <button class="btn-primary" data-id="T6" onclick="addToCart('T6')">Thêm giỏ hàng</button>
+            <button class="btn-primary" data-id="T6" onclick="addToCart(event,'T6')">Thêm giỏ hàng</button>
           </div>
           <div class="product-item">
             <img src="P19046_1.jpg" alt="Salonpas">
             <h3>Salonpas</h3>
             <div class="product-price">25.000đ</div>
             <p>Hộp 10 viên - Giảm đau, giảm viêm</p>
-            <button class="btn-primary" data-id="T7" onclick="addToCart('T7')">Thêm giỏ hàng</button>
+            <button class="btn-primary" data-id="T7" onclick="addToCart(event,'T7')">Thêm giỏ hàng</button>
           </div>
           <div class="product-item">
             <img src="atussin-30ml-amonium-chloride-chlorpheniramine.png" alt="Atussin">
@@ -410,6 +410,8 @@
     </footer>
 
     <!--JAVASCRIPT-->
+    <script src="../js/config.js"></script>
     <script src="../js/cart.js"></script>
+    <script src="../js/khachhang.js"></script>
   </body>
 </html>

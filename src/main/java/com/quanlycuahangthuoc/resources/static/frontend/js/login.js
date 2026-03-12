@@ -1,5 +1,3 @@
-// URL API backend
-const API_URL = "http://localhost:8080/api";
 
 // Lấy các element từ form
 const loginForm = document.getElementById("loginForm");
@@ -53,7 +51,11 @@ async function handleLogin(username, password) {
 
       if (userData && userData.maTaiKhoan) {
         // Lưu thông tin user vào localStorage
-        localStorage.setItem("currentUser", JSON.stringify(userData));
+        localStorage.setItem("currentUser", JSON.stringify({
+          maTaiKhoan: userData.maTaiKhoan,
+          tenDangNhap: userData.tenDangNhap,
+          loaiTaiKhoan: userData.loaiTaiKhoan,
+      }));
 
         // Kiểm tra loại tài khoản và chuyển hướng
         if (userData.loaiTaiKhoan === "Admin") {

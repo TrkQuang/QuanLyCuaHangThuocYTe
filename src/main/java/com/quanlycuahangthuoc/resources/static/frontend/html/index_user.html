@@ -170,7 +170,10 @@
     </footer>
     
     <!--JAVASCRIPT-->
-    <script src="../js/khachhang.js">
+    <script src="../js/config.js"></script>
+    <script src="../js/header.js"></script>
+    <script src="../js/khachhang.js"></script>
+    <script>
         const currentUser = JSON.parse(localStorage.getItem("currentUser"));
         const loginLink = document.getElementById("loginLink");
 
@@ -188,7 +191,12 @@
                 window.location.reload();
             }
             });
-        }
+        } else {
+            // Chưa đăng nhập   
+            loginLink.textContent = "👤 Đăng nhập"
+            loginLink.href = "login.html"
+            };    
     </script>
+    <script src="../js/cart.js"></script>
 </body>
 </html>
