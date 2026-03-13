@@ -5,6 +5,7 @@
     <title>Hồ Sơ Cá Nhân</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../css/profile.css" />
+    <link rel="stylesheet" href="../css/design-system.css" />
   </head>
   <body>
     <div class="profile-container">
@@ -30,6 +31,26 @@
             <div class="info-item">
               <span>📅 Ngày tạo</span>
               <strong id="createdAt">---</strong>
+            </div>
+
+            <div class="info-item">
+              <span>📞 Số điện thoại</span>
+              <strong id="userPhone">---</strong>
+            </div>
+
+            <div class="info-item">
+              <span>🚻 Giới tính</span>
+              <strong id="userGender">---</strong>
+            </div>
+
+            <div class="info-item">
+              <span>🎂 Ngày sinh</span>
+              <strong id="userBirth">---</strong>
+            </div>
+
+            <div class="info-item">
+              <span>🏠 Địa chỉ</span>
+              <strong id="userAddress">---</strong>
             </div>
           </div>
 
@@ -100,36 +121,155 @@
       </div>
     </div>
     <script src="../js/config.js"></script>
+    <script src="../js/ui-layout.js"></script>
     <script>
-      const user = JSON.parse(localStorage.getItem("currentUser"));
-
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        document.getElementById("username").innerText =
-          user.tenDangNhap || "Khách hàng";
-        document.getElementById("userId").innerText = user.maTaiKhoan || "---";
-        document.getElementById("userEmail").innerText =
-          user.email || "Chưa cập nhật";
-        document.getElementById("userRole").innerText =
-          user.loaiTaiKhoan || "User";
-        document.getElementById("createdAt").innerText = user.ngayTao
-          ? new Date(user.ngayTao).toLocaleDateString("vi-VN")
-          : "Không xác định";
-
-        // Hiển thị avatar icon dựa trên tên
-        const firstLetter = (user.tenDangNhap || "U").charAt(0).toUpperCase();
-        document.getElementById("avatarIcon").innerText = firstLetter;
+      function setText(id, value, fallback = "---") {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerText = value == null || value === "" ? fallback : value;
       }
 
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("currentUser");
-        window.location.href = "login.html";
-      });
+      function formatRole(role) {
+        const r = String(role || "").toUpperCase();
+        if (r === "KHACHHANG") return "KHACHHANG";
+        if (r === "NHANVIEN") return "NHANVIEN";
+        if (r === "ADMIN") return "ADMIN";
+        return role || "User";
+      }
+
+      function getMemberLevel(totalSpent) {
+        if (totalSpent >= 3000000) return "Vàng";
+        if (totalSpent >= 1000000) return "Bạc";
+        return "Mới";
+      }
+
+      function renderActivities(orders) {
+        const box = document.querySelector(".recent-activities");
+        if (!box) return;
+
+        const topOrders = [...orders]
+          .sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao))
+          .slice(0, 3);
+
+        const html = [
+          `<h3>📋 Hoạt động gần đây</h3>`,
+          `<div class="activity-item"><div class="activity-date">Hôm nay</div><div class="activity-description">Chào mừng bạn đến với Nhà Thuốc! 🎉</div></div>`,
+        ];
+
+        topOrders.forEach((order) => {
+          const date = order.ngayTao
+            ? new Date(order.ngayTao).toLocaleDateString("vi-VN")
+            : "---";
+          const amount =
+            Number(order.tongTien || 0).toLocaleString("vi-VN") + "đ";
+          html.push(
+            `<div class="activity-item"><div class="activity-date">${date}</div><div class="activity-description">Đơn ${order.maHoaDon || "---"} - ${order.trangThai || "CHO_XAC_NHAN"} - ${amount}</div></div>`,
+          );
+        });
+
+        if (topOrders.length === 0) {
+          html.push(
+            `<div class="activity-item"><div class="activity-date">---</div><div class="activity-description">Đơn hàng của bạn sẽ hiển thị ở đây</div></div>`,
+          );
+        }
+
+        box.innerHTML = html.join("");
+      }
+
+      async function loadProfile() {
+        const user = getCurrentUser();
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        setText("username", user.tenDangNhap || "Khách hàng");
+        setText("userId", user.maTaiKhoan || user.maTK || "---");
+        setText("userEmail", user.email || "Chưa cập nhật", "Chưa cập nhật");
+        setText("userRole", formatRole(user.loaiTaiKhoan), "User");
+        setText(
+          "createdAt",
+          user.ngayTao
+            ? new Date(user.ngayTao).toLocaleDateString("vi-VN")
+            : "Không xác định",
+          "Không xác định",
+        );
+
+        const firstLetter = (user.tenDangNhap || "U").charAt(0).toUpperCase();
+        setText("avatarIcon", firstLetter, "U");
+
+        let resolvedMaKH = user.maKhachHang || user.maKH || "";
+
+        try {
+          const maTK = user.maTaiKhoan || user.maTK;
+          if (!maTK) {
+            throw new Error("Thiếu mã tài khoản");
+          }
+
+          const kh = await apiFetch(
+            `/khachhang/by-tk/${encodeURIComponent(maTK)}`,
+          );
+          resolvedMaKH = kh.maKhachHang || resolvedMaKH;
+          const fullName = [kh.ho || "", kh.ten || ""].join(" ").trim();
+          if (fullName) {
+            setText("username", fullName);
+            setText("avatarIcon", fullName.charAt(0).toUpperCase(), "U");
+          }
+
+          // Map extra user info into sidebar fields.
+          setText("userId", kh.maKhachHang || maTK);
+          setText("userPhone", kh.sdt || "---");
+          setText("userGender", kh.gioiTinh || "---");
+          setText(
+            "userBirth",
+            kh.ngaySinh
+              ? new Date(kh.ngaySinh).toLocaleDateString("vi-VN")
+              : "---",
+          );
+          setText("userAddress", kh.diaChi || "---");
+          if (!user.email) {
+            setText("userEmail", "Chưa cập nhật", "Chưa cập nhật");
+          }
+        } catch (e) {
+          // Keep fallback values from currentUser.
+        }
+
+        try {
+          const allOrders = await apiFetch("/hoadon");
+          const orders = resolvedMaKH
+            ? allOrders.filter((o) => o.maKhachHang === resolvedMaKH)
+            : [];
+
+          const totalOrders = orders.length;
+          const totalSpent = orders.reduce(
+            (sum, o) => sum + Number(o.tongTien || 0),
+            0,
+          );
+
+          setText("totalOrders", String(totalOrders), "0");
+          setText("totalSpent", `${totalSpent.toLocaleString("vi-VN")}đ`, "0đ");
+          setText("memberLevel", getMemberLevel(totalSpent), "Mới");
+
+          renderActivities(orders);
+        } catch (e) {
+          setText("totalOrders", "0", "0");
+          setText("totalSpent", "0đ", "0đ");
+          setText("memberLevel", "Mới", "Mới");
+        }
+      }
+
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", async () => {
+          await logoutSession();
+          window.location.href = "login.html";
+        });
 
       function showProcessing() {
         alert("⚙️ Chức năng đang được xử lý. Vui lòng quay lại sau!");
       }
+
+      document.addEventListener("DOMContentLoaded", loadProfile);
     </script>
   </body>
 </html>

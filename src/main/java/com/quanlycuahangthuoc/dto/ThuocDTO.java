@@ -5,8 +5,9 @@ public class ThuocDTO {
   private String MaThuoc;
   private String MaNhaCungCap;
   private String TenThuoc;
+  private String HinhAnh;
   private String DonViTinh;
-  private String NSX; 
+  private String NSX;
   private String HSD;
   private float GiaBan;
   private int SoLuongTon;
@@ -15,6 +16,7 @@ public class ThuocDTO {
     MaThuoc = "";
     MaNhaCungCap = "";
     TenThuoc = "";
+    HinhAnh = "";
     DonViTinh = "";
     NSX = "";
     HSD = "";
@@ -26,6 +28,7 @@ public class ThuocDTO {
     String MaThuoc,
     String MaNhaCungCap,
     String TenThuoc,
+    String HinhAnh,
     String DonViTinh,
     String NSX,
     String HSD,
@@ -35,6 +38,7 @@ public class ThuocDTO {
     this.MaThuoc = MaThuoc;
     this.MaNhaCungCap = MaNhaCungCap;
     this.TenThuoc = TenThuoc;
+    this.HinhAnh = HinhAnh;
     this.DonViTinh = DonViTinh;
     this.NSX = NSX;
     this.HSD = HSD;
@@ -46,6 +50,7 @@ public class ThuocDTO {
     this.MaThuoc = t.MaThuoc;
     this.MaNhaCungCap = t.MaNhaCungCap;
     this.TenThuoc = t.TenThuoc;
+    this.HinhAnh = t.HinhAnh;
     this.DonViTinh = t.DonViTinh;
     this.NSX = t.NSX;
     this.HSD = t.HSD;
@@ -63,6 +68,10 @@ public class ThuocDTO {
 
   public String getTenThuoc() {
     return TenThuoc;
+  }
+
+  public String getHinhAnh() {
+    return HinhAnh;
   }
 
   public String getDonViTinh() {
@@ -95,6 +104,10 @@ public class ThuocDTO {
 
   public void setTenThuoc(String TenThuoc) {
     this.TenThuoc = TenThuoc;
+  }
+
+  public void setHinhAnh(String HinhAnh) {
+    this.HinhAnh = HinhAnh;
   }
 
   public void setDonViTinh(String DonViTinh) {

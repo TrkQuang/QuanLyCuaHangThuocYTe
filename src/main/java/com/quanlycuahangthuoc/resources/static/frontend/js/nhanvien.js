@@ -4,6 +4,59 @@
 
 const API_URL = "http://localhost:8080/api";
 let currentUser = null;
+let currentNhanVienId = null;
+
+function normalizeRole(role) {
+  return String(role || "")
+    .trim()
+    .toUpperCase();
+}
+
+function normalizeInvoiceStatus(status) {
+  return String(status || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+}
+
+function isPendingInvoiceStatus(status) {
+  const normalized = normalizeInvoiceStatus(status);
+  return normalized === "CHO_XAC_NHAN" || normalized === "CHOXACNHAN";
+}
+
+function getInvoiceStatusClass(status) {
+  const normalized = normalizeInvoiceStatus(status);
+  if (normalized === "DA_THANH_TOAN") return "badge-success";
+  if (normalized === "HUY") return "badge-danger";
+  return "badge-warning";
+}
+
+function normalizePhieuNhapStatus(status) {
+  return String(status || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+}
+
+function isPendingPhieuNhapStatus(status) {
+  const normalized = normalizePhieuNhapStatus(status);
+  return normalized === "CHO_XAC_NHAN" || normalized === "CHOXACNHAN";
+}
+
+function getPhieuNhapStatusClass(status) {
+  const normalized = normalizePhieuNhapStatus(status);
+  if (normalized === "DA_XAC_NHAN") return "badge-success";
+  if (normalized === "DA_HUY") return "badge-danger";
+  return "badge-warning";
+}
+
+function formatPhieuNhapStatus(status) {
+  const normalized = normalizePhieuNhapStatus(status);
+  if (normalized === "DA_XAC_NHAN") return "DA_XAC_NHAN";
+  if (normalized === "DA_HUY") return "DA_HUY";
+  return "CHO_XAC_NHAN";
+}
+
 let cartItems = []; // Giỏ hàng
 let allThuoc = []; // Danh sách tất cả thuốc (để search)
 
@@ -26,8 +79,18 @@ function checkAuth() {
 
   currentUser = JSON.parse(userStr);
 
+  if (normalizeRole(currentUser.loaiTaiKhoan) === "BANNED") {
+    alert("Tài khoản đã bị cấm, không thể truy cập trang nhân viên");
+    localStorage.removeItem("currentUser");
+    window.location.href = "login.html";
+    return;
+  }
+
   // Kiểm tra quyền Nhân Viên
-  if (currentUser.loaiTaiKhoan !== "NhanVien") {
+  if (
+    normalizeRole(currentUser.loaiTaiKhoan) !== "NHANVIEN" &&
+    normalizeRole(currentUser.loaiTaiKhoan) !== "NhanVien"
+  ) {
     alert("Bạn không có quyền truy cập trang này!");
     window.location.href = "login.html";
     return;
@@ -108,6 +171,7 @@ function switchPage(pageName) {
     banhang: "Bán Hàng",
     hoadon: "Hóa Đơn",
     hoso: "Hồ Sơ Của Tôi",
+    lichdangky: "Đăng Ký Lịch Làm",
   };
 
   document.getElementById("pageTitle").textContent =
@@ -141,7 +205,19 @@ async function loadPageData(pageName) {
     case "hoso":
       await loadHoSoCuaToi();
       break;
+    case "lichdangky":
+      await loadLichDangKyNhanVienPage();
+      break;
   }
+}
+
+async function resolveCurrentNhanVienId() {
+  if (currentNhanVienId) return currentNhanVienId;
+  const res = await fetch(`${API_URL}/nhanvien`);
+  const list = await res.json();
+  const currentNV = list.find((nv) => nv.maTaiKhoan === currentUser.maTaiKhoan);
+  currentNhanVienId = currentNV ? currentNV.maNhanVien : null;
+  return currentNhanVienId;
 }
 
 // ====================
@@ -193,7 +269,8 @@ function calculateTodayRevenue(hoadonList) {
   let todayRevenue = 0;
 
   hoadonList.forEach((hd) => {
-    const hdDate = hd.ngayLap ? hd.ngayLap.split("T")[0] : "";
+    const sourceDate = hd.ngayTao || hd.ngayLap;
+    const hdDate = sourceDate ? sourceDate.split("T")[0] : "";
     if (hdDate === today && hd.trangThai !== "Hủy") {
       todayRevenue += hd.tongTien || 0;
     }
@@ -211,7 +288,10 @@ function displayRecentOrders(hoadonList) {
   const ordersDiv = document.getElementById("recentOrders");
 
   const recentOrders = hoadonList
-    .sort((a, b) => new Date(b.ngayLap) - new Date(a.ngayLap))
+    .sort(
+      (a, b) =>
+        new Date(b.ngayTao || b.ngayLap) - new Date(a.ngayTao || a.ngayLap),
+    )
     .slice(0, 5);
 
   if (recentOrders.length === 0) {
@@ -221,7 +301,7 @@ function displayRecentOrders(hoadonList) {
 
   let html = "";
   recentOrders.forEach((hd) => {
-    const time = formatDateTime(hd.ngayLap);
+    const time = formatDateTime(hd.ngayTao || hd.ngayLap);
     html += `
             <div class="activity-item">
                 <strong>HD: ${hd.maHoaDon}</strong><br>
@@ -303,14 +383,15 @@ function displayThuocTable(data) {
     // Highlight nếu số lượng < 10
     const rowClass =
       thuoc.soLuongTon < 10 ? 'style="background: #fff3e0;"' : "";
+    const hsdText = thuoc.hsd ? formatDate(thuoc.hsd) : "";
     html += `
             <tr ${rowClass}>
                 <td>${thuoc.maThuoc}</td>
                 <td>${thuoc.tenThuoc}</td>
-                <td>${thuoc.nsx || ""}</td>
                 <td>${thuoc.donViTinh || ""}</td>
                 <td>${formatCurrency(thuoc.giaBan)}</td>
                 <td>${thuoc.soLuongTon}</td>
+                <td>${hsdText}</td>
                 <td>
                     <button class="btn btn-edit" onclick="editThuoc('${thuoc.maThuoc}')">
                         <i class="fas fa-edit"></i>
@@ -338,7 +419,7 @@ function searchThuoc() {
     (t) =>
       t.tenThuoc.toLowerCase().includes(keyword) ||
       t.maThuoc.toLowerCase().includes(keyword) ||
-      (t.nsx && t.nsx.toLowerCase().includes(keyword)),
+      (t.donViTinh && t.donViTinh.toLowerCase().includes(keyword)),
   );
 
   displayThuocTable(filtered);
@@ -357,12 +438,8 @@ function showAddThuocModal() {
                 <input type="text" name="tenThuoc" required>
             </div>
             <div class="form-group">
-                <label>Loại thuốc</label>
-                <input type="text" name="loaiThuoc">
-            </div>
-            <div class="form-group">
                 <label>Đơn vị *</label>
-                <input type="text" name="donVi" required placeholder="Viên, Hộp, Chai...">
+              <input type="text" name="donViTinh" required placeholder="Viên, Hộp, Chai...">
             </div>
             <div class="form-group">
                 <label>Giá bán *</label>
@@ -370,7 +447,11 @@ function showAddThuocModal() {
             </div>
             <div class="form-group">
                 <label>Số lượng *</label>
-                <input type="number" name="soLuong" required min="0">
+              <input type="number" name="soLuongTon" required min="0">
+            </div>
+            <div class="form-group">
+              <label>Hạn sử dụng</label>
+              <input type="date" name="hsd">
             </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
@@ -398,10 +479,18 @@ function showAddThuocModal() {
  */
 async function addThuoc(data) {
   try {
+    const payload = {
+      tenThuoc: data.tenThuoc,
+      donViTinh: data.donViTinh,
+      giaBan: Number(data.giaBan || 0),
+      soLuongTon: Number(data.soLuongTon || 0),
+      hsd: data.hsd || "",
+    };
+
     const response = await fetch(`${API_URL}/thuoc/them-thuoc`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
@@ -446,12 +535,28 @@ function displayPhieuNhapTable(data) {
 
   if (data.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="6" class="text-center">Chưa có phiếu nhập nào</td></tr>';
+      '<tr><td colspan="7" class="text-center">Chưa có phiếu nhập nào</td></tr>';
     return;
   }
 
   let html = "";
   data.forEach((pn) => {
+    const statusClass = getPhieuNhapStatusClass(pn.trangThai);
+    const canEdit = isPendingPhieuNhapStatus(pn.trangThai);
+    const editButtons = canEdit
+      ? `
+          <button class="btn btn-success" onclick="editPhieuNhap('${pn.maPhieuNhap}')" title="Chinh sua chi tiet">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button class="btn btn-success" onclick="xacNhanPhieuNhap('${pn.maPhieuNhap}')" title="Xac nhan phieu nhap">
+            <i class="fas fa-check"></i>
+          </button>
+          <button class="btn btn-danger" onclick="huyPhieuNhap('${pn.maPhieuNhap}')" title="Huy phieu nhap">
+            <i class="fas fa-times"></i>
+          </button>
+        `
+      : "";
+
     html += `
             <tr>
                 <td>${pn.maPhieuNhap}</td>
@@ -459,10 +564,12 @@ function displayPhieuNhapTable(data) {
                 <td>${pn.maNhaCungCap || ""}</td>
                 <td>${pn.maNhanVien || ""}</td>
                 <td>${formatCurrency(pn.tongTien)}</td>
+                <td><span class="badge ${statusClass}">${formatPhieuNhapStatus(pn.trangThai)}</span></td>
                 <td>
                     <button class="btn btn-view" onclick="viewPhieuNhap('${pn.maPhieuNhap}')">
                         <i class="fas fa-eye"></i>
                     </button>
+                    ${editButtons}
                 </td>
             </tr>
         `;
@@ -471,11 +578,195 @@ function displayPhieuNhapTable(data) {
   tbody.innerHTML = html;
 }
 
+function buildPhieuNhapDetailRow(optionsHtml, row = {}) {
+  return `
+    <tr class="pn-detail-row">
+      <td>
+        <select class="pn-ma-thuoc" required>
+          ${optionsHtml}
+        </select>
+      </td>
+      <td>
+        <input class="pn-so-luong" type="number" min="1" value="${row.soLuongNhap || 1}" required />
+      </td>
+      <td>
+        <input class="pn-don-gia" type="number" min="1" value="${row.donGia || 1}" required />
+      </td>
+      <td>
+        <button type="button" class="btn btn-danger" onclick="removePhieuNhapRow(this)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `;
+}
+
+function removePhieuNhapRow(btn) {
+  const tbody = document.getElementById("phieuNhapDetailBody");
+  if (!tbody) return;
+  if (tbody.querySelectorAll("tr").length <= 1) {
+    showNotification("Phiếu nhập cần ít nhất 1 dòng thuốc", "error");
+    return;
+  }
+  btn.closest("tr")?.remove();
+}
+
+function collectPhieuNhapDetails(maPhieuNhap) {
+  const rows = Array.from(document.querySelectorAll("#phieuNhapDetailBody tr"));
+  return rows.map((row, idx) => ({
+    maCTPN: row.dataset.mactpn || `CTPN${Date.now()}${idx}`,
+    maPhieuNhap,
+    maThuoc: row.querySelector(".pn-ma-thuoc")?.value,
+    soLuongNhap: Number(row.querySelector(".pn-so-luong")?.value || 0),
+    donGia: Number(row.querySelector(".pn-don-gia")?.value || 0),
+  }));
+}
+
 /**
  * Hiển thị modal tạo phiếu nhập
  */
-function showAddPhieuNhapModal() {
-  showNotification("Chức năng đang được phát triển", "info");
+async function showAddPhieuNhapModal() {
+  try {
+    const [nccRes, thuocRes] = await Promise.all([
+      fetch(`${API_URL}/nhacungcap`),
+      fetch(`${API_URL}/thuoc`),
+    ]);
+
+    const nccList = nccRes.ok ? await nccRes.json() : [];
+    const thuocList = thuocRes.ok ? await thuocRes.json() : [];
+
+    const activeNcc = nccList.filter(
+      (ncc) => normalizeInvoiceStatus(ncc.trangThai) !== "NGUNG_HOP_TAC",
+    );
+
+    if (activeNcc.length === 0) {
+      showNotification("Khong co nha cung cap hop le", "error");
+      return;
+    }
+    if (thuocList.length === 0) {
+      showNotification("Khong co thuoc de tao phieu nhap", "error");
+      return;
+    }
+
+    const nccOptions = activeNcc
+      .map(
+        (ncc) =>
+          `<option value="${ncc.maNhaCungCap}">${ncc.maNhaCungCap} - ${ncc.tenNhaCungCap || ""}</option>`,
+      )
+      .join("");
+
+    const thuocOptions = thuocList
+      .map(
+        (t) =>
+          `<option value="${t.maThuoc}" data-price="${Number(t.giaBan || 0)}">${t.maThuoc} - ${t.tenThuoc || ""}</option>`,
+      )
+      .join("");
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <h2>Tao phieu nhap</h2>
+      <form id="addImportForm">
+        <div class="form-group">
+          <label>Ma phieu nhap</label>
+          <input type="text" name="maPhieuNhap" required value="PN${Date.now()}" />
+        </div>
+        <div class="form-group">
+          <label>Nha cung cap</label>
+          <select name="maNhaCungCap" required>
+            ${nccOptions}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Chi tiet thuoc nhap</label>
+          <div class="pn-detail-table-wrap">
+            <table id="detailTable">
+              <thead>
+                <tr><th>Thuoc</th><th>So luong</th><th>Don gia nhap</th><th>Thao tac</th></tr>
+              </thead>
+              <tbody id="phieuNhapDetailBody">
+                ${buildPhieuNhapDetailRow(thuocOptions)}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top: 10px;">
+            <button type="button" class="btn btn-secondary" id="btnAddPhieuNhapRow">
+              <i class="fas fa-plus"></i> Them dong thuoc
+            </button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Huy</button>
+          <button type="submit" class="btn btn-primary">Luu phieu nhap</button>
+        </div>
+      </form>
+    `;
+
+    document
+      .getElementById("btnAddPhieuNhapRow")
+      .addEventListener("click", () => {
+        const tbody = document.getElementById("phieuNhapDetailBody");
+        tbody.insertAdjacentHTML(
+          "beforeend",
+          buildPhieuNhapDetailRow(thuocOptions),
+        );
+      });
+
+    document
+      .getElementById("addImportForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const raw = Object.fromEntries(formData);
+
+        try {
+          const maNhanVien = await resolveCurrentNhanVienId();
+          if (!maNhanVien) {
+            showNotification(
+              "Khong tim thay nhan vien dang dang nhap",
+              "error",
+            );
+            return;
+          }
+
+          const chiTiet = collectPhieuNhapDetails(raw.maPhieuNhap);
+          if (chiTiet.length === 0) {
+            showNotification("Can it nhat 1 dong chi tiet", "error");
+            return;
+          }
+
+          const payload = {
+            phieuNhap: {
+              maPhieuNhap: raw.maPhieuNhap,
+              maNhaCungCap: raw.maNhaCungCap,
+              maNhanVien,
+              ngayNhap: new Date().toISOString().split("T")[0],
+            },
+            chiTiet,
+          };
+
+          const res = await fetch(`${API_URL}/phieunhap/full`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            throw new Error(await res.text());
+          }
+
+          showNotification("Tao phieu nhap thanh cong", "success");
+          closeModal();
+          loadPhieuNhapData();
+          loadThuocData();
+        } catch (err) {
+          showNotification(err.message || "Tao phieu nhap that bai", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    showNotification("Khong the tai du lieu tao phieu nhap", "error");
+  }
 }
 
 // ====================
@@ -489,37 +780,24 @@ async function loadThuocForSale() {
   try {
     const response = await fetch(`${API_URL}/thuoc`);
     allThuoc = await response.json();
+    renderDrugSearchResults(allThuoc);
   } catch (error) {
     console.error("Lỗi khi load thuốc:", error);
     showNotification("Không thể tải danh sách thuốc", "error");
   }
 }
 
-/**
- * Tìm kiếm thuốc để thêm vào giỏ
- */
-function searchDrugForSale() {
-  const keyword = document.getElementById("searchDrug").value.toLowerCase();
+function renderDrugSearchResults(drugList) {
   const resultsDiv = document.getElementById("drugSearchResults");
+  if (!resultsDiv) return;
 
-  if (!keyword) {
-    resultsDiv.innerHTML = "";
-    return;
-  }
-
-  const filtered = allThuoc.filter(
-    (t) =>
-      t.tenThuoc.toLowerCase().includes(keyword) ||
-      t.maThuoc.toLowerCase().includes(keyword),
-  );
-
-  if (filtered.length === 0) {
-    resultsDiv.innerHTML = "<p>Không tìm thấy thuốc nào</p>";
+  if (!drugList || drugList.length === 0) {
+    resultsDiv.innerHTML = "<p>Không có thuốc nào</p>";
     return;
   }
 
   let html = "";
-  filtered.forEach((t) => {
+  drugList.forEach((t) => {
     html += `
             <div class="drug-item" onclick='addToCart(${JSON.stringify(t)})'>
                 <div class="drug-item-name">${t.tenThuoc}</div>
@@ -530,6 +808,23 @@ function searchDrugForSale() {
   });
 
   resultsDiv.innerHTML = html;
+}
+
+/**
+ * Tìm kiếm thuốc để thêm vào giỏ
+ */
+function searchDrugForSale() {
+  const keyword = document.getElementById("searchDrug").value.toLowerCase();
+
+  const filtered = !keyword
+    ? allThuoc
+    : allThuoc.filter(
+        (t) =>
+          t.tenThuoc.toLowerCase().includes(keyword) ||
+          t.maThuoc.toLowerCase().includes(keyword),
+      );
+
+  renderDrugSearchResults(filtered);
 }
 
 /**
@@ -646,18 +941,20 @@ async function searchCustomer() {
   if (!phone) return;
 
   try {
-    // Lấy danh sách khách hàng và tìm theo SĐT
-    const response = await fetch(`${API_URL}/khachhang`);
-    const customers = await response.json();
+    const response = await fetch(
+      `${API_URL}/khachhang/by-phone/${encodeURIComponent(phone)}`,
+    );
 
-    const customer = customers.find((c) => c.sdt === phone);
-
-    if (customer) {
+    if (response.ok) {
+      const customer = await response.json();
       const customerName = `${customer.ho || ""} ${customer.ten || ""}`.trim();
       document.getElementById("customerName").value = customerName;
+      document.getElementById("customerName").dataset.maKhachHang =
+        customer.maKhachHang;
       showNotification("Đã tìm thấy khách hàng", "success");
     } else {
       document.getElementById("customerName").value = "";
+      document.getElementById("customerName").dataset.maKhachHang = "";
       showNotification("Không tìm thấy khách hàng", "info");
     }
   } catch (error) {
@@ -683,27 +980,41 @@ async function createInvoice() {
     return;
   }
 
-  // Tính tổng tiền
-  const tongTien = cartItems.reduce(
-    (sum, item) => sum + item.giaBan * item.quantity,
-    0,
-  );
-
-  // Chuẩn bị dữ liệu hóa đơn
-  const hoaDon = {
-    ngayLap: new Date().toISOString(),
-    maKhachHang: null, // Sẽ cần logic để lấy mã khách hàng
-    maNhanVien: currentUser.maTaiKhoan, // Hoặc lấy từ thông tin nhân viên
-    tongTien: tongTien,
-    trangThai: "Đã thanh toán",
-  };
-
   try {
-    // Tạo hóa đơn
-    const response = await fetch(`${API_URL}/hoadon`, {
+    const maNhanVien = await resolveCurrentNhanVienId();
+    if (!maNhanVien) {
+      showNotification("Khong tim thay nhan vien dang dang nhap", "error");
+      return;
+    }
+
+    const maKhachHang =
+      document.getElementById("customerName").dataset.maKhachHang;
+    if (!maKhachHang) {
+      showNotification("Khach hang chua ton tai trong he thong", "error");
+      return;
+    }
+
+    const maHoaDon = `HD${Date.now()}`;
+    const payload = {
+      hoaDon: {
+        maHoaDon,
+        maKhachHang,
+        maNhanVien,
+        ngayTao: new Date().toISOString().split("T")[0],
+      },
+      chiTiet: cartItems.map((item, idx) => ({
+        maCTHD: `CTHD${Date.now()}${idx}`,
+        maHoaDon,
+        maThuoc: item.maThuoc,
+        soLuong: Number(item.quantity),
+        hdsd: "Dung theo huong dan bac si",
+      })),
+    };
+
+    const response = await fetch(`${API_URL}/hoadon/full`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(hoaDon),
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
@@ -764,12 +1075,24 @@ function displayHoaDonTable(data) {
 
   let html = "";
   data.forEach((hd) => {
-    const statusClass =
-      hd.trangThai === "Hủy" ? "badge-danger" : "badge-success";
+    const statusClass = getInvoiceStatusClass(hd.trangThai);
+    const canHandle = isPendingInvoiceStatus(hd.trangThai);
+
+    const actionButtons = canHandle
+      ? `
+          <button class="btn btn-success" onclick="confirmThanhToanNhanVien('${hd.maHoaDon}')" title="Xac nhan thanh toan">
+            <i class="fas fa-check"></i>
+          </button>
+          <button class="btn btn-danger" onclick="confirmHuyHoaDonNhanVien('${hd.maHoaDon}')" title="Huy hoa don">
+            <i class="fas fa-times"></i>
+          </button>
+        `
+      : "";
+
     html += `
             <tr>
                 <td>${hd.maHoaDon}</td>
-                <td>${formatDate(hd.ngayLap)}</td>
+                <td>${formatDate(hd.ngayTao || hd.ngayLap)}</td>
                 <td>${hd.maKhachHang || ""}</td>
                 <td>${hd.maNhanVien || ""}</td>
                 <td>${formatCurrency(hd.tongTien)}</td>
@@ -778,6 +1101,7 @@ function displayHoaDonTable(data) {
                     <button class="btn btn-view" onclick="viewHoaDon('${hd.maHoaDon}')">
                         <i class="fas fa-eye"></i>
                     </button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;
@@ -893,6 +1217,10 @@ function showNotification(message, type = "info") {
  */
 function logout() {
   if (confirm("Bạn có chắc muốn đăng xuất?")) {
+    fetch(`${API_URL}/taikhoan/session/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
     localStorage.removeItem("currentUser");
     window.location.href = "login.html";
   }
@@ -907,31 +1235,78 @@ function logout() {
  */
 async function loadHoSoCuaToi() {
   try {
-    // Lấy mã nhân viên từ localStorage (giả sử có lưu mã nhân viên khi đăng nhập)
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const user = currentUser || JSON.parse(localStorage.getItem("currentUser"));
+    if (!user) {
+      throw new Error("Không tìm thấy phiên đăng nhập");
+    }
 
-    // Lấy danh sách tất cả nhân viên
+    var accountId = String(user.maTaiKhoan || "").trim();
+    var username = String(user.tenDangNhap || "")
+      .trim()
+      .toLowerCase();
+
+    if (!accountId && username) {
+      try {
+        const taiKhoanRes = await fetch(`${API_URL}/taikhoan`);
+        if (taiKhoanRes.ok) {
+          const allTaiKhoan = await taiKhoanRes.json();
+          const matchedAccount = allTaiKhoan.find(
+            (tk) =>
+              String(tk.tenDangNhap || "")
+                .trim()
+                .toLowerCase() === username,
+          );
+          accountId = matchedAccount
+            ? String(matchedAccount.maTaiKhoan || "").trim()
+            : "";
+        }
+      } catch (error) {
+        console.warn("Không thể map maTaiKhoan từ tenDangNhap:", error);
+      }
+    }
+
     const response = await fetch(`${API_URL}/nhanvien`);
     const allNhanVien = await response.json();
 
-    // Tìm thông tin nhân viên hiện tại dựa trên username hoặc email
-    const myInfo = allNhanVien.find(
-      (nv) =>
-        nv.email === currentUser.email ||
-        nv.maTaiKhoan === currentUser.maTaiKhoan,
-    );
+    function normalized(value) {
+      return String(value || "")
+        .trim()
+        .toLowerCase();
+    }
+
+    const userEmail = normalized(user.email);
+
+    const scored = allNhanVien
+      .map((nv) => {
+        let score = 0;
+        const nvAccountId = String(nv.maTaiKhoan || "").trim();
+        if (accountId && nvAccountId === accountId) score += 100;
+        if (user.maNhanVien && nv.maNhanVien === user.maNhanVien) score += 80;
+        if (userEmail && normalized(nv.email) === userEmail) score += 40;
+        return { nv, score };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    const myInfo = scored.length && scored[0].score > 0 ? scored[0].nv : null;
 
     if (!myInfo) {
       document.getElementById("hosoContent").innerHTML = `
         <div style="text-align: center; padding: 50px;">
           <i class="fas fa-exclamation-circle" style="font-size: 50px; color: #f44336;"></i>
-          <p style="margin-top: 15px; color: #666;">Không tìm thấy thông tin hồ sơ của bạn</p>
+          <p style="margin-top: 15px; color: #666;">Không tìm thấy hồ sơ nhân viên khớp với tài khoản hiện tại</p>
         </div>
       `;
       return;
     }
 
     const hoTen = `${myInfo.ho || ""} ${myInfo.ten || ""}`.trim();
+    const usernameCode = String(user.tenDangNhap || "")
+      .trim()
+      .toUpperCase();
+    const profileCode = usernameCode.startsWith("NV")
+      ? usernameCode
+      : myInfo.maNhanVien || "";
+    const profileName = hoTen || user.tenDangNhap || "Nhân viên";
 
     // Hiển thị hồ sơ
     document.getElementById("hosoContent").innerHTML = `
@@ -939,9 +1314,9 @@ async function loadHoSoCuaToi() {
         <div style="width: 120px; height: 120px; border-radius: 50%; background: white; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
           <i class="fas fa-user" style="font-size: 60px; color: #1abc9c;"></i>
         </div>
-        <h2 style="margin: 0; font-size: 32px; font-weight: 600;">${hoTen}</h2>
+        <h2 style="margin: 0; font-size: 32px; font-weight: 600;">${profileName}</h2>
         <p style="margin: 10px 0 0; opacity: 0.95; font-size: 18px;">
-          <i class="fas fa-id-badge"></i> ${myInfo.maNhanVien}
+          <i class="fas fa-id-badge"></i> ${profileCode}
         </p>
         <div style="display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; margin-top: 15px;">
           <i class="fas fa-briefcase"></i> Nhân Viên
@@ -1032,11 +1407,471 @@ async function loadHoSoCuaToi() {
 
 // Placeholder functions
 function editThuoc(id) {
-  showNotification("Chức năng đang phát triển", "info");
+  const item = allThuoc.find((t) => t.maThuoc === id);
+  if (!item) {
+    showNotification("Khong tim thay thuoc", "error");
+    return;
+  }
+
+  const modalBody = document.getElementById("modalBody");
+  modalBody.innerHTML = `
+    <h2>Cap nhat thuoc</h2>
+    <form id="editThuocFormNv">
+      <input type="hidden" name="maThuoc" value="${item.maThuoc}" />
+      <div class="form-group"><label>Ten thuoc</label><input name="tenThuoc" required value="${item.tenThuoc || ""}" /></div>
+      <div class="form-group"><label>Don vi tinh</label><input name="donViTinh" value="${item.donViTinh || ""}" /></div>
+      <div class="form-group"><label>Gia ban</label><input type="number" name="giaBan" min="0" value="${item.giaBan || 0}" /></div>
+      <div class="form-group"><label>So luong ton</label><input type="number" name="soLuongTon" min="0" value="${item.soLuongTon || 0}" /></div>
+      <div class="form-group"><label>Han su dung</label><input type="date" name="hsd" value="${item.hsd ? String(item.hsd).split("T")[0] : ""}" /></div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Huy</button>
+        <button type="submit" class="btn btn-primary">Luu</button>
+      </div>
+    </form>
+  `;
+
+  document
+    .getElementById("editThuocFormNv")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(e.target));
+      payload.giaBan = Number(payload.giaBan || 0);
+      payload.soLuongTon = Number(payload.soLuongTon || 0);
+      try {
+        const res = await fetch(`${API_URL}/thuoc`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+        closeModal();
+        await loadThuocData();
+        showNotification("Cap nhat thuoc thanh cong", "success");
+      } catch (err) {
+        showNotification(err.message || "Cap nhat that bai", "error");
+      }
+    });
+
+  openModal();
 }
 function viewPhieuNhap(id) {
-  showNotification("Chức năng đang phát triển", "info");
+  Promise.all([
+    fetch(`${API_URL}/phieunhap/${id}`).then((r) => (r.ok ? r.json() : null)),
+    fetch(`${API_URL}/ctphieunhap/phieunhap/${id}`).then((r) =>
+      r.ok ? r.json() : [],
+    ),
+  ])
+    .then(([pn, details]) => {
+      if (!pn) {
+        showNotification("Khong tim thay phieu nhap", "error");
+        return;
+      }
+      const canEdit = isPendingPhieuNhapStatus(pn.trangThai);
+      const rows = (details || [])
+        .map(
+          (d) =>
+            `<tr><td>${d.maCTPN}</td><td>${d.maThuoc}</td><td>${d.soLuongNhap}</td><td>${formatCurrency(d.donGia)}</td></tr>`,
+        )
+        .join("");
+
+      const actionButtons = canEdit
+        ? `
+          <div class="form-actions" style="margin-top: 14px;">
+            <button type="button" class="btn btn-secondary" onclick="editPhieuNhap('${pn.maPhieuNhap}')">Chinh sua chi tiet</button>
+            <button type="button" class="btn btn-success" onclick="xacNhanPhieuNhap('${pn.maPhieuNhap}')">Xac nhan</button>
+            <button type="button" class="btn btn-danger" onclick="huyPhieuNhap('${pn.maPhieuNhap}')">Huy phieu</button>
+          </div>
+        `
+        : "";
+
+      document.getElementById("modalBody").innerHTML = `
+        <h2>Chi tiet phieu nhap ${pn.maPhieuNhap}</h2>
+        <p>Ngay nhap: ${formatDate(pn.ngayNhap)} | NV: ${pn.maNhanVien || ""} | NCC: ${pn.maNhaCungCap || ""} | Trang thai: ${formatPhieuNhapStatus(pn.trangThai)}</p>
+        <div class="pn-detail-table-wrap">
+          <table id="detailTable"><thead><tr><th>Ma CTPN</th><th>Ma thuoc</th><th>So luong</th><th>Don gia</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Khong co chi tiet</td></tr>'}</tbody></table>
+        </div>
+        ${actionButtons}
+      `;
+      openModal();
+    })
+    .catch(() =>
+      showNotification("Khong tai duoc chi tiet phieu nhap", "error"),
+    );
+}
+
+async function editPhieuNhap(maPhieuNhap) {
+  try {
+    const [pnRes, detailRes, thuocRes] = await Promise.all([
+      fetch(`${API_URL}/phieunhap/${maPhieuNhap}`),
+      fetch(`${API_URL}/ctphieunhap/phieunhap/${maPhieuNhap}`),
+      fetch(`${API_URL}/thuoc`),
+    ]);
+
+    if (!pnRes.ok) {
+      showNotification("Khong tim thay phieu nhap", "error");
+      return;
+    }
+
+    const pn = await pnRes.json();
+    if (!isPendingPhieuNhapStatus(pn.trangThai)) {
+      showNotification("Phieu nhap da hoan tat, khong the sua", "error");
+      return;
+    }
+
+    const details = detailRes.ok ? await detailRes.json() : [];
+    const thuocList = thuocRes.ok ? await thuocRes.json() : [];
+    if (thuocList.length === 0) {
+      showNotification("Khong co thuoc de cap nhat", "error");
+      return;
+    }
+
+    const thuocOptions = thuocList
+      .map(
+        (t) =>
+          `<option value="${t.maThuoc}">${t.maThuoc} - ${t.tenThuoc || ""}</option>`,
+      )
+      .join("");
+
+    const rowsHtml = (details || [])
+      .map((d) => {
+        const baseRow = buildPhieuNhapDetailRow(thuocOptions, d);
+        return baseRow.replace(
+          '<tr class="pn-detail-row">',
+          `<tr class=\"pn-detail-row\" data-mactpn=\"${d.maCTPN || ""}\">`,
+        );
+      })
+      .join("");
+
+    document.getElementById("modalBody").innerHTML = `
+      <h2>Chinh sua phieu nhap ${pn.maPhieuNhap}</h2>
+      <p>NCC: ${pn.maNhaCungCap || ""} | NV: ${pn.maNhanVien || ""} | Trang thai: ${formatPhieuNhapStatus(pn.trangThai)}</p>
+      <div class="pn-detail-table-wrap">
+        <table id="detailTable">
+          <thead>
+            <tr><th>Thuoc</th><th>So luong</th><th>Don gia nhap</th><th>Thao tac</th></tr>
+          </thead>
+          <tbody id="phieuNhapDetailBody">${rowsHtml || buildPhieuNhapDetailRow(thuocOptions)}</tbody>
+        </table>
+      </div>
+      <div style="margin-top: 10px;">
+        <button type="button" class="btn btn-secondary" id="btnAddEditPhieuNhapRow">
+          <i class="fas fa-plus"></i> Them dong thuoc
+        </button>
+      </div>
+      <div class="form-actions" style="margin-top: 14px;">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Dong</button>
+        <button type="button" class="btn btn-primary" id="btnSavePhieuNhapEdit">Luu thay doi</button>
+      </div>
+    `;
+
+    document
+      .querySelectorAll("#phieuNhapDetailBody .pn-detail-row")
+      .forEach((row) => {
+        const selected = row.dataset.mactpn
+          ? (details.find((d) => d.maCTPN === row.dataset.mactpn) || {}).maThuoc
+          : null;
+        if (selected) {
+          const select = row.querySelector(".pn-ma-thuoc");
+          if (select) select.value = selected;
+        }
+      });
+
+    document
+      .getElementById("btnAddEditPhieuNhapRow")
+      .addEventListener("click", () => {
+        const tbody = document.getElementById("phieuNhapDetailBody");
+        tbody.insertAdjacentHTML(
+          "beforeend",
+          buildPhieuNhapDetailRow(thuocOptions),
+        );
+      });
+
+    document
+      .getElementById("btnSavePhieuNhapEdit")
+      .addEventListener("click", async () => {
+        try {
+          const chiTiet = collectPhieuNhapDetails(maPhieuNhap);
+          const response = await fetch(
+            `${API_URL}/phieunhap/${maPhieuNhap}/details`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chiTiet }),
+            },
+          );
+
+          const result = await response.json().catch(() => false);
+          if (!response.ok || result !== true) {
+            const errText = await response.text().catch(() => "");
+            showNotification(
+              errText || "Cap nhat phieu nhap that bai",
+              "error",
+            );
+            return;
+          }
+
+          showNotification("Cap nhat phieu nhap thanh cong", "success");
+          closeModal();
+          await loadPhieuNhapData();
+          await loadThuocData();
+          await loadDashboardData();
+        } catch (error) {
+          showNotification("Co loi khi cap nhat phieu nhap", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    showNotification("Khong the tai du lieu chinh sua phieu nhap", "error");
+  }
+}
+
+async function xacNhanPhieuNhap(maPhieuNhap) {
+  if (!confirm("Xac nhan phieu nhap nay? Sau khi xac nhan se khong sua duoc."))
+    return;
+
+  try {
+    const response = await fetch(
+      `${API_URL}/phieunhap/${maPhieuNhap}/xacnhan`,
+      {
+        method: "PUT",
+      },
+    );
+    const result = await response.json().catch(() => false);
+
+    if (!response.ok || result !== true) {
+      const errText = await response.text().catch(() => "");
+      showNotification(errText || "Xac nhan phieu nhap that bai", "error");
+      return;
+    }
+
+    showNotification("Xac nhan phieu nhap thanh cong", "success");
+    await loadPhieuNhapData();
+    await loadDashboardData();
+  } catch (error) {
+    showNotification("Co loi khi xac nhan phieu nhap", "error");
+  }
+}
+
+async function huyPhieuNhap(maPhieuNhap) {
+  if (!confirm("Huy phieu nhap nay? He thong se hoan lai ton kho da nhap."))
+    return;
+
+  try {
+    const response = await fetch(`${API_URL}/phieunhap/${maPhieuNhap}/huy`, {
+      method: "PUT",
+    });
+    const result = await response.json().catch(() => false);
+
+    if (!response.ok || result !== true) {
+      const errText = await response.text().catch(() => "");
+      showNotification(errText || "Huy phieu nhap that bai", "error");
+      return;
+    }
+
+    showNotification("Da huy phieu nhap", "success");
+    await loadPhieuNhapData();
+    await loadThuocData();
+    await loadDashboardData();
+  } catch (error) {
+    showNotification("Co loi khi huy phieu nhap", "error");
+  }
 }
 function viewHoaDon(id) {
-  showNotification("Chức năng đang phát triển", "info");
+  Promise.all([
+    fetch(`${API_URL}/hoadon`).then((r) => (r.ok ? r.json() : [])),
+    fetch(`${API_URL}/cthoadon/${id}`).then((r) => (r.ok ? r.json() : [])),
+  ])
+    .then(([hoadonList, details]) => {
+      const hd = (hoadonList || []).find((x) => x.maHoaDon === id);
+      if (!hd) {
+        showNotification("Khong tim thay hoa don", "error");
+        return;
+      }
+      const rows = (details || [])
+        .map(
+          (d) =>
+            `<tr><td>${d.maCTHD}</td><td>${d.maThuoc}</td><td>${d.soLuong}</td><td>${d.hdsd || ""}</td></tr>`,
+        )
+        .join("");
+      document.getElementById("modalBody").innerHTML = `
+        <h2>Chi tiet hoa don ${hd.maHoaDon}</h2>
+        <p>Ngay tao: ${formatDate(hd.ngayTao || hd.ngayLap)} | KH: ${hd.maKhachHang || ""} | NV: ${hd.maNhanVien || ""} | Tong tien: ${formatCurrency(hd.tongTien)}</p>
+        <table id="detailTable"><thead><tr><th>Ma CTHD</th><th>Ma thuoc</th><th>So luong</th><th>Huong dan</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Khong co chi tiet</td></tr>'}</tbody></table>
+      `;
+      openModal();
+    })
+    .catch(() => showNotification("Khong tai duoc chi tiet hoa don", "error"));
+}
+
+async function confirmThanhToanNhanVien(maHoaDon) {
+  if (!confirm("Xac nhan thanh toan hoa don nay?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/hoadon/thanhtoan`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maHoaDon }),
+    });
+
+    const result = await response.json().catch(() => false);
+    if (!response.ok || result !== true) {
+      showNotification("Xac nhan thanh toan that bai", "error");
+      return;
+    }
+
+    showNotification("Xac nhan thanh toan thanh cong", "success");
+    loadHoaDonData();
+    loadDashboardData();
+  } catch (error) {
+    showNotification("Co loi xay ra", "error");
+  }
+}
+
+async function confirmHuyHoaDonNhanVien(maHoaDon) {
+  if (!confirm("Ban co chac muon huy hoa don nay?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/hoadon/huy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maHoaDon }),
+    });
+
+    const result = await response.json().catch(() => false);
+    if (!response.ok || result !== true) {
+      showNotification("Huy hoa don that bai", "error");
+      return;
+    }
+
+    showNotification("Da huy hoa don", "success");
+    loadHoaDonData();
+    loadDashboardData();
+  } catch (error) {
+    showNotification("Co loi xay ra", "error");
+  }
+}
+
+// ====================
+// ĐĂNG KÝ LỊCH LÀM
+// ====================
+
+function getLichLamStatusClass(status) {
+  const normalized = String(status || "")
+    .trim()
+    .toUpperCase();
+  if (normalized === "DA_DUYET") return "badge-success";
+  if (normalized === "TU_CHOI") return "badge-danger";
+  return "badge-warning";
+}
+
+async function loadFixedSlotsForNhanVien() {
+  const select = document.getElementById("shiftSlotSelect");
+  if (!select) return;
+  try {
+    const response = await fetch(`${API_URL}/lichlam/fixed-slots`);
+    const slots = await response.json();
+    select.innerHTML = '<option value="">-- Chọn khung giờ --</option>';
+    (slots || []).forEach((slot) => {
+      const value = `${slot.gioBatDau}|${slot.gioKetThuc}`;
+      const text = `${slot.gioBatDau} - ${slot.gioKetThuc}`;
+      select.insertAdjacentHTML(
+        "beforeend",
+        `<option value="${value}">${text}</option>`,
+      );
+    });
+  } catch (error) {
+    showNotification("Không thể tải khung giờ cố định", "error");
+  }
+}
+
+async function loadLichDangKyNhanVienTable() {
+  const tbody = document.getElementById("lichdangkyTableBody");
+  if (!tbody) return;
+
+  try {
+    const maNhanVien = await resolveCurrentNhanVienId();
+    if (!maNhanVien) {
+      tbody.innerHTML =
+        '<tr><td colspan="5" class="text-center">Không tìm thấy nhân viên hiện tại</td></tr>';
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/lichlam/nhanvien/${maNhanVien}`);
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML =
+        '<tr><td colspan="5" class="text-center">Chưa có đăng ký lịch làm nào</td></tr>';
+      return;
+    }
+
+    let html = "";
+    data.forEach((ll) => {
+      const statusClass = getLichLamStatusClass(ll.trangThai);
+      html += `
+        <tr>
+          <td>${ll.maLich}</td>
+          <td>${formatDate(ll.ngayLam)}</td>
+          <td>${ll.gioBatDau || ""}</td>
+          <td>${ll.gioKetThuc || ""}</td>
+          <td><span class="badge ${statusClass}">${ll.trangThai || "CHO_DUYET"}</span></td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  } catch (error) {
+    console.error("Lỗi khi tải lịch đăng ký:", error);
+    showNotification("Không thể tải lịch đăng ký", "error");
+  }
+}
+
+async function loadLichDangKyNhanVienPage() {
+  await loadFixedSlotsForNhanVien();
+  await loadLichDangKyNhanVienTable();
+}
+
+async function registerLichLamNhanVien() {
+  const ngayLam = document.getElementById("shiftNgayLam")?.value;
+  const slotValue = document.getElementById("shiftSlotSelect")?.value;
+
+  if (!ngayLam || !slotValue) {
+    showNotification("Vui lòng chọn ngày làm và khung giờ", "error");
+    return;
+  }
+
+  const [gioBatDau, gioKetThuc] = slotValue.split("|");
+
+  try {
+    const maNhanVien = await resolveCurrentNhanVienId();
+    if (!maNhanVien) {
+      showNotification("Không tìm thấy nhân viên hiện tại", "error");
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/lichlam/dangky`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        maNhanVien,
+        ngayLam,
+        gioBatDau,
+        gioKetThuc,
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Đăng ký lịch làm thất bại", "error");
+      return;
+    }
+
+    showNotification("Đăng ký lịch làm thành công, chờ admin duyệt", "success");
+    await loadLichDangKyNhanVienTable();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
 }

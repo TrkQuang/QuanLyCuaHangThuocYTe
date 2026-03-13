@@ -30,6 +30,7 @@ public class PhieuNhapDAO {
         java.sql.Date ngayNhap = rs.getDate("NgayNhap");
         pn.setNgayNhap(ngayNhap != null ? ngayNhap.toString() : "");
         pn.setTongTien(rs.getFloat("TongTien"));
+        pn.setTrangThai(rs.getString("TrangThai"));
 
         ds.add(pn);
       }
@@ -41,7 +42,7 @@ public class PhieuNhapDAO {
 
   public boolean insertPhieuNhap(PhieuNhapDTO pn) {
     String sql =
-      "INSERT INTO PhieuNhap (MaPN, NgayNhap, TongTien, MaNV, MaNCC) VALUES (?,?,?,?,?)";
+      "INSERT INTO PhieuNhap (MaPN, NgayNhap, TongTien, MaNV, MaNCC, TrangThai) VALUES (?,?,?,?,?,?)";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -51,6 +52,12 @@ public class PhieuNhapDAO {
       ps.setFloat(3, pn.getTongTien());
       ps.setString(4, pn.getMaNhanVien());
       ps.setString(5, pn.getMaNhaCungCap());
+      ps.setString(
+        6,
+        (pn.getTrangThai() == null || pn.getTrangThai().isBlank())
+          ? "CHO_XAC_NHAN"
+          : pn.getTrangThai()
+      );
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
@@ -59,9 +66,39 @@ public class PhieuNhapDAO {
     return false;
   }
 
+  public boolean insertPhieuNhap(Connection conn, PhieuNhapDTO pn)
+    throws SQLException {
+    String sql =
+      "INSERT INTO PhieuNhap (MaPN, NgayNhap, TongTien, MaNV, MaNCC, TrangThai) VALUES (?,?,?,?,?,?)";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, pn.getMaPhieuNhap());
+      ps.setString(2, pn.getNgayNhap());
+      ps.setFloat(3, pn.getTongTien());
+      ps.setString(4, pn.getMaNhanVien());
+      ps.setString(5, pn.getMaNhaCungCap());
+      ps.setString(
+        6,
+        (pn.getTrangThai() == null || pn.getTrangThai().isBlank())
+          ? "CHO_XAC_NHAN"
+          : pn.getTrangThai()
+      );
+      return ps.executeUpdate() > 0;
+    }
+  }
+
+  public boolean updateTongTien(Connection conn, String maPN, float tongTien)
+    throws SQLException {
+    String sql = "UPDATE PhieuNhap SET TongTien=? WHERE MaPN=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setFloat(1, tongTien);
+      ps.setString(2, maPN);
+      return ps.executeUpdate() > 0;
+    }
+  }
+
   public boolean updatePhieuNhap(PhieuNhapDTO pn) {
     String sql =
-      "UPDATE PhieuNhap SET MaNhanVien=?, MaNhaCungCap=?, NgayNhap=?, TongTien=? WHERE MaPhieuNhap=?";
+      "UPDATE PhieuNhap SET MaNV=?, MaNCC=?, NgayNhap=?, TongTien=?, TrangThai=? WHERE MaPN=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -70,7 +107,8 @@ public class PhieuNhapDAO {
       ps.setString(2, pn.getMaNhaCungCap());
       ps.setString(3, pn.getNgayNhap());
       ps.setFloat(4, pn.getTongTien());
-      ps.setString(5, pn.getMaPhieuNhap());
+      ps.setString(5, pn.getTrangThai());
+      ps.setString(6, pn.getMaPhieuNhap());
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
@@ -80,7 +118,7 @@ public class PhieuNhapDAO {
   }
 
   public boolean deletePhieuNhap(String MaPhieuNhap) {
-    String sql = "DELETE FROM PhieuNhap WHERE MaPhieuNhap=?";
+    String sql = "DELETE FROM PhieuNhap WHERE MaPN=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -95,7 +133,7 @@ public class PhieuNhapDAO {
   }
 
   public PhieuNhapDTO getById(String maPhieuNhap) {
-    String sql = "SELECT * FROM PhieuNhap WHERE MaPhieuNhap=?";
+    String sql = "SELECT * FROM PhieuNhap WHERE MaPN=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -105,11 +143,12 @@ public class PhieuNhapDAO {
 
       if (rs.next()) {
         PhieuNhapDTO pn = new PhieuNhapDTO();
-        pn.setMaPhieuNhap(rs.getString("MaPhieuNhap"));
-        pn.setMaNhanVien(rs.getString("MaNhanVien"));
-        pn.setMaNhaCungCap(rs.getString("MaNhaCungCap"));
+        pn.setMaPhieuNhap(rs.getString("MaPN"));
+        pn.setMaNhanVien(rs.getString("MaNV"));
+        pn.setMaNhaCungCap(rs.getString("MaNCC"));
         pn.setNgayNhap(rs.getString("NgayNhap"));
         pn.setTongTien(rs.getFloat("TongTien"));
+        pn.setTrangThai(rs.getString("TrangThai"));
         return pn;
       }
     } catch (SQLException e) {
@@ -120,8 +159,7 @@ public class PhieuNhapDAO {
 
   //hàm để CTPhieuNhap cộng tiền vào phiếu nhập
   public boolean CongTongTien(String maPhieuNhap, float tien) {
-    String sql =
-      "UPDATE PhieuNhap SET TongTien = TongTien + ? WHERE MaPhieuNhap=?";
+    String sql = "UPDATE PhieuNhap SET TongTien = TongTien + ? WHERE MaPN=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -137,7 +175,7 @@ public class PhieuNhapDAO {
 
   //đếm số chi tiết nhập theo mã phiếu nhập
   public int demSoCTTheoMaPhieuNhap(String maPN) {
-    String sql = "SELECT COUNT(*) FROM CTPhieuNhap WHERE MaPhieuNhap=?";
+    String sql = "SELECT COUNT(*) FROM CT_PhieuNhap WHERE MaPN=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -153,7 +191,7 @@ public class PhieuNhapDAO {
 
   //đếm số phiếu nhập theo mã nhà cung cấp
   public int countByNhaCungCap(String maNhaCungCap) {
-    String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNhaCungCap=?";
+    String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNCC=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -168,7 +206,7 @@ public class PhieuNhapDAO {
   }
 
   public int countByNhanVien(String maNV) {
-    String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNhanVien=?";
+    String sql = "SELECT COUNT(*) FROM PhieuNhap WHERE MaNV=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql);
@@ -180,5 +218,35 @@ public class PhieuNhapDAO {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  public boolean updateTrangThai(String maPhieuNhap, String trangThai) {
+    String sql = "UPDATE PhieuNhap SET TrangThai=? WHERE MaPN=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, trangThai);
+      ps.setString(2, maPhieuNhap);
+      return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public boolean updateTongTienAndTrangThai(
+    Connection conn,
+    String maPN,
+    float tongTien,
+    String trangThai
+  ) throws SQLException {
+    String sql = "UPDATE PhieuNhap SET TongTien=?, TrangThai=? WHERE MaPN=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setFloat(1, tongTien);
+      ps.setString(2, trangThai);
+      ps.setString(3, maPN);
+      return ps.executeUpdate() > 0;
+    }
   }
 }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin - Quản Lý Nhà Thuốc</title>
     <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="../css/design-system.css" />
     <!-- Font Awesome cho icons -->
     <link
       rel="stylesheet"
@@ -40,6 +41,9 @@
         </a>
         <a href="#" class="menu-item" data-page="taikhoan">
           <i class="fas fa-user-lock"></i> Quản Lý Tài Khoản
+        </a>
+        <a href="#" class="menu-item" data-page="lichlam">
+          <i class="fas fa-calendar-check"></i> Duyệt Lịch Làm
         </a>
       </nav>
 
@@ -142,7 +146,6 @@
                 <tr>
                   <th>Mã NV</th>
                   <th>Họ Tên</th>
-                  <th>Giới Tính</th>
                   <th>SĐT</th>
                   <th>Email</th>
                   <th>Địa Chỉ</th>
@@ -152,7 +155,7 @@
               </thead>
               <tbody id="nhanvienTableBody">
                 <tr>
-                  <td colspan="8" class="text-center">Đang tải dữ liệu...</td>
+                  <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
                 </tr>
               </tbody>
             </table>
@@ -174,7 +177,6 @@
                 <tr>
                   <th>Mã KH</th>
                   <th>Họ Tên</th>
-                  <th>Giới Tính</th>
                   <th>SĐT</th>
                   <th>Email</th>
                   <th>Địa Chỉ</th>
@@ -183,7 +185,7 @@
               </thead>
               <tbody id="khachhangTableBody">
                 <tr>
-                  <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
+                  <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
                 </tr>
               </tbody>
             </table>
@@ -205,10 +207,10 @@
                 <tr>
                   <th>Mã Thuốc</th>
                   <th>Tên Thuốc</th>
-                  <th>Loại</th>
                   <th>Đơn Vị</th>
                   <th>Giá Bán</th>
                   <th>Số Lượng</th>
+                  <th>Hạn Sử Dụng</th>
                   <th>Thao Tác</th>
                 </tr>
               </thead>
@@ -239,12 +241,13 @@
                   <th>Nhà Cung Cấp</th>
                   <th>Nhân Viên</th>
                   <th>Tổng Tiền</th>
+                  <th>Trạng Thái</th>
                   <th>Thao Tác</th>
                 </tr>
               </thead>
               <tbody id="phieunhapTableBody">
                 <tr>
-                  <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
+                  <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
                 </tr>
               </tbody>
             </table>
@@ -304,6 +307,72 @@
             </table>
           </div>
         </div>
+
+        <!-- Duyệt Lịch Làm Page -->
+        <div id="lichlam-page" class="page">
+          <div class="page-header">
+            <h2>Danh Sách Đăng Ký Lịch Làm</h2>
+          </div>
+
+          <div
+            class="dashboard-card"
+            style="padding: 16px; margin-bottom: 16px"
+          >
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 12px;
+                align-items: end;
+              "
+            >
+              <div class="form-group">
+                <label>Lọc theo ngày</label>
+                <input
+                  type="date"
+                  id="lichlamFilterDate"
+                  onchange="applyLichLamFilters()"
+                />
+              </div>
+              <div class="form-group">
+                <label>Lọc theo khung giờ</label>
+                <select id="lichlamFilterSlot" onchange="applyLichLamFilters()">
+                  <option value="">Tất cả khung giờ</option>
+                </select>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="clearLichLamFilters()"
+                >
+                  <i class="fas fa-eraser"></i> Xóa bộ lọc
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table id="lichlamTable">
+              <thead>
+                <tr>
+                  <th>Mã Lịch</th>
+                  <th>Mã Nhân Viên</th>
+                  <th>Ngày Làm</th>
+                  <th>Giờ Bắt Đầu</th>
+                  <th>Giờ Kết Thúc</th>
+                  <th>Trạng Thái</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="lichlamTableBody">
+                <tr>
+                  <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -315,6 +384,7 @@
       </div>
     </div>
 
+    <script src="../js/ui-layout.js"></script>
     <script src="../js/admin.js"></script>
   </body>
 </html>

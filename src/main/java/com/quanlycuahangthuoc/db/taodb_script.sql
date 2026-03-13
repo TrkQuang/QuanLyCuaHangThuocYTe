@@ -62,6 +62,7 @@ CREATE TABLE NhaCungCap (
 CREATE TABLE Thuoc (
     MaThuoc VARCHAR(20) PRIMARY KEY,
     TenThuoc VARCHAR(100) NOT NULL,
+    HinhAnh VARCHAR(255),
     DonViTinh VARCHAR(50),
     GiaNhap FLOAT,
     GiaBan FLOAT,

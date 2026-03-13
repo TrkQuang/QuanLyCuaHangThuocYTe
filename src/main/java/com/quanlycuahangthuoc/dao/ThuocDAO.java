@@ -5,6 +5,7 @@ import com.quanlycuahangthuoc.dto.ThuocDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -25,11 +26,16 @@ public class ThuocDAO {
       while (rs.next()) {
         ThuocDTO t = new ThuocDTO();
         t.setMaThuoc(rs.getString("MaThuoc"));
-        // Skip MaNhaCungCap - column name unknown in actual DB
         t.setMaNhaCungCap("");
         t.setTenThuoc(rs.getString("TenThuoc"));
+        t.setHinhAnh(
+          hasColumn(rs, "HinhAnh")
+            ? rs.getString("HinhAnh")
+            : "img/UATThuoc.jpg"
+        );
         t.setDonViTinh(rs.getString("DonViTinh"));
-        t.setNSX(""); // NSX not in DB
+        java.sql.Date nsx = rs.getDate("NgaySanXuat");
+        t.setNSX(nsx != null ? nsx.toString() : "");
 
         // HanSuDung is DATE type in DB
         java.sql.Date hsd = rs.getDate("HanSuDung");
@@ -47,24 +53,29 @@ public class ThuocDAO {
   }
 
   public boolean insertThuoc(ThuocDTO t) {
-    // Schema thực tế: MaThuoc, TenThuoc, DonViTinh, GiaBan, SoLuongTon, HanSuDung (không rõ tên cột nhà cung cấp)
     String sql =
-      "INSERT INTO Thuoc (MaThuoc, TenThuoc, DonViTinh, GiaBan, SoLuongTon, HanSuDung) VALUES (?,?,?,?,?,?)";
+      "INSERT INTO Thuoc (MaThuoc, TenThuoc, HinhAnh, DonViTinh, GiaBan, SoLuongTon, HanSuDung, NgaySanXuat) VALUES (?,?,?,?,?,?,?,?)";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
     ) {
       ps.setString(1, t.getMaThuoc());
       ps.setString(2, t.getTenThuoc());
-      ps.setString(3, t.getDonViTinh());
-      ps.setFloat(4, t.getGiaBan());
-      ps.setInt(5, t.getSoLuongTon());
+      ps.setString(3, t.getHinhAnh());
+      ps.setString(4, t.getDonViTinh());
+      ps.setFloat(5, t.getGiaBan());
+      ps.setInt(6, t.getSoLuongTon());
 
-      // Handle HanSuDung
       if (t.getHSD() != null && !t.getHSD().isEmpty()) {
-        ps.setString(6, t.getHSD());
+        ps.setString(7, t.getHSD());
       } else {
-        ps.setNull(6, java.sql.Types.DATE);
+        ps.setNull(7, java.sql.Types.DATE);
+      }
+
+      if (t.getNSX() != null && !t.getNSX().isEmpty()) {
+        ps.setString(8, t.getNSX());
+      } else {
+        ps.setNull(8, java.sql.Types.DATE);
       }
 
       return ps.executeUpdate() > 0;
@@ -76,25 +87,31 @@ public class ThuocDAO {
   }
 
   public boolean updateThuoc(ThuocDTO t) {
-    // Schema fields: TenThuoc, DonViTinh, GiaBan, SoLuongTon, HanSuDung (không có MaNCC)
     String sql =
-      "UPDATE Thuoc SET TenThuoc=?, DonViTinh=?, GiaBan=?, SoLuongTon=?, HanSuDung=? WHERE MaThuoc=?";
+      "UPDATE Thuoc SET TenThuoc=?, HinhAnh=?, DonViTinh=?, GiaBan=?, SoLuongTon=?, HanSuDung=?, NgaySanXuat=? WHERE MaThuoc=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
     ) {
       ps.setString(1, t.getTenThuoc());
-      ps.setString(2, t.getDonViTinh());
-      ps.setFloat(3, t.getGiaBan());
-      ps.setInt(4, t.getSoLuongTon());
+      ps.setString(2, t.getHinhAnh());
+      ps.setString(3, t.getDonViTinh());
+      ps.setFloat(4, t.getGiaBan());
+      ps.setInt(5, t.getSoLuongTon());
 
       if (t.getHSD() != null && !t.getHSD().isEmpty()) {
-        ps.setString(5, t.getHSD());
+        ps.setString(6, t.getHSD());
       } else {
-        ps.setNull(5, java.sql.Types.DATE);
+        ps.setNull(6, java.sql.Types.DATE);
       }
 
-      ps.setString(6, t.getMaThuoc());
+      if (t.getNSX() != null && !t.getNSX().isEmpty()) {
+        ps.setString(7, t.getNSX());
+      } else {
+        ps.setNull(7, java.sql.Types.DATE);
+      }
+
+      ps.setString(8, t.getMaThuoc());
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
@@ -130,10 +147,16 @@ public class ThuocDAO {
       if (rs.next()) {
         ThuocDTO t = new ThuocDTO();
         t.setMaThuoc(rs.getString("MaThuoc"));
-        t.setMaNhaCungCap(""); // Not in DB
+        t.setMaNhaCungCap("");
         t.setTenThuoc(rs.getString("TenThuoc"));
+        t.setHinhAnh(
+          hasColumn(rs, "HinhAnh")
+            ? rs.getString("HinhAnh")
+            : "img/UATThuoc.jpg"
+        );
         t.setDonViTinh(rs.getString("DonViTinh"));
-        t.setNSX(""); // Not in DB
+        java.sql.Date nsx = rs.getDate("NgaySanXuat");
+        t.setNSX(nsx != null ? nsx.toString() : "");
 
         // HanSuDung is DATE type in DB
         java.sql.Date hsd = rs.getDate("HanSuDung");
@@ -162,6 +185,30 @@ public class ThuocDAO {
       e.printStackTrace();
     }
     return false;
+  }
+
+  public boolean CongSoLuongTon(Connection conn, String maThuoc, int soLuong)
+    throws SQLException {
+    String sql = "UPDATE Thuoc SET SoLuongTon = SoLuongTon + ? WHERE MaThuoc=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setInt(1, soLuong);
+      ps.setString(2, maThuoc);
+      return ps.executeUpdate() > 0;
+    }
+  }
+
+  public float getGiaBanByMaThuoc(Connection conn, String maThuoc)
+    throws SQLException {
+    String sql = "SELECT GiaBan FROM Thuoc WHERE MaThuoc=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, maThuoc);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getFloat("GiaBan");
+        }
+      }
+    }
+    throw new SQLException("Không tìm thấy thuốc: " + maThuoc);
   }
 
   // Tạo mã thuốc tự động (TH001, TH002, ...)
@@ -193,5 +240,20 @@ public class ThuocDAO {
       e.printStackTrace();
     }
     return "TH001";
+  }
+
+  private boolean hasColumn(ResultSet rs, String columnName) {
+    try {
+      ResultSetMetaData metaData = rs.getMetaData();
+      int columnCount = metaData.getColumnCount();
+      for (int i = 1; i <= columnCount; i++) {
+        if (columnName.equalsIgnoreCase(metaData.getColumnLabel(i))) {
+          return true;
+        }
+      }
+    } catch (SQLException ignored) {
+      // Keep backward compatibility and fallback to default values.
+    }
+    return false;
   }
 }

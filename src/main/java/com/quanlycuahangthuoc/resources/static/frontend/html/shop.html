@@ -5,28 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cửa hàng</title>
     <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/design-system.css" />
+    <style>
+      .shop-shell {
+        padding: 36px 0 60px;
+        min-height: calc(100vh - 200px);
+      }
+
+      .shop-hero {
+        background: linear-gradient(135deg, #f8fbff 0%, #eef3ff 100%);
+        border: 1px solid #dbe7ff;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+
+      .shop-hero h1 {
+        margin: 0;
+        font-size: 34px;
+        color: #1f2a44;
+      }
+
+      .shop-hero p {
+        margin: 8px 0 0;
+        color: #4b5a79;
+        font-size: 16px;
+      }
+
+      .shop-controls {
+        background: #fff;
+        border: 1px solid #dbe7ff;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 24px;
+      }
+
+      .shop-controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+      }
+
+      .shop-controls label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 6px;
+        display: block;
+        text-transform: uppercase;
+      }
+
+      .shop-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        color: #475569;
+      }
+
+      #dynamicProductsGrid .btn-primary {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 8px;
+      }
+
+      .shop-pagination-wrap {
+        margin-top: 22px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .shop-page-btn {
+        border: 1px solid #c7d2fe;
+        background: #fff;
+        border-radius: 8px;
+        min-width: 40px;
+        height: 38px;
+        font-weight: 700;
+        color: #334155;
+        cursor: pointer;
+      }
+
+      .shop-page-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+      }
+
+      #shopLoadMoreBtn {
+        padding: 10px 18px;
+      }
+    </style>
   </head>
   <body>
     <!--Header-->
     <header class="header">
       <div class="header-top">
         <div class="container">
-          Hotline: 19001514 | Giao hàng miễn phí đơn từ 200k
+          Hotline: 19001514 | Giao hàng miễn phí từ 200k
         </div>
       </div>
-      <div class="main">
+      <div class="header-main">
         <div class="container">
           <div class="content">
             <a href="index.html" class="logo">🏥 Nhà Thuốc</a>
             <div class="search-box">
-              <input
-                type="text"
-                id="searchInput"
-                placeholder="Tìm kiếm thuốc......."
-              />
+              <form id="searchForm" action="search.html" method="get">
+                <input
+                  type="text"
+                  id="searchInput"
+                  name="q"
+                  placeholder="Tìm kiếm thuốc......."
+                  autocomplete="off"
+                />
+                <button type="submit" class="search-btn">🔍 Tìm</button>
+              </form>
             </div>
             <div class="menu">
-              <a href="profile.html">👤 Tài khoản</a>
+              <a href="login.html" id="loginLink">👤 Đăng nhập</a>
               <a href="cart.html"
                 >🛒 Giỏ hàng (<span id="cartCount">0</span>)</a
               >
@@ -49,273 +148,102 @@
       </div>
     </nav>
 
-    <!--Content-->
-    <div class="container" style="padding: 40px 0px; min-height: 100vh">
-      <!-- Page Header -->
-      <div style="text-align: center; margin-bottom: 40px">
-        <h1
-          style="
-            font-size: 36px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 12px;
-          "
-        >
-          💊 Tất cả sản phẩm
-        </h1>
-        <p style="color: #718096; font-size: 16px">
-          Khám phá các sản phẩm y tế chất lượng cao
-        </p>
-      </div>
-
-      <!--Bộ lọc-->
-      <div class="card" style="margin-bottom: 32px">
-        <h3
-          style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-          "
-        >
-          <span>🔍</span>
-          <span>Bộ lọc & Sắp xếp</span>
-        </h3>
-        <div
-          style="
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-          "
-        >
-          <div>
-            <label>Loại thuốc</label>
-            <select id="categoryFilter" class="control">
-              <option value="">Tất cả</option>
-              <option value="thuoc-dau">Thuốc giảm đau</option>
-              <option value="vitamin">Vitamin & Thực phẩm chức năng</option>
-              <option value="khang-sinh">Kháng sinh</option>
-              <option value="thiet-bi">Thiết bị y tế</option>
-              <option value="lam-dep">Chăm sóc sắc đẹp</option>
-            </select>
-          </div>
-          <div>
-            <label>Khoảng giá</label>
-            <select id="priceFilter" class="control">
-              <option value="">Tất cả</option>
-              <option value="0-100000">Dưới 100.000đ</option>
-              <option value="100000-500000">100.000 - 500.000đ</option>
-              <option value="500000-1000000">500.000 - 1.000.000đ</option>
-              <option value="1000000+">Trên 1.000.000đ</option>
-            </select>
-          </div>
-          <div>
-            <label>Sắp xếp theo</label>
-            <select id="sortBy" class="control">
-              <option value="name">Tên A-Z</option>
-              <option value="price-low">Giá thấp đến cao</option>
-              <option value="price-high">Giá cao đến thấp</option>
-              <option value="popular">Bán chạy nhất</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!--Danh sách sản phẩm-->
-      <section style="padding: 60px 0px; background: white">
+    <main class="shop-shell">
       <div class="container">
-        <div style="text-align: center; margin-bottom: 48px">
-          <h2
-            style="
-              font-size: 36px;
-              font-weight: 800;
-              color: #2d3748;
-              margin-bottom: 12px;
-            "
-          >
-            🔥 Thuốc Bán Chạy Nhất
-          </h2>
-          <p style="color: #718096; font-size: 16px">
-            Các sản phẩm được tin dùng nhất
-          </p>
-        </div>
-        <div class="products-grid">
-          <div class="product-item">
-            <img src="OIP (2).jpg" alt="Panadol" />
-            <h3>Panadol Extra</h3>
-            <div class="product-price">20.000đ</div>
-            <p>Hộp 24 viên - Giảm đau, hạ sốt</p>
-            <button
-              class="btn-primary"
-              data-id="T1"
-              onclick="addToCart(event, 'T1')"
-            >
-              Thêm giỏ hàng
-            </button>
-          </div>
-          <div class="product-item">
-            <img
-              src="thuoc-vitamin-c-tw3-500mg-dieu-tri-thieu-hut-vitamin-c-65f15f008f538.jpg"
-              alt="Vitamin C"
-            />
-            <h3>Vitamin C 1000mg</h3>
-            <div class="product-price">70.000đ</div>
-            <p>Hộp 30 viên - Tăng sức đề kháng</p>
-            <button
-              class="btn-primary"
-              data-id="T2"
-              onclick="addToCart(event,'T2')"
-            >
-              Thêm giỏ hàng
-            </button>
-          </div>
-          <div class="product-item">
-            <img src="OIP.jpg" alt="Amoxicillin" />
-            <h3>Amoxicillin</h3>
-            <div class="product-price">25.000đ</div>
-            <p>Hộp 20 viên - Kháng sinh</p>
-            <button
-              class="btn-primary"
-              data-id="T3"
-              onclick="addToCart(event,'T3')"
-            >
-              Thêm giỏ hàng
-            </button>
-          </div>
-          <div class="product-item">
-            <img src="hoat-huyet-thong-mach.png" alt="Hoạt huyết thông mạch"/>
-            <h3>Hoạt huyết thông mạch</h3>
-            <div class="product-price">120.000đ</div>
-            <p>Hộp 30 viên - Lưu thông máu, bổ máu</p>
-            <button class="btn-primary" data-id="T4" onclick="addToCart(event,'T4')">Thêm giỏ hàng</button>
-          </div>
-          <div class="product-item">
-            <img src="mieng-dan-ha-sot-aikido-631ef9b54368a.jpg" alt="Miếng dán hạ sốt"/>
-            <h3>Miếng dán hạ sốt Aikido</h3>
-            <div class="product-price">15.000đ</div>
-            <p>Hộp 10 viên - Hạ sốt, giảm đau</p>
-            <button class="btn-primary" data-id="T5" onclick="addToCart(event,'T5')">Thêm giỏ hàng</button>
-          </div>
-          <div class="product-item">
-            <img src="P00245H_1_l.jpg" alt="Thuốc tẩy giun">
-            <h3>Thuốc tẩy giun</h3>
-            <div class="product-price">30.000đ</div>
-            <p>Hộp 10 viên - Điều trị nhiễm giun</p>
-            <button class="btn-primary" data-id="T6" onclick="addToCart(event,'T6')">Thêm giỏ hàng</button>
-          </div>
-          <div class="product-item">
-            <img src="P19046_1.jpg" alt="Salonpas">
-            <h3>Salonpas</h3>
-            <div class="product-price">25.000đ</div>
-            <p>Hộp 10 viên - Giảm đau, giảm viêm</p>
-            <button class="btn-primary" data-id="T7" onclick="addToCart(event,'T7')">Thêm giỏ hàng</button>
-          </div>
-          <div class="product-item">
-            <img src="atussin-30ml-amonium-chloride-chlorpheniramine.png" alt="Atussin">
-            <h3>Atussin</h3>
-            <div class="product-price">40.000đ</div>
-            <p>Chai 30ml - Giảm ho, long đờm</p>
-            <button class="btn-primary" data-id="T8" onclick="addToCart(event,'T8')">Thêm giỏ hàng</button>
-          </div>
-          
-        </div>
-      </div>
-    </section>
+        <section class="shop-hero">
+          <h1>Danh sách thuốc</h1>
+          <p>Hình ảnh và thông tin thuốc lấy trực tiếp từ dữ liệu hệ thống.</p>
+        </section>
 
-    <!--Sản phẩm khuyến mãi-->
-    <section style="padding: 60px 0; background: #f7fafc">
-      <div class="container">
-        <div style="text-align: center; margin-bottom: 48px">
-          <h2
-            style="
-              font-size: 36px;
-              font-weight: 800;
-              color: #2d3748;
-              margin-bottom: 12px;
-            "
-          >
-            🎁 Sản Phẩm Khuyến Mãi
-          </h2>
-          <p style="color: #718096; font-size: 16px">
-            Giảm giá đặc biệt - Số lượng có hạn
-          </p>
-        </div>
-        <div class="products-grid">
-          <div class="product-item">
-            <span class="sale-badge">-30%</span>
-            <img
-              src="36dea234165d80e3db8d4ec7a12be007.jpg"
-              alt="Kem chống nắng"
-            />
-            <h3>Kem chống nắng La Roche Posay</h3>
-            <div class="product-box">
-              <span class="old-price">570.000đ</span>
-              <span class="new-price">400.000đ</span>
+        <section class="shop-controls" id="shopControls">
+          <div class="shop-controls-grid">
+            <div>
+              <label for="shopKeyword">Từ khóa</label>
+              <input
+                id="shopKeyword"
+                class="control"
+                type="text"
+                placeholder="Nhập tên thuốc..."
+              />
             </div>
-            <p>SPF 60+ PA++++</p>
-            <button class="btn-primary" onclick="addToCart('laroche', 400000)">
-              Thêm giỏ hàng
-            </button>
+            <div>
+              <label for="shopUnitFilter">Đơn vị</label>
+              <select id="shopUnitFilter" class="control">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+            <div>
+              <label for="shopPriceFilter">Khoảng giá</label>
+              <select id="shopPriceFilter" class="control">
+                <option value="">Tất cả</option>
+                <option value="lt5000">Dưới 5.000đ</option>
+                <option value="5000-10000">5.000đ - 10.000đ</option>
+                <option value="10000-20000">10.000đ - 20.000đ</option>
+                <option value="gt20000">Trên 20.000đ</option>
+              </select>
+            </div>
+            <div>
+              <label for="shopStockFilter">Tồn kho</label>
+              <select id="shopStockFilter" class="control">
+                <option value="">Tất cả</option>
+                <option value="in-stock">Còn hàng</option>
+                <option value="low-stock">Sắp hết (&lt;=20)</option>
+                <option value="out-stock">Hết hàng</option>
+              </select>
+            </div>
+            <div>
+              <label for="shopSortBy">Sắp xếp</label>
+              <select id="shopSortBy" class="control">
+                <option value="name-asc">Tên A-Z</option>
+                <option value="name-desc">Tên Z-A</option>
+                <option value="price-asc">Giá tăng dần</option>
+                <option value="price-desc">Giá giảm dần</option>
+                <option value="stock-desc">Tồn kho giảm dần</option>
+              </select>
+            </div>
+            <div>
+              <label for="shopPageSize">Mỗi trang</label>
+              <select id="shopPageSize" class="control">
+                <option value="8">8</option>
+                <option value="12">12</option>
+                <option value="16">16</option>
+              </select>
+            </div>
           </div>
-          <div class="product-item">
-            <span class="sale-badge">-30%</span>
-            <img src="kim-tiem-vinahankook-3mlcc-mac-dinh-2.jpg" alt="Kim tiêm" />
-            <h3>Kim tiêm Vinahankook</h3>
-            <div class="product-box">
-              <span class="old-price">120.000đ</span>
-              <span class="new-price">90.000đ</span>
-            </div>
-            <p>hộp-100 chiếc</p>
+          <div style="display: flex; gap: 10px; margin-top: 12px">
+            <button class="btn-primary" id="shopApplyFilterBtn">Áp dụng</button>
             <button
-              class="btn-primary"
-              onclick="addToCart('Kim tiêm', 90000)"
+              class="btn btn-secondary"
+              id="shopResetFilterBtn"
+              type="button"
             >
-              Thêm giỏ hàng
+              Đặt lại
             </button>
           </div>
-          <div class="product-item">
-            <span class="sale-badge">-25%</span>
-            <img src="71vWmxwQC2L._AC_SL1500_.jpg" alt="Omega-3"/>
-            <h3>Omega-3</h3>
-            <div class="product-box">
-              <span class="old-price">200.000đ</span>
-              <span class="new-price">150.000đ</span>
-            </div>
-            <p>Hộp 60 viên - Tốt cho tim mạch</p>
-            <button class="btn-primary" onclick="addToCart('Omega-3', 150000)">
-              Thêm giỏ hàng
-            </button>
-          </div>
-          <div class="product-item">
-            <span class="sale-badge">-20%</span>
-            <img src="sua-rua-mat-cerave-473ml-phap-2.webp" alt="Sữa rửa mặt Cerave">
-            <h3>Sữa rửa mặt Cerave</h3>
-            <div class="product-box">
-              <span class="old-price">350.000đ</span>
-              <span class="new-price">280.000đ</span>
-            </div>
-            <p>Hộp 473ml - Làm sạch da nhẹ nhàng</p>
-            <button class="btn-primary" onclick="addToCart('Sữa rửa mặt Cerave', 280000)">
-              Thêm giỏ hàng
-            </button>
-          </div>
+        </section>
+
+        <div class="shop-summary">
+          <strong id="shopCountInfo">0 sản phẩm</strong>
+          <span id="shopPageInfo">Trang 1/1</span>
         </div>
-      </div>
-    </section>
 
-      <!--Phân trang-->
-      <div style="text-align: center; margin-top: 40px">
-        <a
-          class="btn-primary"
-          href="index.html"
-          style="padding: 16px 40px; font-size: 16px"
-          >⬅ Quay về trang chủ</a
-        >
-      </div>
-    </div>
+        <section>
+          <div class="products-grid" id="dynamicProductsGrid">
+            <p style="grid-column: 1 / -1; text-align: center; color: #718096">
+              Đang tải danh sách thuốc...
+            </p>
+          </div>
 
-    <!--Footer-->
+          <div class="shop-pagination-wrap">
+            <div id="shopPagination"></div>
+            <button id="shopLoadMoreBtn" class="btn btn-warning" type="button">
+              Xem thêm
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+
     <footer class="footer">
       <div class="container">
         <div class="footer-content">
@@ -327,11 +255,10 @@
       </div>
     </footer>
 
-    <!--JAVASCRIPT-->
     <script src="../js/config.js"></script>
+    <script src="../js/ui-layout.js"></script>
     <script src="../js/header.js"></script>
     <script src="../js/cart.js"></script>
-    <script src="../js/add-cart.js"></script>
     <script src="../js/khachhang.js"></script>
   </body>
 </html>

@@ -28,8 +28,7 @@ public class NhaCungCapDAO {
         ncc.setTenNhaCungCap(rs.getString("TenNCC"));
         ncc.setDiaChi(rs.getString("DiaChi"));
         ncc.setSDT(rs.getString("SDT"));
-        // TrangThai not in DB
-        ncc.setTrangThai("");
+        ncc.setTrangThai(rs.getString("TrangThai"));
         ds.add(ncc);
       }
     } catch (SQLException e) {
@@ -40,7 +39,7 @@ public class NhaCungCapDAO {
 
   public boolean insertNhaCungCap(NhaCungCapDTO ncc) {
     String sql =
-      "INSERT INTO NhaCungCap (MaNCC, TenNCC, SDT, DiaChi) VALUES (?,?,?,?)";
+      "INSERT INTO NhaCungCap (MaNCC, TenNCC, SDT, DiaChi, TrangThai) VALUES (?,?,?,?,?)";
 
     try (
       Connection conn = DBConnection.getConnection();
@@ -50,6 +49,12 @@ public class NhaCungCapDAO {
       ps.setString(2, ncc.getTenNhaCungCap());
       ps.setString(3, ncc.getSDT());
       ps.setString(4, ncc.getDiaChi());
+      ps.setString(
+        5,
+        (ncc.getTrangThai() == null || ncc.getTrangThai().isBlank())
+          ? "HOAT_DONG"
+          : ncc.getTrangThai()
+      );
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
@@ -60,7 +65,7 @@ public class NhaCungCapDAO {
 
   public boolean updateNhaCungCap(NhaCungCapDTO ncc) {
     String sql =
-      "UPDATE NhaCungCap SET TenNhaCungCap=?, DiaChi=?, SDT=?, TrangThai=? WHERE MaNhaCungCap=?";
+      "UPDATE NhaCungCap SET TenNCC=?, DiaChi=?, SDT=?, TrangThai=? WHERE MaNCC=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -79,7 +84,7 @@ public class NhaCungCapDAO {
   }
 
   public boolean deleteNhaCungCap(String MaNhaCungCap) {
-    String sql = "DELETE FROM NhaCungCap WHERE MaNhaCungCap=?";
+    String sql = "DELETE FROM NhaCungCap WHERE MaNCC=?";
 
     try (
       Connection conn = DBConnection.getConnection();
@@ -95,7 +100,7 @@ public class NhaCungCapDAO {
   }
 
   public NhaCungCapDTO getById(String maNCC) {
-    String sql = "SELECT * FROM NhaCungCap WHERE MaNhaCungCap=?";
+    String sql = "SELECT * FROM NhaCungCap WHERE MaNCC=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -105,8 +110,8 @@ public class NhaCungCapDAO {
 
       if (rs.next()) {
         NhaCungCapDTO ncc = new NhaCungCapDTO();
-        ncc.setMaNhaCungCap(rs.getString("MaNhaCungCap"));
-        ncc.setTenNhaCungCap(rs.getString("TenNhaCungCap"));
+        ncc.setMaNhaCungCap(rs.getString("MaNCC"));
+        ncc.setTenNhaCungCap(rs.getString("TenNCC"));
         ncc.setSDT(rs.getString("SDT"));
         ncc.setDiaChi(rs.getString("DiaChi"));
         ncc.setTrangThai(rs.getString("TrangThai"));

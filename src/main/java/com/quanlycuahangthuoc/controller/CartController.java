@@ -1,7 +1,7 @@
 package com.quanlycuahangthuoc.controller;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,11 +9,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/cart")
 @CrossOrigin(origins = "*")
 public class CartController {
-
-  // Lưu giỏ hàng tạm trong session (có thể thay bằng database sau)
-  // Sử dụng ConcurrentHashMap để thread-safe
-  private final Map<String, List<CartItem>> sessionCarts =
-    new ConcurrentHashMap<>();
 
   // Model cho cart item
   public static class CartItem {
@@ -154,18 +149,21 @@ public class CartController {
     }
   }
 
-  // Lấy sessionId từ header (hoặc có thể dùng authentication token)
-  private String getSessionId(String sessionHeader) {
-    return sessionHeader != null ? sessionHeader : "default-session";
+  @SuppressWarnings("unchecked")
+  private List<CartItem> getSessionCart(HttpSession session) {
+    Object raw = session.getAttribute("CART_ITEMS");
+    if (raw instanceof List<?>) {
+      return (List<CartItem>) raw;
+    }
+    List<CartItem> cart = new ArrayList<>();
+    session.setAttribute("CART_ITEMS", cart);
+    return cart;
   }
 
   // Lấy giỏ hàng
   @GetMapping
-  public ResponseEntity<List<CartItem>> getCart(
-    @RequestHeader(value = "Session-Id", required = false) String sessionId
-  ) {
-    String sid = getSessionId(sessionId);
-    List<CartItem> cart = sessionCarts.getOrDefault(sid, new ArrayList<>());
+  public ResponseEntity<List<CartItem>> getCart(HttpSession session) {
+    List<CartItem> cart = getSessionCart(session);
     return ResponseEntity.ok(cart);
   }
 
@@ -173,7 +171,7 @@ public class CartController {
   @PostMapping("/add")
   public ResponseEntity<?> addToCart(
     @RequestBody AddToCartRequest request,
-    @RequestHeader(value = "Session-Id", required = false) String sessionId
+    HttpSession session
   ) {
     // Validate input
     if (request == null) {
@@ -197,50 +195,42 @@ public class CartController {
       );
     }
 
-    String sid = getSessionId(sessionId);
+    List<CartItem> cart = getSessionCart(session);
 
-    // Sử dụng compute để thread-safe
-    sessionCarts.compute(sid, (key, cart) -> {
-      if (cart == null) {
-        cart = new ArrayList<>();
-      }
+    // Tìm sản phẩm đã có trong giỏ chưa
+    Optional<CartItem> existingItem = cart
+      .stream()
+      .filter(item -> item.getId().equals(request.getId()))
+      .findFirst();
 
-      // Tìm sản phẩm đã có trong giỏ chưa
-      Optional<CartItem> existingItem = cart
-        .stream()
-        .filter(item -> item.getId().equals(request.getId()))
-        .findFirst();
-
-      if (existingItem.isPresent()) {
-        // Nếu có rồi thì tăng số lượng
-        int newQuantity =
-          existingItem.get().getQuantity() + request.getQuantity();
-        if (newQuantity > 1000) {
-          throw new IllegalArgumentException("Số lượng vượt quá giới hạn");
-        }
-        existingItem.get().setQuantity(newQuantity);
-      } else {
-        // Nếu chưa có thì thêm mới
-        CartItem newItem = new CartItem(
-          request.getId(),
-          request.getName(),
-          request.getTitle(),
-          request.getPrice(),
-          request.getImage(),
-          request.getQuantity()
+    if (existingItem.isPresent()) {
+      int newQuantity =
+        existingItem.get().getQuantity() + request.getQuantity();
+      if (newQuantity > 1000) {
+        return ResponseEntity.badRequest().body(
+          Map.of("error", "Số lượng vượt quá giới hạn")
         );
-        cart.add(newItem);
       }
-      return cart;
-    });
+      existingItem.get().setQuantity(newQuantity);
+    } else {
+      CartItem newItem = new CartItem(
+        request.getId(),
+        request.getName(),
+        request.getTitle(),
+        request.getPrice(),
+        request.getImage(),
+        request.getQuantity()
+      );
+      cart.add(newItem);
+    }
 
-    List<CartItem> updatedCart = sessionCarts.get(sid);
+    session.setAttribute("CART_ITEMS", cart);
     Map<String, Object> response = new HashMap<>();
     response.put("success", true);
     response.put("message", "Đã thêm vào giỏ hàng");
     response.put(
       "cartCount",
-      updatedCart.stream().mapToInt(CartItem::getQuantity).sum()
+      cart.stream().mapToInt(CartItem::getQuantity).sum()
     );
 
     return ResponseEntity.ok(response);
@@ -250,13 +240,12 @@ public class CartController {
   @PutMapping("/update")
   public ResponseEntity<?> updateQuantity(
     @RequestBody Map<String, Object> request,
-    @RequestHeader(value = "Session-Id", required = false) String sessionId
+    HttpSession session
   ) {
-    String sid = getSessionId(sessionId);
     String productId = (String) request.get("id");
     int quantity = (int) request.get("quantity");
 
-    List<CartItem> cart = sessionCarts.getOrDefault(sid, new ArrayList<>());
+    List<CartItem> cart = getSessionCart(session);
 
     Optional<CartItem> item = cart
       .stream()
@@ -269,7 +258,7 @@ public class CartController {
       } else {
         item.get().setQuantity(quantity);
       }
-      sessionCarts.put(sid, cart);
+      session.setAttribute("CART_ITEMS", cart);
       return ResponseEntity.ok(Map.of("success", true));
     }
 
@@ -282,24 +271,20 @@ public class CartController {
   @DeleteMapping("/{productId}")
   public ResponseEntity<?> removeItem(
     @PathVariable String productId,
-    @RequestHeader(value = "Session-Id", required = false) String sessionId
+    HttpSession session
   ) {
-    String sid = getSessionId(sessionId);
-    List<CartItem> cart = sessionCarts.getOrDefault(sid, new ArrayList<>());
+    List<CartItem> cart = getSessionCart(session);
 
     cart.removeIf(item -> item.getId().equals(productId));
-    sessionCarts.put(sid, cart);
+    session.setAttribute("CART_ITEMS", cart);
 
     return ResponseEntity.ok(Map.of("success", true));
   }
 
   // Xóa toàn bộ giỏ hàng
   @DeleteMapping
-  public ResponseEntity<?> clearCart(
-    @RequestHeader(value = "Session-Id", required = false) String sessionId
-  ) {
-    String sid = getSessionId(sessionId);
-    sessionCarts.put(sid, new ArrayList<>());
+  public ResponseEntity<?> clearCart(HttpSession session) {
+    session.setAttribute("CART_ITEMS", new ArrayList<CartItem>());
 
     return ResponseEntity.ok(
       Map.of("success", true, "message", "Đã xóa giỏ hàng")
@@ -308,11 +293,8 @@ public class CartController {
 
   // Đếm số lượng item trong giỏ
   @GetMapping("/count")
-  public ResponseEntity<?> getCartCount(
-    @RequestHeader(value = "Session-Id", required = false) String sessionId
-  ) {
-    String sid = getSessionId(sessionId);
-    List<CartItem> cart = sessionCarts.getOrDefault(sid, new ArrayList<>());
+  public ResponseEntity<?> getCartCount(HttpSession session) {
+    List<CartItem> cart = getSessionCart(session);
     int count = cart.stream().mapToInt(CartItem::getQuantity).sum();
 
     return ResponseEntity.ok(Map.of("count", count));

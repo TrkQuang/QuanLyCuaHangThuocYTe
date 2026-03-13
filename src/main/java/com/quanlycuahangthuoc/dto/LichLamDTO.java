@@ -7,6 +7,7 @@ public class LichLamDTO {
   private String NgayLam;
   private String GioBatDau;
   private String GioKetThuc;
+  private String TrangThai;
 
   public LichLamDTO() {
     MaLich = "";
@@ -14,6 +15,7 @@ public class LichLamDTO {
     NgayLam = "";
     GioBatDau = "";
     GioKetThuc = "";
+    TrangThai = "CHO_DUYET";
   }
 
   public LichLamDTO(
@@ -21,13 +23,15 @@ public class LichLamDTO {
     String MaNhanVien,
     String NgayLam,
     String GioBatDau,
-    String GioKetThuc
+    String GioKetThuc,
+    String TrangThai
   ) {
     this.MaLich = MaLich;
     this.MaNhanVien = MaNhanVien;
     this.NgayLam = NgayLam;
     this.GioBatDau = GioBatDau;
     this.GioKetThuc = GioKetThuc;
+    this.TrangThai = TrangThai;
   }
 
   public LichLamDTO(LichLamDTO ll) {
@@ -36,6 +40,7 @@ public class LichLamDTO {
     this.NgayLam = ll.NgayLam;
     this.GioBatDau = ll.GioBatDau;
     this.GioKetThuc = ll.GioKetThuc;
+    this.TrangThai = ll.TrangThai;
   }
 
   public String getMaLich() {
@@ -58,6 +63,10 @@ public class LichLamDTO {
     return GioKetThuc;
   }
 
+  public String getTrangThai() {
+    return TrangThai;
+  }
+
   public void setMaLich(String MaLich) {
     this.MaLich = MaLich;
   }
@@ -76,5 +85,9 @@ public class LichLamDTO {
 
   public void setGioKetThuc(String GioKetThuc) {
     this.GioKetThuc = GioKetThuc;
+  }
+
+  public void setTrangThai(String TrangThai) {
+    this.TrangThai = TrangThai;
   }
 }

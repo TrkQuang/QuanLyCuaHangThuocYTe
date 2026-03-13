@@ -47,7 +47,7 @@ public class NhaCungCapBUS {
     if (ncc == null) throw new RuntimeException("Nhà cung cấp không tồn tại");
 
     if (phieuNhapDAO.countByNhaCungCap(maNCC) > 0) {
-      ncc.setTrangThai("NGUNGHOP");
+      ncc.setTrangThai("TAM_NGUNG");
       return nhacungcapDAO.updateNhaCungCap(ncc);
     } else {
       return nhacungcapDAO.deleteNhaCungCap(maNCC);

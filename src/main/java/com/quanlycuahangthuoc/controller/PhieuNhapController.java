@@ -3,6 +3,7 @@ package com.quanlycuahangthuoc.controller;
 import com.quanlycuahangthuoc.bus.PhieuNhapBUS;
 import com.quanlycuahangthuoc.dao.PhieuNhapDAO;
 import com.quanlycuahangthuoc.dto.PhieuNhapDTO;
+import com.quanlycuahangthuoc.dto.requests.CreatePhieuNhapRequest;
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,50 @@ public class PhieuNhapController {
         "Tạo phiếu nhập thành công"
       );
       return ResponseEntity.badRequest().body("Tạo phiếu nhập thất bại");
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  // Tạo phiếu nhập + chi tiết trong cùng transaction
+  @PostMapping("/full")
+  public ResponseEntity<?> themPhieuNhapDayDu(
+    @RequestBody CreatePhieuNhapRequest request
+  ) {
+    try {
+      return ResponseEntity.ok(phieuNhapBUS.taoPhieuNhapVaChiTiet(request));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PutMapping("/{maPhieuNhap}/details")
+  public ResponseEntity<?> capNhatChiTietPhieuNhap(
+    @PathVariable String maPhieuNhap,
+    @RequestBody CreatePhieuNhapRequest request
+  ) {
+    try {
+      return ResponseEntity.ok(
+        phieuNhapBUS.capNhatChiTietPhieuNhap(maPhieuNhap, request.getChiTiet())
+      );
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PutMapping("/{maPhieuNhap}/xacnhan")
+  public ResponseEntity<?> xacNhanPhieuNhap(@PathVariable String maPhieuNhap) {
+    try {
+      return ResponseEntity.ok(phieuNhapBUS.xacNhanPhieuNhap(maPhieuNhap));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PutMapping("/{maPhieuNhap}/huy")
+  public ResponseEntity<?> huyPhieuNhap(@PathVariable String maPhieuNhap) {
+    try {
+      return ResponseEntity.ok(phieuNhapBUS.huyPhieuNhap(maPhieuNhap));
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }

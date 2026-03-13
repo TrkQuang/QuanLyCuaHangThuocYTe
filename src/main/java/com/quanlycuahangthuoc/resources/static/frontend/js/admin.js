@@ -5,6 +5,43 @@
 const API_URL = "http://localhost:8080/api";
 let currentUser = null;
 
+function normalizeRole(role) {
+  return String(role || "")
+    .trim()
+    .toUpperCase();
+}
+
+function normalizeHoaDonStatus(status) {
+  return String(status || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+}
+
+function isPendingHoaDonStatus(status) {
+  const s = normalizeHoaDonStatus(status);
+  return s === "CHO_XAC_NHAN" || s === "CHOXACNHAN";
+}
+
+function normalizePhieuNhapStatus(status) {
+  return String(status || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+}
+
+function isPendingPhieuNhapStatus(status) {
+  const s = normalizePhieuNhapStatus(status);
+  return s === "CHO_XAC_NHAN" || s === "CHOXACNHAN";
+}
+
+function getStatusBadgeClass(status) {
+  const s = normalizeHoaDonStatus(status);
+  if (s === "DA_THANH_TOAN" || s === "DA_XAC_NHAN") return "badge-success";
+  if (s === "HUY" || s === "DA_HUY") return "badge-danger";
+  return "badge-warning";
+}
+
 // Kiểm tra đăng nhập khi load trang
 document.addEventListener("DOMContentLoaded", () => {
   checkAuth();
@@ -24,8 +61,15 @@ function checkAuth() {
 
   currentUser = JSON.parse(userStr);
 
+  if (normalizeRole(currentUser.loaiTaiKhoan) === "BANNED") {
+    alert("Tài khoản đã bị cấm, không thể truy cập trang quản trị");
+    localStorage.removeItem("currentUser");
+    window.location.href = "login.html";
+    return;
+  }
+
   // Kiểm tra quyền Admin
-  if (currentUser.loaiTaiKhoan !== "Admin") {
+  if (normalizeRole(currentUser.loaiTaiKhoan) !== "ADMIN") {
     alert("Bạn không có quyền truy cập trang này!");
     window.location.href = "login.html";
     return;
@@ -107,6 +151,7 @@ function switchPage(pageName) {
     phieunhap: "Phiếu Nhập Hàng",
     hoadon: "Hóa Đơn Bán Hàng",
     taikhoan: "Quản Lý Tài Khoản",
+    lichlam: "Duyệt Lịch Làm",
   };
 
   document.getElementById("pageTitle").textContent =
@@ -143,6 +188,9 @@ async function loadPageData(pageName) {
     case "taikhoan":
       await loadTaiKhoanData();
       break;
+    case "lichlam":
+      await loadLichLamChoDuyetData();
+      break;
   }
 }
 
@@ -155,29 +203,29 @@ async function loadPageData(pageName) {
  */
 async function loadDashboardData() {
   try {
-    // Gọi API song song để lấy dữ liệu
-    const [nhanvienRes, khachhangRes, thuocRes, hoadonRes] = await Promise.all([
-      fetch(`${API_URL}/nhanvien`),
-      fetch(`${API_URL}/khachhang`),
-      fetch(`${API_URL}/thuoc`),
-      fetch(`${API_URL}/hoadon`),
-    ]);
+    const statsRes = await fetch(`${API_URL}/admin/dashboard/stats`, {
+      credentials: "include",
+    });
 
-    const nhanvien = await nhanvienRes.json();
-    const khachhang = await khachhangRes.json();
-    const thuoc = await thuocRes.json();
+    if (statsRes.ok) {
+      const stats = await statsRes.json();
+      document.getElementById("totalNhanVien").textContent =
+        stats.totalEmployees || 0;
+      document.getElementById("totalKhachHang").textContent =
+        stats.totalCustomers || 0;
+      document.getElementById("totalThuoc").textContent =
+        stats.totalMedicines || 0;
+      document.getElementById("totalHoaDon").textContent =
+        stats.totalInvoices || 0;
+      document.getElementById("todayRevenue").textContent = formatCurrency(
+        stats.totalRevenue || 0,
+      );
+      document.getElementById("todayOrderCount").textContent =
+        stats.totalInvoices || 0;
+    }
+
+    const hoadonRes = await fetch(`${API_URL}/hoadon`);
     const hoadon = await hoadonRes.json();
-
-    // Cập nhật số liệu thống kê
-    document.getElementById("totalNhanVien").textContent = nhanvien.length;
-    document.getElementById("totalKhachHang").textContent = khachhang.length;
-    document.getElementById("totalThuoc").textContent = thuoc.length;
-    document.getElementById("totalHoaDon").textContent = hoadon.length;
-
-    // Tính doanh thu hôm nay
-    calculateTodayRevenue(hoadon);
-
-    // Hiển thị hoạt động gần đây
     displayRecentActivity(hoadon);
   } catch (error) {
     console.error("Lỗi khi load dashboard:", error);
@@ -197,7 +245,8 @@ function calculateTodayRevenue(hoadonList) {
 
   hoadonList.forEach((hd) => {
     // Kiểm tra nếu hóa đơn là hôm nay và đã thanh toán
-    const hdDate = hd.ngayLap ? hd.ngayLap.split("T")[0] : "";
+    const sourceDate = hd.ngayTao || hd.ngayLap;
+    const hdDate = sourceDate ? sourceDate.split("T")[0] : "";
     if (hdDate === today && hd.trangThai !== "Hủy") {
       todayRevenue += hd.tongTien || 0;
       todayCount++;
@@ -218,7 +267,10 @@ function displayRecentActivity(hoadonList) {
 
   // Sắp xếp hóa đơn theo ngày giảm dần và lấy 5 cái gần nhất
   const recentOrders = hoadonList
-    .sort((a, b) => new Date(b.ngayLap) - new Date(a.ngayLap))
+    .sort(
+      (a, b) =>
+        new Date(b.ngayTao || b.ngayLap) - new Date(a.ngayTao || a.ngayLap),
+    )
     .slice(0, 5);
 
   if (recentOrders.length === 0) {
@@ -228,7 +280,7 @@ function displayRecentActivity(hoadonList) {
 
   let html = "";
   recentOrders.forEach((hd) => {
-    const time = formatDateTime(hd.ngayLap);
+    const time = formatDateTime(hd.ngayTao || hd.ngayLap);
     html += `
             <div class="activity-item">
                 <strong>Hóa đơn ${hd.maHoaDon}</strong><br>
@@ -268,7 +320,7 @@ function displayNhanVienTable(data) {
 
   if (data.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="8" class="text-center">Chưa có nhân viên nào</td></tr>';
+      '<tr><td colspan="7" class="text-center">Chưa có nhân viên nào</td></tr>';
     return;
   }
 
@@ -281,7 +333,6 @@ function displayNhanVienTable(data) {
             <tr>
                 <td>${nv.maNhanVien || ""}</td>
                 <td>${hoTen || "N/A"}</td>
-                <td>${nv.gioiTinh || "N/A"}</td>
                 <td>${nv.sdt || nv.SDT || ""}</td>
                 <td>${nv.email || ""}</td>
                 <td>${nv.diaChi || ""}</td>
@@ -342,13 +393,6 @@ function showAddNhanVienModal() {
             <div class="form-group">
                 <label>Họ tên *</label>
                 <input type="text" name="hoTen" required placeholder="Nguyễn Văn A">
-            </div>
-            <div class="form-group">
-                <label>Giới tính *</label>
-                <select name="gioiTinh" required>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                </select>
             </div>
             <div class="form-group">
                 <label>Số điện thoại *</label>
@@ -469,14 +513,6 @@ async function viewHoSoNhanVien(maNV) {
             
             <div class="info-row">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                <i class="fas fa-venus-mars" style="color: #667eea; width: 20px;"></i>
-                <strong>Giới tính:</strong>
-              </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.gioiTinh || "Chưa cập nhật"}</div>
-            </div>
-
-            <div class="info-row">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                 <i class="fas fa-phone" style="color: #667eea; width: 20px;"></i>
                 <strong>Số điện thoại:</strong>
               </div>
@@ -553,7 +589,7 @@ function displayKhachHangTable(data) {
 
   if (data.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="7" class="text-center">Chưa có khách hàng nào</td></tr>';
+      '<tr><td colspan="6" class="text-center">Chưa có khách hàng nào</td></tr>';
     return;
   }
 
@@ -564,7 +600,6 @@ function displayKhachHangTable(data) {
             <tr>
                 <td>${kh.maKhachHang}</td>
                 <td>${hoTen}</td>
-                <td>${kh.gioiTinh}</td>
                 <td>${kh.sdt}</td>
                 <td>${kh.email || ""}</td>
                 <td>${kh.diaChi || ""}</td>
@@ -591,32 +626,45 @@ function showAddKhachHangModal() {
   modalBody.innerHTML = `
         <h2>Thêm Khách Hàng Mới</h2>
         <form id="addKhachHangForm">
+      <h3 style="color: #667eea; margin-top: 20px;">📝 Thông Tin Tài Khoản</h3>
+      <div class="form-group">
+        <label>Tên đăng nhập *</label>
+        <input type="text" name="tenDangNhap" required>
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu *</label>
+        <input type="password" name="matKhau" required>
+      </div>
             <div class="form-group">
-                <label>Họ tên *</label>
-                <input type="text" name="hoTen" required>
+        <label>Email *</label>
+        <input type="email" name="email" required>
             </div>
+      <input type="hidden" name="loaiTaiKhoan" value="KHACHHANG">
+
+      <h3 style="color: #667eea; margin-top: 20px;">👤 Thông Tin Khách Hàng</h3>
             <div class="form-group">
-                <label>Giới tính *</label>
-                <select name="gioiTinh" required>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                </select>
+        <label>Họ tên *</label>
+        <input type="text" name="hoTen" required>
             </div>
             <div class="form-group">
                 <label>Số điện thoại *</label>
                 <input type="tel" name="soDienThoai" required>
             </div>
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email">
+        <label>Ngày sinh</label>
+        <input type="date" name="ngaySinh">
             </div>
             <div class="form-group">
                 <label>Địa chỉ</label>
                 <input type="text" name="diaChi">
             </div>
+      <div class="form-group">
+        <label>Tiền sử bệnh lý</label>
+        <input type="text" name="tienSuBenhLy">
+      </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
-                <button type="submit" class="btn btn-primary">Thêm</button>
+        <button type="submit" class="btn btn-primary">Tạo Khách Hàng</button>
             </div>
         </form>
     `;
@@ -640,18 +688,20 @@ function showAddKhachHangModal() {
  */
 async function addKhachHang(data) {
   try {
-    const response = await fetch(`${API_URL}/khachhang`, {
+    const response = await fetch(`${API_URL}/khachhang/create-with-account`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
 
     if (response.ok) {
-      showNotification("Thêm khách hàng thành công", "success");
+      showNotification("Tạo khách hàng và tài khoản thành công", "success");
       closeModal();
       loadKhachHangData();
+      loadTaiKhoanData();
     } else {
-      showNotification("Thêm khách hàng thất bại", "error");
+      const err = await response.json().catch(() => ({}));
+      showNotification(err.error || "Thêm khách hàng thất bại", "error");
     }
   } catch (error) {
     console.error("Lỗi:", error);
@@ -717,14 +767,15 @@ function displayThuocTable(data) {
 
   let html = "";
   data.forEach((thuoc) => {
+    const hsdText = thuoc.hsd ? formatDate(thuoc.hsd) : "";
     html += `
             <tr>
                 <td>${thuoc.maThuoc}</td>
                 <td>${thuoc.tenThuoc}</td>
-                <td>${thuoc.nsx || ""}</td>
                 <td>${thuoc.donViTinh || ""}</td>
                 <td>${formatCurrency(thuoc.giaBan)}</td>
                 <td>${thuoc.soLuongTon}</td>
+          <td>${hsdText}</td>
                 <td>
                     <button class="btn btn-view" onclick="viewThuoc('${thuoc.maThuoc}')">
                         <i class="fas fa-eye"></i>
@@ -873,12 +924,28 @@ function displayPhieuNhapTable(data) {
 
   if (data.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="6" class="text-center">Chưa có phiếu nhập nào</td></tr>';
+      '<tr><td colspan="7" class="text-center">Chưa có phiếu nhập nào</td></tr>';
     return;
   }
 
   let html = "";
   data.forEach((pn) => {
+    const statusClass = getStatusBadgeClass(pn.trangThai);
+    const canEdit = isPendingPhieuNhapStatus(pn.trangThai);
+    const actionButtons = canEdit
+      ? `
+          <button class="btn btn-edit" onclick="editPhieuNhapAdmin('${pn.maPhieuNhap}')" title="Chỉnh sửa chi tiết">
+              <i class="fas fa-pen"></i>
+          </button>
+          <button class="btn btn-success" onclick="xacNhanPhieuNhapAdmin('${pn.maPhieuNhap}')" title="Xác nhận phiếu nhập">
+              <i class="fas fa-check"></i>
+          </button>
+          <button class="btn btn-delete" onclick="huyPhieuNhapAdmin('${pn.maPhieuNhap}')" title="Hủy phiếu nhập">
+              <i class="fas fa-times"></i>
+          </button>
+        `
+      : "";
+
     html += `
             <tr>
                 <td>${pn.maPhieuNhap}</td>
@@ -886,13 +953,12 @@ function displayPhieuNhapTable(data) {
                 <td>${pn.maNhaCungCap || ""}</td>
                 <td>${pn.maNhanVien || ""}</td>
                 <td>${formatCurrency(pn.tongTien)}</td>
+                <td><span class="badge ${statusClass}">${pn.trangThai || "CHO_XAC_NHAN"}</span></td>
                 <td>
                     <button class="btn btn-view" onclick="viewPhieuNhap('${pn.maPhieuNhap}')">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-delete" onclick="deletePhieuNhap('${pn.maPhieuNhap}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;
@@ -901,11 +967,338 @@ function displayPhieuNhapTable(data) {
   tbody.innerHTML = html;
 }
 
+async function resolveCurrentNhanVienIdAdmin() {
+  const res = await fetch(`${API_URL}/nhanvien`);
+  const list = await res.json();
+  const currentNV = list.find((nv) => nv.maTaiKhoan === currentUser.maTaiKhoan);
+  return currentNV ? currentNV.maNhanVien : null;
+}
+
+function buildPhieuNhapDetailRowAdmin(optionsHtml, row = {}) {
+  return `
+    <tr class="pn-detail-row-admin" data-mactpn="${row.maCTPN || ""}">
+      <td><select class="pn-ma-thuoc" required>${optionsHtml}</select></td>
+      <td><input class="pn-so-luong" type="number" min="1" value="${row.soLuongNhap || 1}" required /></td>
+      <td><input class="pn-don-gia" type="number" min="1" value="${row.donGia || 1}" required /></td>
+      <td><button type="button" class="btn btn-delete" onclick="removePhieuNhapRowAdmin(this)"><i class="fas fa-trash"></i></button></td>
+    </tr>
+  `;
+}
+
+function removePhieuNhapRowAdmin(btn) {
+  const tbody = document.getElementById("phieuNhapDetailBodyAdmin");
+  if (!tbody) return;
+  if (tbody.querySelectorAll("tr").length <= 1) {
+    showNotification("Phiếu nhập cần ít nhất 1 dòng thuốc", "error");
+    return;
+  }
+  btn.closest("tr")?.remove();
+}
+
+function collectPhieuNhapDetailsAdmin(maPhieuNhap) {
+  return Array.from(
+    document.querySelectorAll("#phieuNhapDetailBodyAdmin tr"),
+  ).map((row, idx) => ({
+    maCTPN: row.dataset.mactpn || `CTPN${Date.now()}${idx}`,
+    maPhieuNhap,
+    maThuoc: row.querySelector(".pn-ma-thuoc")?.value,
+    soLuongNhap: Number(row.querySelector(".pn-so-luong")?.value || 0),
+    donGia: Number(row.querySelector(".pn-don-gia")?.value || 0),
+  }));
+}
+
 /**
  * Hiển thị modal thêm phiếu nhập
  */
-function showAddPhieuNhapModal() {
-  showNotification("Chức năng đang được phát triển", "info");
+async function showAddPhieuNhapModal() {
+  try {
+    const [nccRes, thuocRes] = await Promise.all([
+      fetch(`${API_URL}/nhacungcap`),
+      fetch(`${API_URL}/thuoc`),
+    ]);
+    const nccList = nccRes.ok ? await nccRes.json() : [];
+    const thuocList = thuocRes.ok ? await thuocRes.json() : [];
+    if (!nccList.length || !thuocList.length) {
+      showNotification("Thiếu dữ liệu nhà cung cấp hoặc thuốc", "error");
+      return;
+    }
+
+    const nccOptions = nccList
+      .filter(
+        (ncc) => normalizePhieuNhapStatus(ncc.trangThai) !== "NGUNG_HOP_TAC",
+      )
+      .map(
+        (ncc) =>
+          `<option value="${ncc.maNhaCungCap}">${ncc.maNhaCungCap} - ${ncc.tenNhaCungCap || ""}</option>`,
+      )
+      .join("");
+    const thuocOptions = thuocList
+      .map(
+        (t) =>
+          `<option value="${t.maThuoc}">${t.maThuoc} - ${t.tenThuoc || ""}</option>`,
+      )
+      .join("");
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <h2>Tạo phiếu nhập</h2>
+      <form id="addPhieuNhapForm">
+        <div class="form-group">
+          <label>Mã phiếu nhập *</label>
+          <input type="text" name="maPhieuNhap" required value="PN${Date.now()}" />
+        </div>
+        <div class="form-group">
+          <label>Nhà cung cấp *</label>
+          <select name="maNhaCungCap" required>${nccOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Chi tiết thuốc nhập</label>
+          <div class="pn-detail-table-wrap">
+            <table id="detailTable">
+              <thead><tr><th>Thuốc</th><th>Số lượng</th><th>Đơn giá nhập</th><th>Thao tác</th></tr></thead>
+              <tbody id="phieuNhapDetailBodyAdmin">${buildPhieuNhapDetailRowAdmin(thuocOptions)}</tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;">
+            <button type="button" class="btn btn-secondary" id="btnAddPhieuNhapRowAdmin"><i class="fas fa-plus"></i> Thêm dòng thuốc</button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu phiếu nhập</button>
+        </div>
+      </form>
+    `;
+
+    document
+      .getElementById("btnAddPhieuNhapRowAdmin")
+      .addEventListener("click", () => {
+        document
+          .getElementById("phieuNhapDetailBodyAdmin")
+          .insertAdjacentHTML(
+            "beforeend",
+            buildPhieuNhapDetailRowAdmin(thuocOptions),
+          );
+      });
+
+    document
+      .getElementById("addPhieuNhapForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const raw = Object.fromEntries(new FormData(e.target));
+        const maNhanVien = await resolveCurrentNhanVienIdAdmin();
+        if (!maNhanVien) {
+          showNotification(
+            "Không tìm thấy nhân viên tương ứng tài khoản hiện tại",
+            "error",
+          );
+          return;
+        }
+
+        const chiTiet = collectPhieuNhapDetailsAdmin(raw.maPhieuNhap);
+        const payload = {
+          phieuNhap: {
+            maPhieuNhap: raw.maPhieuNhap,
+            ngayNhap: new Date().toISOString().split("T")[0],
+            maNhanVien,
+            maNhaCungCap: raw.maNhaCungCap,
+          },
+          chiTiet,
+        };
+
+        try {
+          const res = await fetch(`${API_URL}/phieunhap/full`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          showNotification("Tạo phiếu nhập thành công", "success");
+          closeModal();
+          loadPhieuNhapData();
+        } catch (err) {
+          showNotification(err.message || "Tạo phiếu nhập thất bại", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    showNotification("Không thể mở form tạo phiếu nhập", "error");
+  }
+}
+
+async function editPhieuNhapAdmin(maPhieuNhap) {
+  try {
+    const [pnRes, detailRes, thuocRes] = await Promise.all([
+      fetch(`${API_URL}/phieunhap/${maPhieuNhap}`),
+      fetch(`${API_URL}/ctphieunhap/phieunhap/${maPhieuNhap}`),
+      fetch(`${API_URL}/thuoc`),
+    ]);
+
+    if (!pnRes.ok) {
+      showNotification("Không tìm thấy phiếu nhập", "error");
+      return;
+    }
+
+    const phieuNhap = await pnRes.json();
+    if (!isPendingPhieuNhapStatus(phieuNhap.trangThai)) {
+      showNotification("Phiếu nhập đã hoàn tất, không thể chỉnh sửa", "error");
+      return;
+    }
+
+    const details = detailRes.ok ? await detailRes.json() : [];
+    const thuocList = thuocRes.ok ? await thuocRes.json() : [];
+    if (!thuocList.length) {
+      showNotification("Không có thuốc để chỉnh sửa", "error");
+      return;
+    }
+
+    const thuocOptions = thuocList
+      .map(
+        (t) =>
+          `<option value="${t.maThuoc}">${t.maThuoc} - ${t.tenThuoc || ""}</option>`,
+      )
+      .join("");
+
+    const rowsHtml = (details || [])
+      .map((d) => buildPhieuNhapDetailRowAdmin(thuocOptions, d))
+      .join("");
+
+    const modalBody = document.getElementById("modalBody");
+    modalBody.innerHTML = `
+      <h2>Chỉnh sửa phiếu nhập ${phieuNhap.maPhieuNhap}</h2>
+      <p>NCC: ${phieuNhap.maNhaCungCap || ""} | NV: ${phieuNhap.maNhanVien || ""} | Trạng thái: ${formatPhieuNhapStatus(phieuNhap.trangThai)}</p>
+      <div class="pn-detail-table-wrap">
+        <table id="detailTable">
+          <thead>
+            <tr><th>Thuốc</th><th>Số lượng</th><th>Đơn giá nhập</th><th>Thao tác</th></tr>
+          </thead>
+          <tbody id="phieuNhapDetailBodyAdmin">${rowsHtml || buildPhieuNhapDetailRowAdmin(thuocOptions)}</tbody>
+        </table>
+      </div>
+      <div style="margin-top: 10px;">
+        <button type="button" class="btn btn-secondary" id="btnAddEditPhieuNhapRowAdmin">
+          <i class="fas fa-plus"></i> Thêm dòng thuốc
+        </button>
+      </div>
+      <div class="form-actions" style="margin-top: 14px;">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Đóng</button>
+        <button type="button" class="btn btn-primary" id="btnSavePhieuNhapEditAdmin">Lưu thay đổi</button>
+      </div>
+    `;
+
+    document
+      .querySelectorAll("#phieuNhapDetailBodyAdmin .pn-detail-row-admin")
+      .forEach((row) => {
+        const selected = row.dataset.mactpn
+          ? (details.find((d) => d.maCTPN === row.dataset.mactpn) || {}).maThuoc
+          : null;
+        if (selected) {
+          const select = row.querySelector(".pn-ma-thuoc");
+          if (select) select.value = selected;
+        }
+      });
+
+    document
+      .getElementById("btnAddEditPhieuNhapRowAdmin")
+      .addEventListener("click", () => {
+        document
+          .getElementById("phieuNhapDetailBodyAdmin")
+          .insertAdjacentHTML(
+            "beforeend",
+            buildPhieuNhapDetailRowAdmin(thuocOptions),
+          );
+      });
+
+    document
+      .getElementById("btnSavePhieuNhapEditAdmin")
+      .addEventListener("click", async () => {
+        try {
+          const chiTiet = collectPhieuNhapDetailsAdmin(maPhieuNhap);
+          const response = await fetch(
+            `${API_URL}/phieunhap/${maPhieuNhap}/details`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chiTiet }),
+            },
+          );
+
+          const result = await response.json().catch(() => false);
+          if (!response.ok || result !== true) {
+            const errText = await response.text().catch(() => "");
+            showNotification(
+              errText || "Cập nhật phiếu nhập thất bại",
+              "error",
+            );
+            return;
+          }
+
+          showNotification("Cập nhật phiếu nhập thành công", "success");
+          closeModal();
+          await loadPhieuNhapData();
+          await loadThuocData();
+          await loadDashboardData();
+        } catch (error) {
+          showNotification("Có lỗi khi cập nhật phiếu nhập", "error");
+        }
+      });
+
+    openModal();
+  } catch (error) {
+    showNotification("Không thể tải dữ liệu chỉnh sửa phiếu nhập", "error");
+  }
+}
+
+async function xacNhanPhieuNhapAdmin(maPhieuNhap) {
+  if (!confirm("Xác nhận phiếu nhập này? Sau khi xác nhận sẽ không sửa được."))
+    return;
+
+  try {
+    const response = await fetch(
+      `${API_URL}/phieunhap/${maPhieuNhap}/xacnhan`,
+      {
+        method: "PUT",
+      },
+    );
+    const result = await response.json().catch(() => false);
+
+    if (!response.ok || result !== true) {
+      const errText = await response.text().catch(() => "");
+      showNotification(errText || "Xác nhận phiếu nhập thất bại", "error");
+      return;
+    }
+
+    showNotification("Xác nhận phiếu nhập thành công", "success");
+    await loadPhieuNhapData();
+    await loadDashboardData();
+  } catch (error) {
+    showNotification("Có lỗi khi xác nhận phiếu nhập", "error");
+  }
+}
+
+async function huyPhieuNhapAdmin(maPhieuNhap) {
+  if (!confirm("Hủy phiếu nhập này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/phieunhap/${maPhieuNhap}/huy`, {
+      method: "PUT",
+    });
+    const result = await response.json().catch(() => false);
+
+    if (!response.ok || result !== true) {
+      const errText = await response.text().catch(() => "");
+      showNotification(errText || "Hủy phiếu nhập thất bại", "error");
+      return;
+    }
+
+    showNotification("Đã hủy phiếu nhập", "success");
+    await loadPhieuNhapData();
+    await loadThuocData();
+    await loadDashboardData();
+  } catch (error) {
+    showNotification("Có lỗi khi hủy phiếu nhập", "error");
+  }
 }
 
 /**
@@ -966,15 +1359,14 @@ function displayHoaDonTable(data) {
 
   let html = "";
   data.forEach((hd) => {
-    const statusClass =
-      hd.trangThai === "Hủy" ? "badge-danger" : "badge-success";
+    const statusClass = getStatusBadgeClass(hd.trangThai);
 
     // Tạo nút hành động dựa trên trạng thái
     let actionButtons = `<button class="btn btn-view" onclick="viewHoaDon('${hd.maHoaDon}')" title="Xem chi tiết">
                             <i class="fas fa-eye"></i>
                         </button>`;
 
-    if (hd.trangThai === "Chưa xác định" || !hd.trangThai) {
+    if (isPendingHoaDonStatus(hd.trangThai)) {
       actionButtons += `
         <button class="btn btn-success" onclick="confirmThanhToan('${hd.maHoaDon}')" title="Thanh toán">
             <i class="fas fa-check-circle"></i>
@@ -987,11 +1379,11 @@ function displayHoaDonTable(data) {
     html += `
             <tr>
                 <td>${hd.maHoaDon}</td>
-                <td>${formatDate(hd.ngayLap)}</td>
+                <td>${formatDate(hd.ngayTao || hd.ngayLap)}</td>
                 <td>${hd.maKhachHang || ""}</td>
                 <td>${hd.maNhanVien || ""}</td>
                 <td>${formatCurrency(hd.tongTien)}</td>
-                <td><span class="badge ${statusClass}">${hd.trangThai || "Chưa xác định"}</span></td>
+                <td><span class="badge ${statusClass}">${hd.trangThai || "CHO_XAC_NHAN"}</span></td>
                 <td>
                     ${actionButtons}
                 </td>
@@ -1036,13 +1428,32 @@ function displayTaiKhoanTable(data) {
 
   let html = "";
   data.forEach((tk) => {
+    const role = normalizeRole(tk.loaiTaiKhoan);
+    const badgeClass =
+      role === "ADMIN" ? "danger" : role === "BANNED" ? "danger" : "success";
+
+    const loaiTaiKhoanText = role === "BANNED" ? "BANNED (Đã bị cấm)" : role;
+
+    const toggleBanButton =
+      role === "BANNED"
+        ? `<button class="btn btn-success" onclick="showGoCamTaiKhoanModal('${tk.maTaiKhoan}')" title="Gỡ cấm tài khoản">
+             <i class="fas fa-user-check"></i>
+           </button>`
+        : `<button class="btn btn-danger" onclick="banTaiKhoan('${tk.maTaiKhoan}')" title="Vô hiệu hóa tài khoản">
+             <i class="fas fa-user-slash"></i>
+           </button>`;
+
     html += `
             <tr>
                 <td>${tk.maTaiKhoan}</td>
                 <td>${tk.tenDangNhap}</td>
                 <td>${tk.email || ""}</td>
-                <td><span class="badge badge-${tk.loaiTaiKhoan === "Admin" ? "danger" : "success"}">${tk.loaiTaiKhoan}</span></td>
+          <td><span class="badge badge-${badgeClass}">${loaiTaiKhoanText}</span></td>
                 <td>
+            <button class="btn btn-secondary" onclick="resetMatKhauTaiKhoan('${tk.maTaiKhoan}')" title="Reset mật khẩu về 123456">
+              <i class="fas fa-key"></i>
+            </button>
+            ${toggleBanButton}
                     <button class="btn btn-delete" onclick="deleteTaiKhoan('${tk.maTaiKhoan}')">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -1052,6 +1463,316 @@ function displayTaiKhoanTable(data) {
   });
 
   tbody.innerHTML = html;
+}
+
+async function resetMatKhauTaiKhoan(maTK) {
+  if (!confirm("Reset mật khẩu tài khoản này về mặc định 123456?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/taikhoan/${maTK}/reset-password`, {
+      method: "PUT",
+    });
+
+    const result = await response.json().catch(() => false);
+    if (!response.ok || result !== true) {
+      const err = await response.text();
+      showNotification(err || "Reset mật khẩu thất bại", "error");
+      return;
+    }
+
+    showNotification("Đã reset mật khẩu về 123456", "success");
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+async function banTaiKhoan(maTK) {
+  if (!confirm("Bạn có chắc muốn vô hiệu hóa tài khoản này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/taikhoan/${maTK}/ban`, {
+      method: "PUT",
+    });
+
+    const result = await response.json().catch(() => false);
+    if (!response.ok || result !== true) {
+      const err = await response.text();
+      showNotification(err || "Vô hiệu hóa tài khoản thất bại", "error");
+      return;
+    }
+
+    showNotification("Đã vô hiệu hóa tài khoản", "success");
+    loadTaiKhoanData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+function showGoCamTaiKhoanModal(maTK) {
+  const modalBody = document.getElementById("modalBody");
+  if (!modalBody) {
+    goCamTaiKhoan(maTK, "NHANVIEN");
+    return;
+  }
+
+  modalBody.innerHTML = `
+    <h2>Gỡ Cấm Tài Khoản</h2>
+    <form id="goCamTaiKhoanForm">
+      <div class="form-group">
+        <label>Mã tài khoản</label>
+        <input type="text" value="${maTK}" disabled>
+      </div>
+      <div class="form-group">
+        <label>Vai trò sau khi gỡ cấm *</label>
+        <select name="loaiTaiKhoan" required>
+          <option value="NHANVIEN" selected>NHANVIEN</option>
+          <option value="KHACHHANG">KHACHHANG</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+        <button type="submit" class="btn btn-success">Gỡ cấm</button>
+      </div>
+    </form>
+  `;
+
+  document
+    .getElementById("goCamTaiKhoanForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const roleSauMoKhoa = String(formData.get("loaiTaiKhoan") || "");
+      await goCamTaiKhoan(maTK, roleSauMoKhoa);
+    });
+
+  openModal();
+}
+
+async function goCamTaiKhoan(maTK, roleSauMoKhoa) {
+  if (!roleSauMoKhoa) {
+    showNotification("Thiếu vai trò sau khi gỡ cấm", "error");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/taikhoan/${maTK}/unban`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ loaiTaiKhoan: roleSauMoKhoa }),
+    });
+
+    const result = await response.json().catch(() => false);
+    if (!response.ok || result !== true) {
+      const err = await response.text();
+      showNotification(err || "Gỡ cấm tài khoản thất bại", "error");
+      return;
+    }
+
+    showNotification("Đã gỡ cấm tài khoản", "success");
+    closeModal();
+    loadTaiKhoanData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+// ====================
+// DUYỆT LỊCH LÀM
+// ====================
+
+let allLichLamData = [];
+
+function getLichLamStatusBadgeClass(status) {
+  const s = String(status || "")
+    .trim()
+    .toUpperCase();
+  if (s === "DA_DUYET") return "badge-success";
+  if (s === "TU_CHOI") return "badge-danger";
+  return "badge-warning";
+}
+
+function normalizeSlotValue(gioBatDau, gioKetThuc) {
+  return `${String(gioBatDau || "").trim()}|${String(gioKetThuc || "").trim()}`;
+}
+
+async function initLichLamFilters() {
+  const slotSelect = document.getElementById("lichlamFilterSlot");
+  if (!slotSelect) return;
+  if (slotSelect.dataset.loaded === "1") return;
+
+  try {
+    const response = await fetch(`${API_URL}/lichlam/fixed-slots`);
+    const slots = response.ok ? await response.json() : [];
+    slotSelect.innerHTML = '<option value="">Tất cả khung giờ</option>';
+    (slots || []).forEach((slot) => {
+      const value = normalizeSlotValue(slot.gioBatDau, slot.gioKetThuc);
+      slotSelect.insertAdjacentHTML(
+        "beforeend",
+        `<option value="${value}">${slot.gioBatDau} - ${slot.gioKetThuc}</option>`,
+      );
+    });
+    slotSelect.dataset.loaded = "1";
+  } catch (error) {
+    // Ignore filter option loading errors to avoid blocking main table.
+  }
+}
+
+function refreshLichLamSlotOptionsFromData(data) {
+  const slotSelect = document.getElementById("lichlamFilterSlot");
+  if (!slotSelect) return;
+
+  const currentValue = slotSelect.value || "";
+  const slotMap = new Map();
+
+  Array.from(slotSelect.options || []).forEach((opt) => {
+    const value = String(opt.value || "").trim();
+    if (!value) return;
+    slotMap.set(value, opt.textContent || value.replace("|", " - "));
+  });
+
+  (data || []).forEach((ll) => {
+    const value = normalizeSlotValue(ll.gioBatDau, ll.gioKetThuc);
+    if (!value || value === "|") return;
+    if (!slotMap.has(value)) {
+      slotMap.set(value, `${ll.gioBatDau || ""} - ${ll.gioKetThuc || ""}`);
+    }
+  });
+
+  slotSelect.innerHTML = '<option value="">Tất cả khung giờ</option>';
+  Array.from(slotMap.entries()).forEach(([value, label]) => {
+    slotSelect.insertAdjacentHTML(
+      "beforeend",
+      `<option value="${value}">${label}</option>`,
+    );
+  });
+
+  if (currentValue && slotMap.has(currentValue)) {
+    slotSelect.value = currentValue;
+  }
+}
+
+function applyLichLamFilters() {
+  const dateValue = document.getElementById("lichlamFilterDate")?.value || "";
+  const slotValue = document.getElementById("lichlamFilterSlot")?.value || "";
+
+  const filtered = (allLichLamData || []).filter((ll) => {
+    const byDate = !dateValue || String(ll.ngayLam || "").startsWith(dateValue);
+    const bySlot =
+      !slotValue ||
+      normalizeSlotValue(ll.gioBatDau, ll.gioKetThuc) === slotValue;
+    return byDate && bySlot;
+  });
+
+  displayLichLamChoDuyetTable(filtered || []);
+}
+
+function clearLichLamFilters() {
+  const dateInput = document.getElementById("lichlamFilterDate");
+  const slotSelect = document.getElementById("lichlamFilterSlot");
+  if (dateInput) dateInput.value = "";
+  if (slotSelect) slotSelect.value = "";
+  applyLichLamFilters();
+}
+
+async function loadLichLamChoDuyetData() {
+  try {
+    await initLichLamFilters();
+    const response = await fetch(`${API_URL}/lichlam`);
+    const data = response.ok ? await response.json() : [];
+    allLichLamData = Array.isArray(data) ? data : [];
+    refreshLichLamSlotOptionsFromData(allLichLamData);
+    applyLichLamFilters();
+  } catch (error) {
+    console.error("Lỗi khi load lịch làm chờ duyệt:", error);
+    showNotification("Không thể tải danh sách lịch làm", "error");
+  }
+}
+
+function displayLichLamChoDuyetTable(data) {
+  const tbody = document.getElementById("lichlamTableBody");
+  if (!tbody) return;
+
+  if (data.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="7" class="text-center">Không có đăng ký nào cần duyệt</td></tr>';
+    return;
+  }
+
+  let html = "";
+  data.forEach((ll) => {
+    const status = String(ll.trangThai || "CHO_DUYET").toUpperCase();
+    const canHandle = status === "CHO_DUYET";
+
+    const actionButtons = canHandle
+      ? `
+          <button class="btn btn-success" onclick="duyetDangKyLichLam('${ll.maLich}')" title="Duyệt đăng ký">
+            <i class="fas fa-check"></i>
+          </button>
+          <button class="btn btn-delete" onclick="tuChoiDangKyLichLam('${ll.maLich}')" title="Từ chối đăng ký">
+            <i class="fas fa-times"></i>
+          </button>
+        `
+      : '<span style="color:#64748b;font-size:12px;">Đã xử lý</span>';
+
+    html += `
+      <tr>
+        <td>${ll.maLich}</td>
+        <td>${ll.maNhanVien}</td>
+        <td>${formatDate(ll.ngayLam)}</td>
+        <td>${ll.gioBatDau || ""}</td>
+        <td>${ll.gioKetThuc || ""}</td>
+        <td><span class="badge ${getLichLamStatusBadgeClass(status)}">${status}</span></td>
+        <td>
+          ${actionButtons}
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+async function duyetDangKyLichLam(maLich) {
+  if (!confirm("Duyệt đăng ký lịch làm này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/lichlam/${maLich}/duyet`, {
+      method: "PUT",
+    });
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Duyệt đăng ký thất bại", "error");
+      return;
+    }
+    showNotification("Đã duyệt đăng ký lịch làm", "success");
+    loadLichLamChoDuyetData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+async function tuChoiDangKyLichLam(maLich) {
+  if (!confirm("Từ chối đăng ký lịch làm này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/lichlam/${maLich}/tuchoi`, {
+      method: "PUT",
+    });
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Từ chối đăng ký thất bại", "error");
+      return;
+    }
+    showNotification("Đã từ chối đăng ký lịch làm", "success");
+    loadLichLamChoDuyetData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
 }
 
 /**
@@ -1185,6 +1906,10 @@ function showNotification(message, type = "info") {
  */
 function logout() {
   if (confirm("Bạn có chắc muốn đăng xuất?")) {
+    fetch(`${API_URL}/taikhoan/session/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
     localStorage.removeItem("currentUser");
     window.location.href = "login.html";
   }
@@ -1225,13 +1950,6 @@ async function editNhanVien(maNV) {
           <input type="text" name="hoTen" value="${hoTen}" required>
         </div>
         <div class="form-group">
-          <label>Giới tính *</label>
-          <select name="gioiTinh" required>
-            <option value="Nam" ${nhanvien.gioiTinh === "Nam" ? "selected" : ""}>Nam</option>
-            <option value="Nữ" ${nhanvien.gioiTinh === "Nữ" ? "selected" : ""}>Nữ</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>Số điện thoại *</label>
           <input type="tel" name="soDienThoai" value="${nhanvien.sdt || nhanvien.SDT || ""}" required>
         </div>
@@ -1266,7 +1984,6 @@ async function editNhanVien(maNV) {
           maNhanVien: nhanvien.maNhanVien,
           ho: ho,
           ten: ten,
-          gioiTinh: data.gioiTinh,
           sdt: data.soDienThoai,
           email: data.email,
           diaChi: data.diaChi,
@@ -1331,13 +2048,6 @@ async function editKhachHang(maKH) {
           <input type="text" name="hoTen" value="${hoTen}" required>
         </div>
         <div class="form-group">
-          <label>Giới tính *</label>
-          <select name="gioiTinh" required>
-            <option value="Nam" ${khachhang.gioiTinh === "Nam" ? "selected" : ""}>Nam</option>
-            <option value="Nữ" ${khachhang.gioiTinh === "Nữ" ? "selected" : ""}>Nữ</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>Số điện thoại *</label>
           <input type="tel" name="soDienThoai" value="${khachhang.sdt || ""}" required>
         </div>
@@ -1372,7 +2082,6 @@ async function editKhachHang(maKH) {
           maKhachHang: khachhang.maKhachHang,
           ho: ho,
           ten: ten,
-          gioiTinh: data.gioiTinh,
           sdt: data.soDienThoai,
           email: data.email,
           diaChi: data.diaChi,
@@ -1433,9 +2142,6 @@ async function viewThuoc(maThuoc) {
         </h2>
         
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; text-align: center; margin-bottom: 30px;">
-          <div style="width: 100px; height: 100px; border-radius: 50%; background: white; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-pills" style="font-size: 50px; color: #667eea;"></i>
-          </div>
           <h3 style="margin: 0; font-size: 24px;">${thuoc.tenThuoc}</h3>
           <p style="margin: 5px 0 0; opacity: 0.9;">${thuoc.maThuoc}</p>
         </div>
@@ -1473,14 +2179,6 @@ async function viewThuoc(maThuoc) {
                 <strong>Hạn sử dụng:</strong>
               </div>
               <div style="padding-left: 30px; color: #555;">${thuoc.hsd ? formatDate(thuoc.hsd) : "Chưa cập nhật"}</div>
-            </div>
-
-            <div class="info-row">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                <i class="fas fa-industry" style="color: #667eea; width: 20px;"></i>
-                <strong>Nhà sản xuất:</strong>
-              </div>
-              <div style="padding-left: 30px; color: #555;">${thuoc.nsx || "Chưa cập nhật"}</div>
             </div>
 
           </div>
@@ -1541,10 +2239,6 @@ async function editThuoc(maThuoc) {
           <label>Hạn sử dụng</label>
           <input type="date" name="hsd" value="${thuoc.hsd ? thuoc.hsd.split("T")[0] : ""}">
         </div>
-        <div class="form-group">
-          <label>Nhà sản xuất</label>
-          <input type="text" name="nsx" value="${thuoc.nsx || ""}">
-        </div>
         <div class="form-actions">
           <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
           <button type="submit" class="btn btn-primary">Cập Nhật</button>
@@ -1570,7 +2264,6 @@ async function editThuoc(maThuoc) {
           giaBan: data.giaBan,
           soLuongTon: data.soLuongTon,
           hsd: data.hsd,
-          nsx: data.nsx,
           maNhaCungCap: thuoc.maNhaCungCap || "",
         };
 
@@ -1607,23 +2300,45 @@ async function editThuoc(maThuoc) {
  */
 async function viewPhieuNhap(maPhieuNhap) {
   try {
-    const response = await fetch(`${API_URL}/phieunhap/${maPhieuNhap}`);
+    const [phieuNhapRes, detailsRes] = await Promise.all([
+      fetch(`${API_URL}/phieunhap/${maPhieuNhap}`),
+      fetch(`${API_URL}/ctphieunhap/phieunhap/${maPhieuNhap}`),
+    ]);
 
-    if (!response.ok) {
+    if (!phieuNhapRes.ok) {
       showNotification("Không thể tải thông tin phiếu nhập", "error");
       return;
     }
 
-    const phieuNhap = await response.json();
+    const phieuNhap = await phieuNhapRes.json();
+    const details = detailsRes.ok ? await detailsRes.json() : [];
 
     if (!phieuNhap) {
       showNotification("Không tìm thấy thông tin phiếu nhập", "error");
       return;
     }
 
+    const canEdit = isPendingPhieuNhapStatus(phieuNhap.trangThai);
+    const detailRows = (details || [])
+      .map(
+        (d) =>
+          `<tr><td>${d.maCTPN}</td><td>${d.maThuoc}</td><td>${d.soLuongNhap}</td><td>${formatCurrency(d.donGia)}</td></tr>`,
+      )
+      .join("");
+
+    const actionButtons = canEdit
+      ? `
+        <div class="form-actions" style="margin-top: 14px;">
+          <button type="button" class="btn btn-secondary" onclick="editPhieuNhapAdmin('${phieuNhap.maPhieuNhap}')">Chỉnh sửa chi tiết</button>
+          <button type="button" class="btn btn-success" onclick="xacNhanPhieuNhapAdmin('${phieuNhap.maPhieuNhap}')">Xác nhận</button>
+          <button type="button" class="btn btn-danger" onclick="huyPhieuNhapAdmin('${phieuNhap.maPhieuNhap}')">Hủy phiếu</button>
+        </div>
+      `
+      : "";
+
     const modalBody = document.getElementById("modalBody");
     modalBody.innerHTML = `
-      <div style="max-width: 700px; margin: 0 auto;">
+      <div style="max-width: 760px; margin: 0 auto;">
         <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">
           <i class="fas fa-file-import"></i> Chi Tiết Phiếu Nhập
         </h2>
@@ -1633,7 +2348,7 @@ async function viewPhieuNhap(maPhieuNhap) {
           <p style="margin: 10px 0 0; text-align: center; opacity: 0.9;">Ngày nhập: ${formatDate(phieuNhap.ngayNhap)}</p>
         </div>
 
-        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 16px;">
           <div style="display: grid; gap: 15px;">
             
             <div class="info-row">
@@ -1654,6 +2369,14 @@ async function viewPhieuNhap(maPhieuNhap) {
 
             <div class="info-row" style="border-top: 2px solid #dee2e6; padding-top: 15px; margin-top: 10px;">
               <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-flag" style="color: #667eea; width: 20px;"></i>
+                <strong>Trạng thái:</strong>
+                <span style="margin-left: auto; color: #555;">${formatPhieuNhapStatus(phieuNhap.trangThai)}</span>
+              </div>
+            </div>
+
+            <div class="info-row" style="border-top: 1px dashed #cfd4dc; padding-top: 15px; margin-top: 5px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-money-bill-wave" style="color: #28a745; width: 20px;"></i>
                 <strong style="font-size: 18px;">Tổng tiền:</strong>
                 <span style="margin-left: auto; color: #28a745; font-size: 20px; font-weight: bold;">${formatCurrency(phieuNhap.tongTien)}</span>
@@ -1662,6 +2385,17 @@ async function viewPhieuNhap(maPhieuNhap) {
 
           </div>
         </div>
+
+        <div class="pn-detail-table-wrap">
+          <table id="detailTable">
+            <thead>
+              <tr><th>Mã CTPN</th><th>Mã thuốc</th><th>Số lượng</th><th>Đơn giá</th></tr>
+            </thead>
+            <tbody>${detailRows || '<tr><td colspan="4" class="text-center">Không có chi tiết phiếu nhập</td></tr>'}</tbody>
+          </table>
+        </div>
+
+        ${actionButtons}
 
         <div style="margin-top: 20px; text-align: center;">
           <button class="btn btn-primary" onclick="closeModal()">Đóng</button>
@@ -1704,7 +2438,7 @@ async function viewHoaDon(maHoaDon) {
         
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; margin-bottom: 30px;">
           <h3 style="margin: 0; font-size: 24px; text-align: center;">${hoaDon.maHoaDon}</h3>
-          <p style="margin: 10px 0 0; text-align: center; opacity: 0.9;">Ngày lập: ${formatDate(hoaDon.ngayLap)}</p>
+          <p style="margin: 10px 0 0; text-align: center; opacity: 0.9;">Ngày lập: ${formatDate(hoaDon.ngayTao || hoaDon.ngayLap)}</p>
           <div style="text-align: center; margin-top: 15px;">
             <span style="background: ${statusColor}; padding: 8px 20px; border-radius: 20px; font-weight: bold;">
               <i class="fas ${statusIcon}"></i> ${hoaDon.trangThai || "Chưa xác định"}
@@ -1769,7 +2503,8 @@ async function confirmThanhToan(maHoaDon) {
       body: JSON.stringify({ maHoaDon: maHoaDon }),
     });
 
-    if (response.ok) {
+    const result = await response.json().catch(() => false);
+    if (response.ok && result === true) {
       showNotification("Thanh toán hóa đơn thành công", "success");
       loadHoaDonData();
     } else {
@@ -1795,7 +2530,8 @@ async function confirmHuyHoaDon(maHoaDon) {
       body: JSON.stringify({ maHoaDon: maHoaDon }),
     });
 
-    if (response.ok) {
+    const result = await response.json().catch(() => false);
+    if (response.ok && result === true) {
       showNotification("Đã hủy hóa đơn", "success");
       loadHoaDonData();
     } else {

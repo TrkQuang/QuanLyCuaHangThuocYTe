@@ -13,7 +13,7 @@ public class HoaDonDTO {
     MaHoaDon = "";
     MaKhachHang = "";
     NgayTao = "";
-    TrangThai = "CHOXACNHAN";
+    TrangThai = "CHO_XAC_NHAN";
     TongTien = 0;
   }
 

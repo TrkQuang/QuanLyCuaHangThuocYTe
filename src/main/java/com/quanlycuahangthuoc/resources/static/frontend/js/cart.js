@@ -1,85 +1,68 @@
-// ============================================================
-// cart.js — Thêm sản phẩm vào giỏ hàng & cập nhật số lượng
-// Yêu cầu: config.js được nhúng trước
-// ============================================================
-
-// Thêm vào giỏ hàng
-// Gọi từ HTML: onclick="addToCart(event, '${product.id}')"
-async function addToCart(event, productId) {
-  const button = event.target.closest("button") || event.target;
-  const productItem = button.closest(".product-item");
-
-  if (!productItem) {
-    console.error("Không tìm thấy .product-item");
-    return;
-  }
-
-  // Lấy thông tin sản phẩm từ DOM
-  const title = productItem.querySelector("h3")?.innerText || "";
-  const image = productItem.querySelector("img")?.src || "";
-
-  // Lấy giá từ data-price attribute (ưu tiên) hoặc parse từ text
+async function addToCart(eventOrId, maybeIdOrPrice) {
+  let productId = "";
+  let title = "";
+  let image = "";
   let price = 0;
-  const priceEl = productItem.querySelector(".product-price");
-  if (priceEl) {
-    // Ưu tiên data-price để tránh sai khi format tiền thay đổi
-    price = parseInt(priceEl.getAttribute("data-price")) ||
-            parseInt(priceEl.innerText.replace(/[^0-9]/g, "")) || 0;
+
+  const isEvent =
+    eventOrId && typeof eventOrId === "object" && "target" in eventOrId;
+
+  if (isEvent) {
+    productId = String(maybeIdOrPrice || "");
+    const button = eventOrId?.target?.closest("button") || eventOrId?.target;
+    const productItem = button?.closest(".product-item");
+    if (!productItem) return;
+
+    title = productItem.querySelector("h3")?.innerText || productId;
+    image = productItem.querySelector("img")?.src || "";
+    const priceEl =
+      productItem.querySelector(".product-price") ||
+      productItem.querySelector(".new-price");
+    price = Number(
+      priceEl?.getAttribute("data-price") ||
+        priceEl?.innerText?.replace(/[^0-9]/g, "") ||
+        0,
+    );
+  } else {
+    // Legacy calls like addToCart('panadol', 20000)
+    productId = String(eventOrId || "");
+    title = productId;
+    price = Number(maybeIdOrPrice || 0);
   }
 
   try {
-    const response = await fetch(`${API_URL}/cart/add`, {
+    await apiFetch("/cart/add", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Session-Id": getSessionId(),
-      },
       body: JSON.stringify({
         id: productId,
-        title: title,
-        price: price,
-        image: image,
+        title,
+        price,
+        image,
         quantity: 1,
       }),
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Lỗi server:", errorText);
-      throw new Error(`Server error ${response.status}: ${errorText}`);
-    }
-
-    const result = await response.json();
-
-    if (result.success) {
-      updateCartCount();
-      alert(`✅ Đã thêm "${title}" vào giỏ hàng`);
-    } else {
-      alert("⚠️ " + (result.message || "Thêm thất bại"));
-    }
-  } catch (error) {
-    console.error("Lỗi khi thêm vào giỏ:", error);
-    alert("❌ Không thể thêm vào giỏ hàng!");
+    await updateCartCount();
+    alert(`Da them \"${title}\" vao gio hang`);
+  } catch (e) {
+    alert(e.message || "Khong the them vao gio hang");
   }
 }
 
-// Cập nhật badge số lượng giỏ hàng trên header
 async function updateCartCount() {
   try {
-    const response = await fetch(`${API_URL}/cart/count`, {
-      headers: { "Session-Id": getSessionId() },
-    });
-    const result = await response.json();
+    const data = await apiFetch("/cart/count");
     const cartCountEl = document.getElementById("cartCount");
     if (cartCountEl) {
-      cartCountEl.innerText = result.count || 0;
+      cartCountEl.innerText = data.count || 0;
     }
-  } catch (error) {
-    console.error("Lỗi khi cập nhật số lượng giỏ:", error);
+  } catch (e) {
+    const cartCountEl = document.getElementById("cartCount");
+    if (cartCountEl) {
+      cartCountEl.innerText = "0";
+    }
   }
 }
 
-// Xử lý Search
 document.addEventListener("DOMContentLoaded", () => {
   updateCartCount();
 
@@ -87,11 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchForm = document.getElementById("searchForm");
 
   if (searchInput) {
-    searchInput.addEventListener("keydown", function (e) {
+    searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        const keyword = this.value.trim();
-        if (keyword.length > 0) {
+        const keyword = searchInput.value.trim();
+        if (keyword) {
           window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
         }
       }
@@ -99,10 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (searchForm) {
-    searchForm.addEventListener("submit", function (e) {
+    searchForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const keyword = searchInput ? searchInput.value.trim() : "";
-      if (keyword.length > 0) {
+      const keyword = searchInput?.value?.trim() || "";
+      if (keyword) {
         window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
       }
     });

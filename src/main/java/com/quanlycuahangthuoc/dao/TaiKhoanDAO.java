@@ -93,6 +93,36 @@ public class TaiKhoanDAO {
     return false;
   }
 
+  public boolean updateMatKhau(String maTK, String matKhauMoi) {
+    String sql = "UPDATE TaiKhoan SET MatKhau=? WHERE MaTK=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, matKhauMoi);
+      ps.setString(2, maTK);
+      return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public boolean updateLoaiTaiKhoan(String maTK, String loaiTaiKhoan) {
+    String sql = "UPDATE TaiKhoan SET LoaiTK=? WHERE MaTK=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, loaiTaiKhoan);
+      ps.setString(2, maTK);
+      return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
   public boolean existUsername(String username) {
     String sql = "SELECT 1 FROM TaiKhoan WHERE TenDangNhap=?";
     try (

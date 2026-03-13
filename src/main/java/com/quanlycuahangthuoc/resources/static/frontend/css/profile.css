@@ -211,7 +211,7 @@ body {
   margin-bottom: 40px;
 }
 
-.stat-card {
+.profile-main .stat-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 24px;
@@ -220,18 +220,18 @@ body {
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 }
 
-.stat-card-icon {
+.profile-main .stat-card-icon {
   font-size: 36px;
   margin-bottom: 12px;
 }
 
-.stat-card-value {
+.profile-main .stat-card-value {
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
-.stat-card-label {
+.profile-main .stat-card-label {
   font-size: 14px;
   opacity: 0.9;
 }
@@ -241,7 +241,7 @@ body {
   margin-top: 40px;
 }
 
-.activity-item {
+.profile-main .activity-item {
   padding: 20px;
   background: #f7fafc;
   border-radius: 12px;
@@ -250,18 +250,18 @@ body {
   transition: all 0.3s ease;
 }
 
-.activity-item:hover {
+.profile-main .activity-item:hover {
   transform: translateX(8px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.activity-date {
+.profile-main .activity-date {
   font-size: 12px;
   color: #718096;
   margin-bottom: 8px;
 }
 
-.activity-description {
+.profile-main .activity-description {
   color: #2d3748;
   font-weight: 600;
 }

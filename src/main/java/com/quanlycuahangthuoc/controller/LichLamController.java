@@ -4,6 +4,8 @@ import com.quanlycuahangthuoc.bus.LichLamBUS;
 import com.quanlycuahangthuoc.dao.LichLamDAO;
 import com.quanlycuahangthuoc.dto.LichLamDTO;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,43 @@ public class LichLamController {
 
   @Autowired
   private LichLamDAO lichLamDAO;
+
+  @GetMapping("/fixed-slots")
+  public List<Map<String, String>> getFixedSlots() {
+    return lichLamBUS.getFixedSlots();
+  }
+
+  @GetMapping("/cho-duyet")
+  public ArrayList<LichLamDTO> getChoDuyet() {
+    return lichLamBUS.getChoDuyet();
+  }
+
+  @PostMapping("/dangky")
+  public ResponseEntity<?> dangKy(@RequestBody LichLamDTO ll) {
+    try {
+      return ResponseEntity.ok(lichLamBUS.dangKyCaLam(ll));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PutMapping("/{maLich}/duyet")
+  public ResponseEntity<?> duyet(@PathVariable String maLich) {
+    try {
+      return ResponseEntity.ok(lichLamBUS.duyetDangKy(maLich));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PutMapping("/{maLich}/tuchoi")
+  public ResponseEntity<?> tuChoi(@PathVariable String maLich) {
+    try {
+      return ResponseEntity.ok(lichLamBUS.tuChoiDangKy(maLich));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 
   // Lấy tất cả lịch làm
   @GetMapping

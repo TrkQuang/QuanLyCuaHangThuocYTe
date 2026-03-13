@@ -324,12 +324,9 @@ h1 {
 /* Product Grid */
 .products-grid {
   display: grid;
-  grid-template-columns:  repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
-  justify-content: center;
-  margin: 30px;
-  flex-wrap: nowrap;
-
+  margin: 30px 0;
 }
 
 .product-item {
@@ -344,7 +341,7 @@ h1 {
   overflow: hidden;
 }
 
-.product-grid .product-item{
+.product-grid .product-item {
   width: 260px;
   margin: auto;
 }
@@ -384,41 +381,41 @@ h1 {
   transform: scale(1.05);
 }
 
-.product-box{
+.product-box {
   margin: 10px 0;
 }
 
-.sale-badge{
-    position:absolute;
-    top:10px;
-    left:10px;
-    background:red;
-    color:white;
-    padding:5px 10px;
-    font-size:14px;
-    border-radius:6px;
+.sale-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: red;
+  color: white;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 6px;
 }
 
-.price-box{
-    margin:10px 0;
+.price-box {
+  margin: 10px 0;
 }
 
-.old-price{
-    text-decoration:line-through;
-    color:#999;
-    margin-right:10px;
+.old-price {
+  text-decoration: line-through;
+  color: #999;
+  margin-right: 10px;
 }
 
-.new-price{
-  color:#e53935;
-  font-size:20px;
-  font-weight:bold;
+.new-price {
+  color: #e53935;
+  font-size: 20px;
+  font-weight: bold;
 }
 
-.product-price{
-    color:#e53935;
-    font-size:20px;
-    font-weight:bold;
+.product-price {
+  color: #e53935;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .product-item h3 {

@@ -5,5 +5,12 @@ db.username=your-username
 db.password=your-password
 db.driver=com.mysql.cj.jdbc.Driver
 
+# Optional HikariCP pool tuning
+db.hikari.maximum-pool-size=10
+db.hikari.minimum-idle=2
+db.hikari.connection-timeout=30000
+db.hikari.idle-timeout=600000
+db.hikari.max-lifetime=1800000
+
 server.port=8080
 spring.web.resources.static-locations=file:src/main/java/com/quanlycuahangthuoc/resources/static/

@@ -6,7 +6,8 @@ public class PhieuNhapDTO {
   private String MaNhanVien;
   private String MaNhaCungCap;
   private String NgayNhap;
-  private float TongTien; 
+  private float TongTien;
+  private String TrangThai;
 
   public PhieuNhapDTO() {
     MaPhieuNhap = "";
@@ -14,6 +15,7 @@ public class PhieuNhapDTO {
     MaNhaCungCap = "";
     NgayNhap = "";
     TongTien = 0;
+    TrangThai = "CHO_XAC_NHAN";
   }
 
   public PhieuNhapDTO(
@@ -21,13 +23,15 @@ public class PhieuNhapDTO {
     String MaNhanVien,
     String MaNhaCungCap,
     String NgayNhap,
-    float TongTien
+    float TongTien,
+    String TrangThai
   ) {
     this.MaPhieuNhap = MaPhieuNhap;
     this.MaNhanVien = MaNhanVien;
     this.MaNhaCungCap = MaNhaCungCap;
     this.NgayNhap = NgayNhap;
     this.TongTien = TongTien;
+    this.TrangThai = TrangThai;
   }
 
   public PhieuNhapDTO(PhieuNhapDTO pn) {
@@ -36,6 +40,7 @@ public class PhieuNhapDTO {
     this.MaNhaCungCap = pn.MaNhaCungCap;
     this.NgayNhap = pn.NgayNhap;
     this.TongTien = pn.TongTien;
+    this.TrangThai = pn.TrangThai;
   }
 
   public String getMaPhieuNhap() {
@@ -58,6 +63,10 @@ public class PhieuNhapDTO {
     return TongTien;
   }
 
+  public String getTrangThai() {
+    return TrangThai;
+  }
+
   public void setMaPhieuNhap(String MaPhieuNhap) {
     this.MaPhieuNhap = MaPhieuNhap;
   }
@@ -76,5 +85,9 @@ public class PhieuNhapDTO {
 
   public void setTongTien(float TongTien) {
     this.TongTien = TongTien;
+  }
+
+  public void setTrangThai(String TrangThai) {
+    this.TrangThai = TrangThai;
   }
 }

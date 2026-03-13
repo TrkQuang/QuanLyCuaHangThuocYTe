@@ -29,8 +29,7 @@ public class HoaDonDAO {
         java.sql.Date ngayTao = rs.getDate("NgayTao");
         hd.setNgayTao(ngayTao != null ? ngayTao.toString() : "");
         hd.setTongTien(rs.getFloat("TongTien"));
-        // TrangThai not in DB, set default or skip
-        hd.setTrangThai("");
+        hd.setTrangThai(rs.getString("TrangThai"));
         ds.add(hd);
       }
     } catch (SQLException e) {
@@ -41,7 +40,7 @@ public class HoaDonDAO {
 
   public boolean insertHoaDon(HoaDonDTO hd) {
     String sql =
-      "INSERT INTO HoaDon (MaHD, NgayTao, TongTien, MaKH, MaNV) VALUES (?,?,?,?,?)";
+      "INSERT INTO HoaDon (MaHD, NgayTao, TongTien, MaKH, MaNV, TrangThai) VALUES (?,?,?,?,?,?)";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -51,6 +50,12 @@ public class HoaDonDAO {
       ps.setFloat(3, hd.getTongTien());
       ps.setString(4, hd.getMaKhachHang());
       ps.setString(5, hd.getMaNhanVien());
+      ps.setString(
+        6,
+        (hd.getTrangThai() == null || hd.getTrangThai().isBlank())
+          ? "CHO_XAC_NHAN"
+          : hd.getTrangThai()
+      );
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
       e.printStackTrace();
@@ -58,9 +63,39 @@ public class HoaDonDAO {
     return false;
   }
 
+  public boolean insertHoaDon(Connection conn, HoaDonDTO hd)
+    throws SQLException {
+    String sql =
+      "INSERT INTO HoaDon (MaHD, NgayTao, TongTien, MaKH, MaNV, TrangThai) VALUES (?,?,?,?,?,?)";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, hd.getMaHoaDon());
+      ps.setString(2, hd.getNgayTao());
+      ps.setFloat(3, hd.getTongTien());
+      ps.setString(4, hd.getMaKhachHang());
+      ps.setString(5, hd.getMaNhanVien());
+      ps.setString(
+        6,
+        (hd.getTrangThai() == null || hd.getTrangThai().isBlank())
+          ? "CHO_XAC_NHAN"
+          : hd.getTrangThai()
+      );
+      return ps.executeUpdate() > 0;
+    }
+  }
+
+  public boolean updateTongTien(Connection conn, String maHD, float tongTien)
+    throws SQLException {
+    String sql = "UPDATE HoaDon SET TongTien=? WHERE MaHD=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setFloat(1, tongTien);
+      ps.setString(2, maHD);
+      return ps.executeUpdate() > 0;
+    }
+  }
+
   public boolean updateHoaDon(HoaDonDTO hd) {
     String sql =
-      "UPDATE HoaDon SET MaKH=?, NgayTao=?, TongTien=?, MaNV=? WHERE MaHD=?";
+      "UPDATE HoaDon SET MaKH=?, NgayTao=?, TongTien=?, MaNV=?, TrangThai=? WHERE MaHD=?";
     try (
       Connection conn = DBConnection.getConnection();
       PreparedStatement ps = conn.prepareStatement(sql)
@@ -69,8 +104,104 @@ public class HoaDonDAO {
       ps.setString(2, hd.getNgayTao());
       ps.setFloat(3, hd.getTongTien());
       ps.setString(4, hd.getMaNhanVien());
-      ps.setString(5, hd.getMaHoaDon());
+      ps.setString(5, hd.getTrangThai());
+      ps.setString(6, hd.getMaHoaDon());
 
+      return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public HoaDonDTO getByMaHoaDon(String maHoaDon) {
+    String sql = "SELECT * FROM HoaDon WHERE MaHD=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, maHoaDon);
+      ResultSet rs = ps.executeQuery();
+      if (rs.next()) {
+        HoaDonDTO hd = new HoaDonDTO();
+        hd.setMaHoaDon(rs.getString("MaHD"));
+        hd.setMaKhachHang(rs.getString("MaKH"));
+        hd.setMaNhanVien(rs.getString("MaNV"));
+        java.sql.Date ngayTao = rs.getDate("NgayTao");
+        hd.setNgayTao(ngayTao != null ? ngayTao.toString() : "");
+        hd.setTongTien(rs.getFloat("TongTien"));
+        hd.setTrangThai(rs.getString("TrangThai"));
+        return hd;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public HoaDonDTO getByMaHoaDon(Connection conn, String maHoaDon)
+    throws SQLException {
+    String sql = "SELECT * FROM HoaDon WHERE MaHD=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, maHoaDon);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          HoaDonDTO hd = new HoaDonDTO();
+          hd.setMaHoaDon(rs.getString("MaHD"));
+          hd.setMaKhachHang(rs.getString("MaKH"));
+          hd.setMaNhanVien(rs.getString("MaNV"));
+          java.sql.Date ngayTao = rs.getDate("NgayTao");
+          hd.setNgayTao(ngayTao != null ? ngayTao.toString() : "");
+          hd.setTongTien(rs.getFloat("TongTien"));
+          hd.setTrangThai(rs.getString("TrangThai"));
+          return hd;
+        }
+      }
+    }
+    return null;
+  }
+
+  public boolean updateTrangThai(String maHoaDon, String trangThai) {
+    String sql = "UPDATE HoaDon SET TrangThai=? WHERE MaHD=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, trangThai);
+      ps.setString(2, maHoaDon);
+      return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public boolean updateTrangThai(
+    Connection conn,
+    String maHoaDon,
+    String trangThai
+  ) throws SQLException {
+    String sql = "UPDATE HoaDon SET TrangThai=? WHERE MaHD=?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, trangThai);
+      ps.setString(2, maHoaDon);
+      return ps.executeUpdate() > 0;
+    }
+  }
+
+  public boolean updateTrangThaiAndTongTien(
+    String maHoaDon,
+    String trangThai,
+    float tongTien
+  ) {
+    String sql = "UPDATE HoaDon SET TrangThai=?, TongTien=? WHERE MaHD=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, trangThai);
+      ps.setFloat(2, tongTien);
+      ps.setString(3, maHoaDon);
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
       e.printStackTrace();
