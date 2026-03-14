@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 public class KhachHangDAO {
 
   private Boolean hasGioiTinhColumnCache = null;
+  private Boolean hasHoTenColumnCache = null;
+  private Boolean hasHoColumnCache = null;
+  private Boolean hasTenColumnCache = null;
 
   private boolean hasGioiTinhColumn(Connection conn) {
     if (hasGioiTinhColumnCache != null) {
@@ -27,6 +30,54 @@ public class KhachHangDAO {
     return hasGioiTinhColumnCache;
   }
 
+  private boolean hasHoTenColumn(Connection conn) {
+    if (hasHoTenColumnCache != null) {
+      return hasHoTenColumnCache;
+    }
+    try (
+      ResultSet rs = conn
+        .getMetaData()
+        .getColumns(conn.getCatalog(), null, "KhachHang", "HoTen")
+    ) {
+      hasHoTenColumnCache = rs.next();
+    } catch (SQLException e) {
+      hasHoTenColumnCache = false;
+    }
+    return hasHoTenColumnCache;
+  }
+
+  private boolean hasHoColumn(Connection conn) {
+    if (hasHoColumnCache != null) {
+      return hasHoColumnCache;
+    }
+    try (
+      ResultSet rs = conn
+        .getMetaData()
+        .getColumns(conn.getCatalog(), null, "KhachHang", "Ho")
+    ) {
+      hasHoColumnCache = rs.next();
+    } catch (SQLException e) {
+      hasHoColumnCache = false;
+    }
+    return hasHoColumnCache;
+  }
+
+  private boolean hasTenColumn(Connection conn) {
+    if (hasTenColumnCache != null) {
+      return hasTenColumnCache;
+    }
+    try (
+      ResultSet rs = conn
+        .getMetaData()
+        .getColumns(conn.getCatalog(), null, "KhachHang", "Ten")
+    ) {
+      hasTenColumnCache = rs.next();
+    } catch (SQLException e) {
+      hasTenColumnCache = false;
+    }
+    return hasTenColumnCache;
+  }
+
   // Lấy danh sách tất cả khách hàng
   public ArrayList<KhachHangDTO> getAllKhachHang() {
     ArrayList<KhachHangDTO> ds = new ArrayList<>();
@@ -42,12 +93,24 @@ public class KhachHangDAO {
         kh.setMaKhachHang(rs.getString("MaKH")); // MaKH in DB
         kh.setMaTaiKhoan(rs.getString("MaTK")); // MaTK in DB
 
-        // Database has HoTen as single field
-        String hoTen = rs.getString("HoTen");
-        if (hoTen != null && !hoTen.isEmpty()) {
-          String[] parts = hoTen.trim().split("\\s+", 2);
-          kh.setHo(parts.length > 0 ? parts[0] : "");
-          kh.setTen(parts.length > 1 ? parts[1] : "");
+        if (hasHoTenColumn(conn)) {
+          String hoTen = rs.getString("HoTen");
+          if (hoTen != null && !hoTen.isEmpty()) {
+            String[] parts = hoTen.trim().split("\\s+", 2);
+            kh.setHo(parts.length > 0 ? parts[0] : "");
+            kh.setTen(parts.length > 1 ? parts[1] : "");
+          }
+        } else {
+          try {
+            kh.setHo(rs.getString("Ho"));
+          } catch (SQLException ignored) {
+            kh.setHo("");
+          }
+          try {
+            kh.setTen(rs.getString("Ten"));
+          } catch (SQLException ignored) {
+            kh.setTen("");
+          }
         }
 
         java.sql.Date ngaySinh = rs.getDate("NgaySinh");
@@ -72,39 +135,57 @@ public class KhachHangDAO {
   // Thêm khách hàng
   public boolean insertKhachHang(KhachHangDTO kh) {
     try (
-      Connection conn = DBConnection.getConnection();
-      PreparedStatement ps = conn.prepareStatement(
-        hasGioiTinhColumn(conn)
-          ? "INSERT INTO KhachHang (MaKH, HoTen, NgaySinh, GioiTinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES (?,?,?,?,?,?,?,?)"
-          : "INSERT INTO KhachHang (MaKH, HoTen, NgaySinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES (?,?,?,?,?,?,?)"
-      )
+      Connection conn = DBConnection.getConnection()
     ) {
-      ps.setString(1, kh.getMaKhachHang());
-      String hoTen = (kh.getHo() + " " + kh.getTen()).trim();
-      ps.setString(2, hoTen);
-      if (kh.getNgaySinh() == null || kh.getNgaySinh().isBlank()) {
-        ps.setNull(3, Types.DATE);
+      boolean hasGioiTinh = hasGioiTinhColumn(conn);
+      boolean hasHoTen = hasHoTenColumn(conn);
+      boolean hasHoTenPair = hasHoColumn(conn) && hasTenColumn(conn);
+
+      String sql;
+      if (hasHoTen) {
+        sql = hasGioiTinh
+          ? "INSERT INTO KhachHang (MaKH, HoTen, NgaySinh, GioiTinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES (?,?,?,?,?,?,?,?)"
+          : "INSERT INTO KhachHang (MaKH, HoTen, NgaySinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES (?,?,?,?,?,?,?)";
+      } else if (hasHoTenPair) {
+        sql = hasGioiTinh
+          ? "INSERT INTO KhachHang (MaKH, Ho, Ten, NgaySinh, GioiTinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES (?,?,?,?,?,?,?,?,?)"
+          : "INSERT INTO KhachHang (MaKH, Ho, Ten, NgaySinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES (?,?,?,?,?,?,?,?)";
       } else {
-        ps.setString(3, kh.getNgaySinh());
-      }
-      if (hasGioiTinhColumn(conn)) {
-        ps.setString(4, kh.getGioiTinh());
-        ps.setString(5, kh.getSDT());
-        ps.setString(6, kh.getDiaChi());
-        ps.setString(7, kh.getTienSuBenhLy());
-        ps.setString(8, kh.getMaTaiKhoan());
-      } else {
-        ps.setString(4, kh.getSDT());
-        ps.setString(5, kh.getDiaChi());
-        ps.setString(6, kh.getTienSuBenhLy());
-        ps.setString(7, kh.getMaTaiKhoan());
+        throw new RuntimeException("Schema bảng KhachHang không hợp lệ: thiếu cột HoTen hoặc Ho/Ten");
       }
 
-      return ps.executeUpdate() > 0;
+      try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        int idx = 1;
+        ps.setString(idx++, kh.getMaKhachHang());
+
+        if (hasHoTen) {
+          String hoTen = (kh.getHo() + " " + kh.getTen()).trim();
+          ps.setString(idx++, hoTen);
+        } else {
+          ps.setString(idx++, kh.getHo());
+          ps.setString(idx++, kh.getTen());
+        }
+
+        if (kh.getNgaySinh() == null || kh.getNgaySinh().isBlank()) {
+          ps.setNull(idx++, Types.DATE);
+        } else {
+          ps.setString(idx++, kh.getNgaySinh());
+        }
+
+        if (hasGioiTinh) {
+          ps.setString(idx++, kh.getGioiTinh());
+        }
+
+        ps.setString(idx++, kh.getSDT());
+        ps.setString(idx++, kh.getDiaChi());
+        ps.setString(idx++, kh.getTienSuBenhLy());
+        ps.setString(idx, kh.getMaTaiKhoan());
+
+        return ps.executeUpdate() > 0;
+      }
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Lỗi tạo hồ sơ khách hàng: " + e.getMessage(), e);
     }
-    return false;
   }
 
   // Cập nhật khách hàng
@@ -174,11 +255,24 @@ public class KhachHangDAO {
         KhachHangDTO kh = new KhachHangDTO();
         kh.setMaKhachHang(rs.getString("MaKH"));
         kh.setMaTaiKhoan(rs.getString("MaTK"));
-        String hoTen = rs.getString("HoTen");
-        if (hoTen != null && !hoTen.isBlank()) {
-          String[] parts = hoTen.trim().split("\\s+", 2);
-          kh.setHo(parts.length > 0 ? parts[0] : "");
-          kh.setTen(parts.length > 1 ? parts[1] : "");
+        if (hasHoTenColumn(conn)) {
+          String hoTen = rs.getString("HoTen");
+          if (hoTen != null && !hoTen.isBlank()) {
+            String[] parts = hoTen.trim().split("\\s+", 2);
+            kh.setHo(parts.length > 0 ? parts[0] : "");
+            kh.setTen(parts.length > 1 ? parts[1] : "");
+          }
+        } else {
+          try {
+            kh.setHo(rs.getString("Ho"));
+          } catch (SQLException ignored) {
+            kh.setHo("");
+          }
+          try {
+            kh.setTen(rs.getString("Ten"));
+          } catch (SQLException ignored) {
+            kh.setTen("");
+          }
         }
         java.sql.Date ngaySinh = rs.getDate("NgaySinh");
         kh.setNgaySinh(ngaySinh != null ? ngaySinh.toString() : "");
@@ -210,11 +304,24 @@ public class KhachHangDAO {
         KhachHangDTO kh = new KhachHangDTO();
         kh.setMaKhachHang(rs.getString("MaKH"));
         kh.setMaTaiKhoan(rs.getString("MaTK"));
-        String hoTen = rs.getString("HoTen");
-        if (hoTen != null && !hoTen.isBlank()) {
-          String[] parts = hoTen.trim().split("\\s+", 2);
-          kh.setHo(parts.length > 0 ? parts[0] : "");
-          kh.setTen(parts.length > 1 ? parts[1] : "");
+        if (hasHoTenColumn(conn)) {
+          String hoTen = rs.getString("HoTen");
+          if (hoTen != null && !hoTen.isBlank()) {
+            String[] parts = hoTen.trim().split("\\s+", 2);
+            kh.setHo(parts.length > 0 ? parts[0] : "");
+            kh.setTen(parts.length > 1 ? parts[1] : "");
+          }
+        } else {
+          try {
+            kh.setHo(rs.getString("Ho"));
+          } catch (SQLException ignored) {
+            kh.setHo("");
+          }
+          try {
+            kh.setTen(rs.getString("Ten"));
+          } catch (SQLException ignored) {
+            kh.setTen("");
+          }
         }
         java.sql.Date ngaySinh = rs.getDate("NgaySinh");
         kh.setNgaySinh(ngaySinh != null ? ngaySinh.toString() : "");
@@ -235,7 +342,10 @@ public class KhachHangDAO {
   }
 
   public String generateMaKH() {
-    String sql = "SELECT MaKH FROM KhachHang ORDER BY MaKH DESC LIMIT 1";
+    String sql =
+      "SELECT MaKH FROM KhachHang " +
+      "WHERE MaKH REGEXP '^KH[0-9]+$' " +
+      "ORDER BY CAST(SUBSTRING(MaKH, 3) AS UNSIGNED) DESC LIMIT 1";
     try (
       Connection conn = DBConnection.getConnection();
       Statement stmt = conn.createStatement();
@@ -245,8 +355,7 @@ public class KhachHangDAO {
         String lastMa = rs.getString("MaKH");
         String numberPart = lastMa.substring(2);
         long number = Long.parseLong(numberPart) + 1;
-        int len = Math.max(3, numberPart.length());
-        return String.format("KH%0" + len + "d", number);
+        return String.format("KH%03d", number);
       }
       return "KH001";
     } catch (Exception e) {

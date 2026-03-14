@@ -69,6 +69,45 @@
         margin-top: 8px;
       }
 
+      #dynamicProductsGrid {
+        align-items: stretch;
+      }
+
+      #dynamicProductsGrid .product-item {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      #dynamicProductsGrid .product-item img {
+        height: 170px;
+        width: 100%;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+
+      #dynamicProductsGrid .product-item h3 {
+        min-height: 2.8em;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      #dynamicProductsGrid .product-price {
+        min-height: 1.6em;
+      }
+
+      #dynamicProductsGrid .product-item p {
+        min-height: 2.4em;
+        margin: 8px 0 12px;
+      }
+
+      #dynamicProductsGrid .product-item .btn-primary {
+        margin-top: auto;
+      }
+
       .shop-pagination-wrap {
         margin-top: 22px;
         display: flex;
