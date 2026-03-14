@@ -59,6 +59,25 @@ public class NhanVienBUS {
       throw new RuntimeException("Email đã tồn tại");
     }
 
+    // Kiểm tra số điện thoại nhân viên đã tồn tại chưa
+    if (nhanVienDAO.existsBySDT(request.getSoDienThoai())) {
+      throw new RuntimeException("Số điện thoại đã tồn tại");
+    }
+
+    String normalizedRole = String
+      .valueOf(request.getLoaiTaiKhoan() == null ? "" : request.getLoaiTaiKhoan())
+      .trim()
+      .toUpperCase();
+    if (normalizedRole.equals("NHANVIEN") || normalizedRole.equals("NHÂNVIÊN")) {
+      normalizedRole = "NHANVIEN";
+    } else if (normalizedRole.equals("ADMIN")) {
+      normalizedRole = "ADMIN";
+    } else if (normalizedRole.isBlank()) {
+      normalizedRole = "NHANVIEN";
+    } else {
+      throw new RuntimeException("Loại tài khoản không hợp lệ");
+    }
+
     // Bước 1: Tạo tài khoản
     String maTK = taiKhoanDAO.generateMaTK(); // Tự động tạo mã TK
     TaiKhoanDTO taiKhoan = new TaiKhoanDTO();
@@ -66,9 +85,7 @@ public class NhanVienBUS {
     taiKhoan.setTenDangNhap(request.getTenDangNhap());
     taiKhoan.setMatKhau(request.getMatKhau());
     taiKhoan.setEmail(request.getEmail());
-    taiKhoan.setLoaiTaiKhoan(
-      request.getLoaiTaiKhoan() != null ? request.getLoaiTaiKhoan() : "NhanVien"
-    );
+    taiKhoan.setLoaiTaiKhoan(normalizedRole);
 
     boolean taiKhoanCreated = taiKhoanDAO.insertTaiKhoan(taiKhoan);
     if (!taiKhoanCreated) {

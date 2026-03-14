@@ -6,6 +6,46 @@
     <title>Cửa Hàng Thuoc</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/design-system.css" />
+    <style>
+      .promo-products-grid {
+        align-items: stretch;
+      }
+
+      .promo-products-grid .product-item {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .promo-products-grid .product-item img {
+        height: 170px;
+        width: 100%;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+
+      .promo-products-grid .product-item h3 {
+        min-height: 2.8em;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .promo-products-grid .product-box {
+        min-height: 1.8em;
+      }
+
+      .promo-products-grid .product-item p {
+        min-height: 2.4em;
+        margin: 8px 0 12px;
+      }
+
+      .promo-products-grid .product-item .btn-primary {
+        margin-top: auto;
+      }
+    </style>
   </head>
   <body>
     <script src="../js/shared-header-loader.js" data-active="home"></script>
@@ -105,7 +145,7 @@
             Giảm giá đặc biệt - Số lượng có hạn
           </p>
         </div>
-        <div class="products-grid">
+        <div class="products-grid promo-products-grid">
           <div class="product-item">
             <span class="sale-badge">-30%</span>
             <img

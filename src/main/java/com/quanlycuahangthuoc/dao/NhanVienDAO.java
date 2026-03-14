@@ -59,7 +59,10 @@ public class NhanVienDAO {
 
   // Tạo mã nhân viên tự động (NV001, NV002, ...)
   public String generateMaNV() {
-    String sql = "SELECT MaNV FROM NhanVien ORDER BY MaNV DESC LIMIT 1";
+    String sql =
+      "SELECT MaNV FROM NhanVien " +
+      "WHERE MaNV REGEXP '^NV[0-9]+$' " +
+      "ORDER BY CAST(SUBSTRING(MaNV, 3) AS UNSIGNED) DESC LIMIT 1";
     try (
       Connection conn = DBConnection.getConnection();
       Statement stmt = conn.createStatement();
@@ -68,16 +71,12 @@ public class NhanVienDAO {
       if (rs.next()) {
         String lastMa = rs.getString("MaNV");
         try {
-          // Lấy số từ mã cuối (VD: NV001 -> 001)
           String numberPart = lastMa.substring(2);
           long number = Long.parseLong(numberPart);
           number++;
-          // Format lại thành NV + số với độ dài tương tự
-          int length = Math.max(3, numberPart.length());
-          return String.format("NV%0" + length + "d", number);
+          return String.format("NV%03d", number);
         } catch (NumberFormatException e) {
-          // Nếu parse thất bại, dùng timestamp
-          return "NV" + System.currentTimeMillis();
+          return "NV001";
         }
       } else {
         return "NV001";
@@ -109,10 +108,8 @@ public class NhanVienDAO {
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
-      e.printStackTrace();
-      System.err.println("Error inserting NhanVien: " + e.getMessage());
+      throw new RuntimeException("Lỗi tạo nhân viên: " + e.getMessage(), e);
     }
-    return false;
   }
 
   public boolean updateNhanVien(NhanVienDTO nv) {
@@ -135,10 +132,23 @@ public class NhanVienDAO {
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
-      e.printStackTrace();
-      System.err.println("Error updating NhanVien: " + e.getMessage());
+      throw new RuntimeException("Lỗi cập nhật nhân viên: " + e.getMessage(), e);
     }
-    return false;
+  }
+
+  public boolean existsBySDT(String sdt) {
+    String sql = "SELECT 1 FROM NhanVien WHERE SDT=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, sdt);
+      try (ResultSet rs = ps.executeQuery()) {
+        return rs.next();
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Lỗi kiểm tra số điện thoại nhân viên: " + e.getMessage(), e);
+    }
   }
 
   public boolean deleteNhanVien(String MaNhanVien) {
