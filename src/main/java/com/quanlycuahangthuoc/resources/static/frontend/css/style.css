@@ -52,14 +52,23 @@ body {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  font-size: 26px;
+}
+
+.logo-text {
   font-size: 26px;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-decoration: none;
-  letter-spacing: -0.5px;
 }
 
 .search-box {
