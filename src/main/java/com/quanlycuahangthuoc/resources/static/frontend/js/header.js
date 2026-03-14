@@ -9,7 +9,7 @@
     return;
   }
 
-  loginLink.textContent = `👋 ${currentUser.tenDangNhap}`;
+  loginLink.innerHTML = `🔓 ${currentUser.tenDangNhap} <span class="user-arrow">▾</span>`;
   loginLink.href = "#";
 
   loginLink.addEventListener("click", (e) => {
@@ -29,7 +29,7 @@
       '<a href="profile.html" style="display:block;padding:8px 14px;color:#333;text-decoration:none;">👤 Tài khoản</a>' +
       '<a href="order-history.html" style="display:block;padding:8px 14px;color:#333;text-decoration:none;">📋 Đơn hàng</a>' +
       '<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">' +
-      '<a href="#" id="logoutBtnHeader" style="display:block;padding:8px 14px;color:#d00;text-decoration:none;">🚪 Dang xuat</a>';
+      '<a href="#" id="logoutBtnHeader" style="display:block;padding:8px 14px;color:#d00;text-decoration:none;">🚪 Đăng xuất</a>';
 
     loginLink.parentElement.style.position = "relative";
     loginLink.parentElement.appendChild(menu);
