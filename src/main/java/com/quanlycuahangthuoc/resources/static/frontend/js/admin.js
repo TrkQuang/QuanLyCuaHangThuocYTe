@@ -44,6 +44,26 @@ function formatPhieuNhapStatus(status) {
   return s;
 }
 
+function normalizeNhaCungCapStatus(status) {
+  return String(status || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_");
+}
+
+function isNhaCungCapDangHopTac(status) {
+  const s = normalizeNhaCungCapStatus(status);
+  return s === "HOAT_DONG" || s === "HOP_TAC";
+}
+
+function formatNhaCungCapStatus(status) {
+  return isNhaCungCapDangHopTac(status) ? "ĐANG_HỢP_TÁC" : "TẠM_NGỪNG";
+}
+
+function getNhaCungCapBadgeClass(status) {
+  return isNhaCungCapDangHopTac(status) ? "badge-success" : "badge-warning";
+}
+
 function getStatusBadgeClass(status) {
   const s = normalizeHoaDonStatus(status);
   if (s === "DA_THANH_TOAN" || s === "DA_XAC_NHAN") return "badge-success";
@@ -157,6 +177,7 @@ function switchPage(pageName) {
     nhanvien: "Quản Lý Nhân Viên",
     khachhang: "Quản Lý Khách Hàng",
     thuoc: "Quản Lý Thuốc",
+    nhacungcap: "Quản Lý Nhà Cung Cấp",
     phieunhap: "Phiếu Nhập Hàng",
     hoadon: "Hóa Đơn Bán Hàng",
     taikhoan: "Quản Lý Tài Khoản",
@@ -187,6 +208,9 @@ async function loadPageData(pageName) {
       break;
     case "thuoc":
       await loadThuocData();
+      break;
+    case "nhacungcap":
+      await loadNhaCungCapData();
       break;
     case "phieunhap":
       await loadPhieuNhapData();
@@ -906,6 +930,293 @@ async function deleteThuoc(maThuoc) {
 }
 
 // ====================
+// QUẢN LÝ NHÀ CUNG CẤP
+// ====================
+
+async function loadNhaCungCapData() {
+  try {
+    const response = await fetch(`${API_URL}/nhacungcap`);
+    const data = response.ok ? await response.json() : [];
+    displayNhaCungCapTable(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("Lỗi khi load nhà cung cấp:", error);
+    showNotification("Không thể tải danh sách nhà cung cấp", "error");
+  }
+}
+
+function displayNhaCungCapTable(data) {
+  const tbody = document.getElementById("nhacungcapTableBody");
+  if (!tbody) return;
+
+  if (data.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" class="text-center">Chưa có nhà cung cấp nào</td></tr>';
+    return;
+  }
+
+  let html = "";
+  data.forEach((ncc) => {
+    const isHopTac = isNhaCungCapDangHopTac(ncc.trangThai);
+    const actionButton = isHopTac
+      ? `<button class="btn btn-delete" onclick="ngungHopTacNhaCungCap('${ncc.maNhaCungCap}')" title="Ngừng hợp tác">
+           <i class="fas fa-handshake-slash"></i>
+         </button>`
+      : `<button class="btn btn-success" onclick="hopTacLaiNhaCungCap('${ncc.maNhaCungCap}')" title="Hợp tác lại">
+           <i class="fas fa-handshake"></i>
+         </button>`;
+
+    html += `
+      <tr>
+        <td>${ncc.maNhaCungCap || ""}</td>
+        <td>${ncc.tenNhaCungCap || ""}</td>
+        <td>${ncc.sdt || ""}</td>
+        <td>${ncc.diaChi || ""}</td>
+        <td><span class="badge ${getNhaCungCapBadgeClass(ncc.trangThai)}">${formatNhaCungCapStatus(ncc.trangThai)}</span></td>
+        <td>
+          <button class="btn btn-edit" onclick="showEditNhaCungCapModal('${ncc.maNhaCungCap}')" title="Chỉnh sửa nhà cung cấp">
+            <i class="fas fa-edit"></i>
+          </button>
+          ${actionButton}
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+function showAddNhaCungCapModal() {
+  const modalBody = document.getElementById("modalBody");
+  if (!modalBody) return;
+
+  modalBody.innerHTML = `
+    <h2>Thêm Nhà Cung Cấp</h2>
+    <form id="addNhaCungCapForm">
+      <div class="form-group">
+        <label>Mã NCC *</label>
+        <input type="text" name="maNhaCungCap" required placeholder="VD: NCC04" />
+      </div>
+      <div class="form-group">
+        <label>Tên nhà cung cấp *</label>
+        <input type="text" name="tenNhaCungCap" required />
+      </div>
+      <div class="form-group">
+        <label>Số điện thoại *</label>
+        <input type="text" name="sdt" required />
+      </div>
+      <div class="form-group">
+        <label>Địa chỉ *</label>
+        <input type="text" name="diaChi" required />
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary">Thêm</button>
+      </div>
+    </form>
+  `;
+
+  document
+    .getElementById("addNhaCungCapForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const payload = {
+        maNhaCungCap: String(formData.get("maNhaCungCap") || "").trim(),
+        tenNhaCungCap: String(formData.get("tenNhaCungCap") || "").trim(),
+        sdt: String(formData.get("sdt") || "").trim(),
+        diaChi: String(formData.get("diaChi") || "").trim(),
+        trangThai: "HOAT_DONG",
+      };
+
+      if (!validateNhaCungCapPayload(payload)) return;
+
+      await addNhaCungCap(payload);
+    });
+
+  openModal();
+}
+
+async function addNhaCungCap(payload) {
+  try {
+    const response = await fetch(`${API_URL}/nhacungcap`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Thêm nhà cung cấp thất bại", "error");
+      return;
+    }
+
+    showNotification("Thêm nhà cung cấp thành công", "success");
+    closeModal();
+    await loadNhaCungCapData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+function validateNhaCungCapPayload(payload) {
+  const ma = String(payload.maNhaCungCap || "").trim();
+  const ten = String(payload.tenNhaCungCap || "").trim();
+  const sdt = String(payload.sdt || "").trim();
+  const diaChi = String(payload.diaChi || "").trim();
+
+  if (!ma || !ten || !sdt || !diaChi) {
+    showNotification("Vui lòng nhập đầy đủ thông tin nhà cung cấp", "error");
+    return false;
+  }
+
+  if (!/^\d{10,15}$/.test(sdt)) {
+    showNotification("SĐT phải từ 10 đến 15 chữ số", "error");
+    return false;
+  }
+
+  return true;
+}
+
+async function showEditNhaCungCapModal(maNhaCungCap) {
+  try {
+    const response = await fetch(`${API_URL}/nhacungcap`);
+    const data = response.ok ? await response.json() : [];
+    const ncc = (Array.isArray(data) ? data : []).find(
+      (item) =>
+        String(item.maNhaCungCap || "").trim() ===
+        String(maNhaCungCap || "").trim(),
+    );
+
+    if (!ncc) {
+      showNotification("Không tìm thấy nhà cung cấp", "error");
+      return;
+    }
+
+    const modalBody = document.getElementById("modalBody");
+    if (!modalBody) return;
+
+    modalBody.innerHTML = `
+      <h2>Chỉnh Sửa Nhà Cung Cấp</h2>
+      <form id="editNhaCungCapForm">
+        <div class="form-group">
+          <label>Mã NCC</label>
+          <input type="text" value="${ncc.maNhaCungCap || ""}" disabled />
+        </div>
+        <div class="form-group">
+          <label>Tên nhà cung cấp *</label>
+          <input type="text" name="tenNhaCungCap" value="${ncc.tenNhaCungCap || ""}" required />
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="text" name="sdt" value="${ncc.sdt || ""}" required />
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ *</label>
+          <input type="text" name="diaChi" value="${ncc.diaChi || ""}" required />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    `;
+
+    document
+      .getElementById("editNhaCungCapForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const payload = {
+          maNhaCungCap: ncc.maNhaCungCap,
+          tenNhaCungCap: String(formData.get("tenNhaCungCap") || "").trim(),
+          sdt: String(formData.get("sdt") || "").trim(),
+          diaChi: String(formData.get("diaChi") || "").trim(),
+          trangThai: ncc.trangThai,
+        };
+
+        if (!validateNhaCungCapPayload(payload)) return;
+        await updateNhaCungCap(payload);
+      });
+
+    openModal();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Không thể tải thông tin nhà cung cấp", "error");
+  }
+}
+
+async function updateNhaCungCap(payload) {
+  try {
+    const response = await fetch(`${API_URL}/nhacungcap`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Cập nhật nhà cung cấp thất bại", "error");
+      return;
+    }
+
+    showNotification("Cập nhật nhà cung cấp thành công", "success");
+    closeModal();
+    await loadNhaCungCapData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+async function ngungHopTacNhaCungCap(maNhaCungCap) {
+  if (!confirm("Bạn có chắc muốn ngừng hợp tác với nhà cung cấp này?")) return;
+
+  try {
+    const response = await fetch(`${API_URL}/nhacungcap/${maNhaCungCap}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Ngừng hợp tác thất bại", "error");
+      return;
+    }
+
+    showNotification("Đã ngừng hợp tác", "success");
+    await loadNhaCungCapData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+async function hopTacLaiNhaCungCap(maNhaCungCap) {
+  if (!confirm("Xác nhận hợp tác lại với nhà cung cấp này?")) return;
+
+  try {
+    const response = await fetch(
+      `${API_URL}/nhacungcap/hop-tac/${maNhaCungCap}`,
+      {
+        method: "PUT",
+      },
+    );
+
+    if (!response.ok) {
+      const err = await response.text();
+      showNotification(err || "Hợp tác lại thất bại", "error");
+      return;
+    }
+
+    showNotification("Đã chuyển trạng thái hợp tác", "success");
+    await loadNhaCungCapData();
+  } catch (error) {
+    console.error("Lỗi:", error);
+    showNotification("Có lỗi xảy ra", "error");
+  }
+}
+
+// ====================
 // QUẢN LÝ PHIẾU NHẬP
 // ====================
 
@@ -1033,9 +1344,7 @@ async function showAddPhieuNhapModal() {
     }
 
     const nccOptions = nccList
-      .filter(
-        (ncc) => normalizePhieuNhapStatus(ncc.trangThai) !== "NGUNG_HOP_TAC",
-      )
+      .filter((ncc) => isNhaCungCapDangHopTac(ncc.trangThai))
       .map(
         (ncc) =>
           `<option value="${ncc.maNhaCungCap}">${ncc.maNhaCungCap} - ${ncc.tenNhaCungCap || ""}</option>`,
@@ -2269,9 +2578,11 @@ async function editThuoc(maThuoc) {
         const updateData = {
           maThuoc: thuoc.maThuoc,
           tenThuoc: data.tenThuoc,
+          hinhAnh: thuoc.hinhAnh || "img/UATThuoc.jpg",
           donViTinh: data.donViTinh,
           giaBan: data.giaBan,
           soLuongTon: data.soLuongTon,
+          nsx: thuoc.nsx || "",
           hsd: data.hsd,
           maNhaCungCap: thuoc.maNhaCungCap || "",
         };
@@ -2288,7 +2599,8 @@ async function editThuoc(maThuoc) {
             closeModal();
             loadThuocData();
           } else {
-            showNotification("Cập nhật thuốc thất bại", "error");
+            const err = await response.text();
+            showNotification(err || "Cập nhật thuốc thất bại", "error");
           }
         } catch (error) {
           console.error("Lỗi:", error);
@@ -2328,7 +2640,9 @@ async function viewPhieuNhap(maPhieuNhap) {
 
     const [listRes, detailsRes] = await Promise.all([
       fetch(`${API_URL}/phieunhap`),
-      fetch(`${API_URL}/ctphieunhap/phieunhap/${encodeURIComponent(normalizedMaPhieuNhap)}`),
+      fetch(
+        `${API_URL}/ctphieunhap/phieunhap/${encodeURIComponent(normalizedMaPhieuNhap)}`,
+      ),
     ]);
 
     const listRaw = listRes.ok ? await safeJson(listRes) : [];

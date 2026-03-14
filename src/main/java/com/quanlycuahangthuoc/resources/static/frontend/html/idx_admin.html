@@ -33,6 +33,9 @@
         <a href="#" class="menu-item" data-page="thuoc">
           <i class="fas fa-pills"></i> Quản Lý Thuốc
         </a>
+        <a href="#" class="menu-item" data-page="nhacungcap">
+          <i class="fas fa-truck"></i> Quản Lý Nhà Cung Cấp
+        </a>
         <a href="#" class="menu-item" data-page="phieunhap">
           <i class="fas fa-file-import"></i> Phiếu Nhập Hàng
         </a>
@@ -217,6 +220,36 @@
               <tbody id="thuocTableBody">
                 <tr>
                   <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quản Lý Nhà Cung Cấp Page -->
+        <div id="nhacungcap-page" class="page">
+          <div class="page-header">
+            <h2>Danh Sách Nhà Cung Cấp</h2>
+            <button class="btn btn-primary" onclick="showAddNhaCungCapModal()">
+              <i class="fas fa-plus"></i> Thêm Nhà Cung Cấp
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table id="nhacungcapTable">
+              <thead>
+                <tr>
+                  <th>Mã NCC</th>
+                  <th>Tên Nhà Cung Cấp</th>
+                  <th>SĐT</th>
+                  <th>Địa Chỉ</th>
+                  <th>Trạng Thái</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="nhacungcapTableBody">
+                <tr>
+                  <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
                 </tr>
               </tbody>
             </table>

@@ -169,6 +169,22 @@ body {
   border-radius: 8px;
 }
 
+.menu a#loginLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-user-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.login-user-name {
+  line-height: 1;
+}
+
 .menu a:hover {
   color: #667eea;
   background: #f7fafc;

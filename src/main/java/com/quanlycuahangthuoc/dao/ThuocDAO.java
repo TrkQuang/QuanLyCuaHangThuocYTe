@@ -115,10 +115,11 @@ public class ThuocDAO {
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
-      e.printStackTrace();
-      System.err.println("Error updating Thuoc: " + e.getMessage());
+      throw new RuntimeException(
+        "Cập nhật thuoc thất bại: " + e.getMessage(),
+        e
+      );
     }
-    return false;
   }
 
   public boolean deleteThuoc(String MaThuoc) {

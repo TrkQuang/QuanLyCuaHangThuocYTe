@@ -9,7 +9,18 @@
     return;
   }
 
-  loginLink.innerHTML = `🔓 ${currentUser.tenDangNhap} <span class="user-arrow">▾</span>`;
+  loginLink.textContent = "";
+  const userIcon = document.createElement("img");
+  userIcon.src = "img/icon/account.png";
+  userIcon.alt = "Tài khoản";
+  userIcon.className = "login-user-icon";
+
+  const userName = document.createElement("span");
+  userName.className = "login-user-name";
+  userName.textContent = currentUser.tenDangNhap;
+
+  loginLink.appendChild(userIcon);
+  loginLink.appendChild(userName);
   loginLink.href = "#";
 
   loginLink.addEventListener("click", (e) => {

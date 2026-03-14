@@ -1,7 +1,6 @@
 package com.quanlycuahangthuoc.controller;
 
 import com.quanlycuahangthuoc.bus.ThuocBUS;
-import com.quanlycuahangthuoc.dao.ThuocDAO;
 import com.quanlycuahangthuoc.dto.ThuocDTO;
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +15,16 @@ public class ThuocController {
   @Autowired
   private ThuocBUS thuocBUS;
 
-  @Autowired
-  private ThuocDAO thuocDAO;
-
   // Lấy tất cả thuoc
   @GetMapping
   public ArrayList<ThuocDTO> getAll() {
-    return thuocDAO.getAllThuoc();
+    return thuocBUS.getAllThuoc();
   }
 
   // Lấy thuoc theo ID
   @GetMapping("/{maThuoc}")
   public ResponseEntity<?> getById(@PathVariable String maThuoc) {
-    ThuocDTO thuoc = thuocDAO.getById(maThuoc);
+    ThuocDTO thuoc = thuocBUS.getById(maThuoc);
     if (thuoc != null) {
       return ResponseEntity.ok(thuoc);
     }
@@ -52,7 +48,7 @@ public class ThuocController {
   @PutMapping
   public ResponseEntity<?> suaThuoc(@RequestBody ThuocDTO th) {
     try {
-      if (thuocDAO.updateThuoc(th)) {
+      if (thuocBUS.suaThuoc(th)) {
         return ResponseEntity.ok("Cập nhật thuoc thành công");
       }
       return ResponseEntity.badRequest().body("Cập nhật thuoc thất bại");
@@ -65,7 +61,7 @@ public class ThuocController {
   @DeleteMapping("/{maThuoc}")
   public ResponseEntity<?> xoaThuoc(@PathVariable String maThuoc) {
     try {
-      if (thuocDAO.deleteThuoc(maThuoc)) {
+      if (thuocBUS.xoaThuoc(maThuoc)) {
         return ResponseEntity.ok("Xóa thuoc thành công");
       }
       return ResponseEntity.badRequest().body("Xóa thuoc thất bại");

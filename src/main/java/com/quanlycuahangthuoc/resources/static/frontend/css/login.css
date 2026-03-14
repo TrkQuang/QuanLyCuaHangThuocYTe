@@ -74,6 +74,18 @@ body.register-page #registerForm {
   font-size: 14px;
 }
 
+.label-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 .full-width {
   grid-column: 1 / -1;
 }

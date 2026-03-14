@@ -58,9 +58,11 @@ public class NhaCungCapDAO {
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new RuntimeException(
+        "Thêm nhà cung cấp thất bại: " + e.getMessage(),
+        e
+      );
     }
-    return false;
   }
 
   public boolean updateNhaCungCap(NhaCungCapDTO ncc) {
@@ -78,9 +80,11 @@ public class NhaCungCapDAO {
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new RuntimeException(
+        "Cập nhật nhà cung cấp thất bại: " + e.getMessage(),
+        e
+      );
     }
-    return false;
   }
 
   public boolean deleteNhaCungCap(String MaNhaCungCap) {
