@@ -94,9 +94,8 @@ public class LichLamDAO {
         return ps.executeUpdate() > 0;
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Lỗi lưu lịch làm: " + e.getMessage(), e);
     }
-    return false;
   }
 
   public boolean updateLichLam(LichLamDTO ll) {
@@ -282,7 +281,10 @@ public class LichLamDAO {
   }
 
   public String generateMaLich() {
-    String sql = "SELECT MaLich FROM LichLamViec ORDER BY MaLich DESC LIMIT 1";
+    String sql =
+      "SELECT MaLich FROM LichLamViec " +
+      "WHERE MaLich REGEXP '^LICH[0-9]+$' " +
+      "ORDER BY CAST(SUBSTRING(MaLich, 5) AS UNSIGNED) DESC LIMIT 1";
     try (
       Connection conn = DBConnection.getConnection();
       Statement stmt = conn.createStatement();
@@ -293,10 +295,9 @@ public class LichLamDAO {
         try {
           String numberPart = lastMa.substring(4);
           long number = Long.parseLong(numberPart) + 1;
-          int len = Math.max(4, numberPart.length());
-          return String.format("LICH%0" + len + "d", number);
+          return String.format("LICH%04d", number);
         } catch (Exception ignored) {
-          return "LICH" + System.currentTimeMillis();
+          return "LICH0001";
         }
       }
       return "LICH0001";

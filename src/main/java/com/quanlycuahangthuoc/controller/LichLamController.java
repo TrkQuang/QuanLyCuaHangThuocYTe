@@ -34,7 +34,11 @@ public class LichLamController {
   @PostMapping("/dangky")
   public ResponseEntity<?> dangKy(@RequestBody LichLamDTO ll) {
     try {
-      return ResponseEntity.ok(lichLamBUS.dangKyCaLam(ll));
+      boolean saved = lichLamBUS.dangKyCaLam(ll);
+      if (!saved) {
+        return ResponseEntity.badRequest().body("Đăng ký lịch làm thất bại");
+      }
+      return ResponseEntity.ok(true);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }

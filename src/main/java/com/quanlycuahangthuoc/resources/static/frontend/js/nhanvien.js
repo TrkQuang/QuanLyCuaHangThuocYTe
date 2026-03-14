@@ -1868,6 +1868,12 @@ async function registerLichLamNhanVien() {
       return;
     }
 
+    const result = await response.json();
+    if (result !== true) {
+      showNotification("Đăng ký lịch làm thất bại", "error");
+      return;
+    }
+
     showNotification("Đăng ký lịch làm thành công, chờ admin duyệt", "success");
     await loadLichDangKyNhanVienTable();
   } catch (error) {
