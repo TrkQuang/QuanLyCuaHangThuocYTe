@@ -21,6 +21,32 @@ public class ThuocBUS {
     return thuocDAO.getAllThuoc();
   }
 
+  public java.util.ArrayList<ThuocDTO> getAllThuoc(boolean includeImage) {
+    return thuocDAO.getAllThuoc(includeImage);
+  }
+
+  public java.util.ArrayList<ThuocDTO> getThuocPaged(
+    String keyword,
+    String priceFilter,
+    String sortBy,
+    int page,
+    int size,
+    boolean includeImage
+  ) {
+    return thuocDAO.getThuocPaged(
+      keyword,
+      priceFilter,
+      sortBy,
+      page,
+      size,
+      includeImage
+    );
+  }
+
+  public int countThuocPaged(String keyword, String priceFilter) {
+    return thuocDAO.countThuocPaged(keyword, priceFilter);
+  }
+
   public ThuocDTO getById(String maThuoc) {
     return thuocDAO.getById(maThuoc);
   }

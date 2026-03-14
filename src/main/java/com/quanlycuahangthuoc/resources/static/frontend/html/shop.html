@@ -137,6 +137,32 @@
       #shopLoadMoreBtn {
         padding: 10px 18px;
       }
+
+      .shop-loading-state {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 220px;
+        color: #64748b;
+      }
+
+      .shop-loading-spinner {
+        width: 34px;
+        height: 34px;
+        border: 3px solid #dbeafe;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: shop-spin 0.8s linear infinite;
+      }
+
+      @keyframes shop-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>

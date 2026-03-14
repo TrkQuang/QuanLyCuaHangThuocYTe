@@ -96,7 +96,7 @@ DELIMITER ;
 CREATE TABLE Thuoc (
     MaThuoc VARCHAR(20) PRIMARY KEY,
     TenThuoc VARCHAR(100) NOT NULL,
-    HinhAnh VARCHAR(255),
+    HinhAnh LONGTEXT,
     DonViTinh VARCHAR(50) NOT NULL,
     GiaBan FLOAT NOT NULL,
     SoLuongTon INT NOT NULL,

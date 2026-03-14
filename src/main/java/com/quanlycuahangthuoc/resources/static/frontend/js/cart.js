@@ -94,7 +94,9 @@ function hideHeaderSearchDropdown() {
 }
 
 function normalizeSearchText(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function navigateToShopWithKeyword(rawKeyword) {
@@ -117,7 +119,9 @@ function renderHeaderSearchDropdown(keyword) {
     .filter((p) => {
       const name = normalizeSearchText(p.name);
       const desc = normalizeSearchText(p.description);
-      return name.includes(normalizedKeyword) || desc.includes(normalizedKeyword);
+      return (
+        name.includes(normalizedKeyword) || desc.includes(normalizedKeyword)
+      );
     })
     .slice(0, 8);
 
@@ -150,8 +154,11 @@ function renderHeaderSearchDropdown(keyword) {
 async function ensureHeaderSearchProducts() {
   if (headerSearchProducts.length) return;
   try {
-    const data = await apiFetch("/thuoc");
-    headerSearchProducts = (Array.isArray(data) ? data : []).map((x) => ({
+    const data = await apiFetch(
+      "/thuoc/paged?page=1&size=200&includeImage=false&sortBy=name-asc",
+    );
+    const items = Array.isArray(data?.items) ? data.items : [];
+    headerSearchProducts = items.map((x) => ({
       name: x.tenThuoc || "",
       description: x.donViTinh || "",
       price: Number(x.giaBan || 0),

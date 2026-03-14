@@ -775,7 +775,7 @@ async function deleteKhachHang(maKH) {
  */
 async function loadThuocData() {
   try {
-    const response = await fetch(`${API_URL}/thuoc`);
+    const response = await fetch(`${API_URL}/thuoc?includeImage=false`);
     const data = await response.json();
 
     displayThuocTable(data);
@@ -855,6 +855,10 @@ function showAddThuocModal() {
                 <label>Hạn sử dụng</label>
                 <input type="date" name="hsd">
             </div>
+            <div class="form-group">
+              <label>Ảnh thuốc</label>
+              <input type="file" name="hinhAnhFile" accept="image/*">
+            </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
                 <button type="submit" class="btn btn-primary">Thêm</button>
@@ -867,13 +871,7 @@ function showAddThuocModal() {
     .addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData);
-
-      // Convert string to number for numeric fields
-      if (data.giaBan) data.giaBan = parseFloat(data.giaBan);
-      if (data.soLuongTon) data.soLuongTon = parseInt(data.soLuongTon);
-
-      await addThuoc(data);
+      await addThuoc(formData);
     });
 
   openModal();
@@ -883,12 +881,26 @@ function showAddThuocModal() {
  * Thêm thuốc mới
  * @param {Object} data - Dữ liệu thuốc
  */
-async function addThuoc(data) {
+async function addThuoc(formData) {
   try {
-    const response = await fetch(`${API_URL}/thuoc/them-thuoc`, {
+    const payload = new FormData();
+    payload.append("tenThuoc", String(formData.get("tenThuoc") || "").trim());
+    payload.append("donViTinh", String(formData.get("donViTinh") || "").trim());
+    payload.append("giaBan", String(formData.get("giaBan") || "0").trim());
+    payload.append(
+      "soLuongTon",
+      String(formData.get("soLuongTon") || "0").trim(),
+    );
+    payload.append("hsd", String(formData.get("hsd") || "").trim());
+
+    const imageFile = formData.get("hinhAnhFile");
+    if (imageFile instanceof File && imageFile.size > 0) {
+      payload.append("hinhAnh", imageFile);
+    }
+
+    const response = await fetch(`${API_URL}/thuoc/them-thuoc-upload`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: payload,
     });
 
     if (response.ok) {
@@ -1332,9 +1344,10 @@ function collectPhieuNhapDetailsAdmin(maPhieuNhap) {
  */
 async function showAddPhieuNhapModal() {
   try {
+    setPhieuNhapModalLayout(true);
     const [nccRes, thuocRes] = await Promise.all([
       fetch(`${API_URL}/nhacungcap`),
-      fetch(`${API_URL}/thuoc`),
+      fetch(`${API_URL}/thuoc?includeImage=false`),
     ]);
     const nccList = nccRes.ok ? await nccRes.json() : [];
     const thuocList = thuocRes.ok ? await thuocRes.json() : [];
@@ -1447,10 +1460,11 @@ async function showAddPhieuNhapModal() {
 
 async function editPhieuNhapAdmin(maPhieuNhap) {
   try {
+    setPhieuNhapModalLayout(true);
     const [pnRes, detailRes, thuocRes] = await Promise.all([
       fetch(`${API_URL}/phieunhap/${maPhieuNhap}`),
       fetch(`${API_URL}/ctphieunhap/phieunhap/${maPhieuNhap}`),
-      fetch(`${API_URL}/thuoc`),
+      fetch(`${API_URL}/thuoc?includeImage=false`),
     ]);
 
     if (!pnRes.ok) {
@@ -2181,11 +2195,22 @@ function openModal() {
   document.getElementById("modal").style.display = "block";
 }
 
+function getModalContentElement() {
+  return document.querySelector("#modal .modal-content");
+}
+
+function setPhieuNhapModalLayout(enabled) {
+  const modalContent = getModalContentElement();
+  if (!modalContent) return;
+  modalContent.classList.toggle("modal-phieunhap", Boolean(enabled));
+}
+
 /**
  * Đóng modal
  */
 function closeModal() {
   document.getElementById("modal").style.display = "none";
+  setPhieuNhapModalLayout(false);
 }
 
 /**
@@ -2621,6 +2646,7 @@ async function editThuoc(maThuoc) {
  */
 async function viewPhieuNhap(maPhieuNhap) {
   try {
+    setPhieuNhapModalLayout(true);
     const normalizedMaPhieuNhap = String(maPhieuNhap || "").trim();
     if (!normalizedMaPhieuNhap) {
       showNotification("Không tìm thấy thông tin phiếu nhập", "error");

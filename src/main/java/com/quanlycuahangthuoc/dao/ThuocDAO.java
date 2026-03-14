@@ -9,15 +9,36 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ThuocDAO {
 
+  private static final Map<String, String> SORT_BY_MAP = Map.of(
+    "name-asc",
+    "TenThuoc ASC",
+    "name-desc",
+    "TenThuoc DESC",
+    "price-asc",
+    "GiaBan ASC",
+    "price-desc",
+    "GiaBan DESC",
+    "stock-desc",
+    "SoLuongTon DESC"
+  );
+
   public ArrayList<ThuocDTO> getAllThuoc() {
+    return getAllThuoc(true);
+  }
+
+  public ArrayList<ThuocDTO> getAllThuoc(boolean includeImage) {
     ArrayList<ThuocDTO> ds = new ArrayList<>();
 
-    String sql = "SELECT * FROM Thuoc";
+    String sql = includeImage
+      ? "SELECT MaThuoc, TenThuoc, HinhAnh, DonViTinh, GiaBan, SoLuongTon, NgaySanXuat, HanSuDung FROM Thuoc"
+      : "SELECT MaThuoc, TenThuoc, DonViTinh, GiaBan, SoLuongTon, NgaySanXuat, HanSuDung FROM Thuoc";
     try (
       Connection conn = DBConnection.getConnection();
       Statement stmt = conn.createStatement();
@@ -28,11 +49,7 @@ public class ThuocDAO {
         t.setMaThuoc(rs.getString("MaThuoc"));
         t.setMaNhaCungCap("");
         t.setTenThuoc(rs.getString("TenThuoc"));
-        t.setHinhAnh(
-          hasColumn(rs, "HinhAnh")
-            ? rs.getString("HinhAnh")
-            : "img/UATThuoc.jpg"
-        );
+        t.setHinhAnh(includeImage ? rs.getString("HinhAnh") : "");
         t.setDonViTinh(rs.getString("DonViTinh"));
         java.sql.Date nsx = rs.getDate("NgaySanXuat");
         t.setNSX(nsx != null ? nsx.toString() : "");
@@ -50,6 +67,94 @@ public class ThuocDAO {
       e.printStackTrace();
     }
     return ds;
+  }
+
+  public ArrayList<ThuocDTO> getThuocPaged(
+    String keyword,
+    String priceFilter,
+    String sortBy,
+    int page,
+    int size,
+    boolean includeImage
+  ) {
+    ArrayList<ThuocDTO> ds = new ArrayList<>();
+
+    int safePage = Math.max(1, page);
+    int safeSize = Math.max(1, size);
+    int offset = (safePage - 1) * safeSize;
+
+    List<Object> params = new ArrayList<>();
+    String where = buildThuocFilterWhereClause(keyword, priceFilter, params);
+    String orderBy = SORT_BY_MAP.getOrDefault(sortBy, "TenThuoc ASC");
+
+    String selectCols = includeImage
+      ? "MaThuoc, TenThuoc, HinhAnh, DonViTinh, GiaBan, SoLuongTon, NgaySanXuat, HanSuDung"
+      : "MaThuoc, TenThuoc, DonViTinh, GiaBan, SoLuongTon, NgaySanXuat, HanSuDung";
+
+    String sql =
+      "SELECT " +
+      selectCols +
+      " FROM Thuoc" +
+      where +
+      " ORDER BY " +
+      orderBy +
+      " LIMIT ? OFFSET ?";
+
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      int idx = bindParams(ps, params);
+      ps.setInt(idx++, safeSize);
+      ps.setInt(idx, offset);
+
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          ThuocDTO t = new ThuocDTO();
+          t.setMaThuoc(rs.getString("MaThuoc"));
+          t.setMaNhaCungCap("");
+          t.setTenThuoc(rs.getString("TenThuoc"));
+          t.setHinhAnh(includeImage ? rs.getString("HinhAnh") : "");
+          t.setDonViTinh(rs.getString("DonViTinh"));
+
+          java.sql.Date nsx = rs.getDate("NgaySanXuat");
+          t.setNSX(nsx != null ? nsx.toString() : "");
+
+          java.sql.Date hsd = rs.getDate("HanSuDung");
+          t.setHSD(hsd != null ? hsd.toString() : "");
+
+          t.setGiaBan(rs.getFloat("GiaBan"));
+          t.setSoLuongTon(rs.getInt("SoLuongTon"));
+          ds.add(t);
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return ds;
+  }
+
+  public int countThuocPaged(String keyword, String priceFilter) {
+    List<Object> params = new ArrayList<>();
+    String where = buildThuocFilterWhereClause(keyword, priceFilter, params);
+    String sql = "SELECT COUNT(*) AS total FROM Thuoc" + where;
+
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      bindParams(ps, params);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt("total");
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return 0;
   }
 
   public boolean insertThuoc(ThuocDTO t) {
@@ -256,5 +361,56 @@ public class ThuocDAO {
       // Keep backward compatibility and fallback to default values.
     }
     return false;
+  }
+
+  private String buildThuocFilterWhereClause(
+    String keyword,
+    String priceFilter,
+    List<Object> params
+  ) {
+    StringBuilder where = new StringBuilder(" WHERE 1=1");
+
+    String kw = String.valueOf(keyword == null ? "" : keyword).trim();
+    if (!kw.isEmpty()) {
+      where.append(
+        " AND (TenThuoc LIKE ? OR DonViTinh LIKE ? OR MaThuoc LIKE ?)"
+      );
+      String like = "%" + kw + "%";
+      params.add(like);
+      params.add(like);
+      params.add(like);
+    }
+
+    String pf = String.valueOf(priceFilter == null ? "" : priceFilter)
+      .trim()
+      .toLowerCase();
+    switch (pf) {
+      case "lt5000":
+        where.append(" AND GiaBan < ?");
+        params.add(50000);
+        break;
+      case "5000-10000":
+        where.append(" AND GiaBan >= ? AND GiaBan <= ?");
+        params.add(50000);
+        params.add(100000);
+        break;
+      case "gt20000":
+        where.append(" AND GiaBan > ?");
+        params.add(100000);
+        break;
+      default:
+        break;
+    }
+
+    return where.toString();
+  }
+
+  private int bindParams(PreparedStatement ps, List<Object> params)
+    throws SQLException {
+    int idx = 1;
+    for (Object param : params) {
+      ps.setObject(idx++, param);
+    }
+    return idx;
   }
 }

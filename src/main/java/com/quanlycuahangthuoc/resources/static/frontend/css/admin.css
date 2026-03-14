@@ -473,6 +473,66 @@ tbody tr:hover {
   color: #ff9800;
 }
 
+/* ===== PHIEU NHAP MODAL LAYOUT FIX (ADMIN) ===== */
+.modal-content.modal-phieunhap {
+  width: min(1000px, calc(100vw - 24px));
+  max-width: min(1000px, calc(100vw - 24px));
+}
+
+.modal-content.modal-phieunhap #modalBody {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.modal-content.modal-phieunhap .pn-detail-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.modal-content.modal-phieunhap #detailTable {
+  width: 100%;
+  min-width: 760px;
+  table-layout: fixed;
+}
+
+.modal-content.modal-phieunhap #detailTable th,
+.modal-content.modal-phieunhap #detailTable td {
+  padding: 10px 8px;
+  vertical-align: middle;
+}
+
+.modal-content.modal-phieunhap #detailTable th:nth-child(1),
+.modal-content.modal-phieunhap #detailTable td:nth-child(1) {
+  width: 38%;
+}
+
+.modal-content.modal-phieunhap #detailTable th:nth-child(2),
+.modal-content.modal-phieunhap #detailTable td:nth-child(2),
+.modal-content.modal-phieunhap #detailTable th:nth-child(3),
+.modal-content.modal-phieunhap #detailTable td:nth-child(3) {
+  width: 23%;
+}
+
+.modal-content.modal-phieunhap #detailTable th:nth-child(4),
+.modal-content.modal-phieunhap #detailTable td:nth-child(4) {
+  width: 16%;
+  text-align: center;
+}
+
+.modal-content.modal-phieunhap .pn-ma-thuoc,
+.modal-content.modal-phieunhap .pn-so-luong,
+.modal-content.modal-phieunhap .pn-don-gia {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.modal-content.modal-phieunhap #detailTable .btn {
+  padding: 8px 10px;
+  min-width: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
@@ -496,5 +556,16 @@ tbody tr:hover {
 
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+
+  .modal-content.modal-phieunhap {
+    margin: 12px auto;
+    padding: 16px;
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+  }
+
+  .modal-content.modal-phieunhap .form-actions {
+    flex-wrap: wrap;
   }
 }

@@ -231,7 +231,7 @@ async function loadDashboardData() {
   try {
     // Gọi API song song
     const [thuocRes, phieunhapRes, hoadonRes] = await Promise.all([
-      fetch(`${API_URL}/thuoc`),
+      fetch(`${API_URL}/thuoc?includeImage=false`),
       fetch(`${API_URL}/phieunhap`),
       fetch(`${API_URL}/hoadon`),
     ]);
@@ -354,7 +354,7 @@ function displayLowStockDrugs(thuocList) {
  */
 async function loadThuocData() {
   try {
-    const response = await fetch(`${API_URL}/thuoc`);
+    const response = await fetch(`${API_URL}/thuoc?includeImage=false`);
     const data = await response.json();
 
     allThuoc = data; // Lưu để search
@@ -453,6 +453,10 @@ function showAddThuocModal() {
               <label>Hạn sử dụng</label>
               <input type="date" name="hsd">
             </div>
+            <div class="form-group">
+              <label>Ảnh thuốc</label>
+              <input type="file" name="hinhAnhFile" accept="image/*">
+            </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
                 <button type="submit" class="btn btn-primary">Thêm</button>
@@ -465,9 +469,7 @@ function showAddThuocModal() {
     .addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData);
-
-      await addThuoc(data);
+      await addThuoc(formData);
     });
 
   openModal();
@@ -477,20 +479,26 @@ function showAddThuocModal() {
  * Thêm thuốc mới
  * @param {Object} data - Dữ liệu thuốc
  */
-async function addThuoc(data) {
+async function addThuoc(formData) {
   try {
-    const payload = {
-      tenThuoc: data.tenThuoc,
-      donViTinh: data.donViTinh,
-      giaBan: Number(data.giaBan || 0),
-      soLuongTon: Number(data.soLuongTon || 0),
-      hsd: data.hsd || "",
-    };
+    const payload = new FormData();
+    payload.append("tenThuoc", String(formData.get("tenThuoc") || "").trim());
+    payload.append("donViTinh", String(formData.get("donViTinh") || "").trim());
+    payload.append("giaBan", String(formData.get("giaBan") || "0").trim());
+    payload.append(
+      "soLuongTon",
+      String(formData.get("soLuongTon") || "0").trim(),
+    );
+    payload.append("hsd", String(formData.get("hsd") || "").trim());
 
-    const response = await fetch(`${API_URL}/thuoc/them-thuoc`, {
+    const imageFile = formData.get("hinhAnhFile");
+    if (imageFile instanceof File && imageFile.size > 0) {
+      payload.append("hinhAnh", imageFile);
+    }
+
+    const response = await fetch(`${API_URL}/thuoc/them-thuoc-upload`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (response.ok) {
@@ -629,7 +637,7 @@ async function showAddPhieuNhapModal() {
   try {
     const [nccRes, thuocRes] = await Promise.all([
       fetch(`${API_URL}/nhacungcap`),
-      fetch(`${API_URL}/thuoc`),
+      fetch(`${API_URL}/thuoc?includeImage=false`),
     ]);
 
     const nccList = nccRes.ok ? await nccRes.json() : [];
@@ -778,7 +786,7 @@ async function showAddPhieuNhapModal() {
  */
 async function loadThuocForSale() {
   try {
-    const response = await fetch(`${API_URL}/thuoc`);
+    const response = await fetch(`${API_URL}/thuoc?includeImage=false`);
     allThuoc = await response.json();
     renderDrugSearchResults(allThuoc);
   } catch (error) {
@@ -1506,7 +1514,7 @@ async function editPhieuNhap(maPhieuNhap) {
     const [pnRes, detailRes, thuocRes] = await Promise.all([
       fetch(`${API_URL}/phieunhap/${maPhieuNhap}`),
       fetch(`${API_URL}/ctphieunhap/phieunhap/${maPhieuNhap}`),
-      fetch(`${API_URL}/thuoc`),
+      fetch(`${API_URL}/thuoc?includeImage=false`),
     ]);
 
     if (!pnRes.ok) {

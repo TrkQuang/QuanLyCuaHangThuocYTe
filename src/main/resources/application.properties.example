@@ -13,4 +13,10 @@ db.hikari.idle-timeout=600000
 db.hikari.max-lifetime=1800000
 
 server.port=8080
+
+# Compress JSON/static responses to reduce transfer time.
+server.compression.enabled=true
+server.compression.min-response-size=1024
+server.compression.mime-types=application/json,text/html,text/plain,text/css,application/javascript
+
 spring.web.resources.static-locations=file:src/main/java/com/quanlycuahangthuoc/resources/static/

@@ -6,10 +6,14 @@ const shopState = {
   filtered: [],
   currentPage: 1,
   extraPerPage: 0,
+  totalItems: 0,
+  totalPages: 1,
 };
 
 function normalizeText(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function getQueryParamKeyword() {
@@ -65,7 +69,9 @@ function renderSearchDropdown(keyword) {
     .filter((p) => {
       const name = normalizeText(p.name);
       const desc = normalizeText(p.description);
-      return name.includes(normalizedKeyword) || desc.includes(normalizedKeyword);
+      return (
+        name.includes(normalizedKeyword) || desc.includes(normalizedKeyword)
+      );
     })
     .slice(0, 8);
 
@@ -85,14 +91,12 @@ function renderSearchDropdown(keyword) {
     )
     .join("");
 
-  dropdown
-    .querySelectorAll(".search-suggestion-item")
-    .forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const keywordSelected = btn.getAttribute("data-name") || "";
-        navigateToShopWithKeyword(keywordSelected);
-      });
+  dropdown.querySelectorAll(".search-suggestion-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const keywordSelected = btn.getAttribute("data-name") || "";
+      navigateToShopWithKeyword(keywordSelected);
     });
+  });
 
   dropdown.style.display = "block";
 }
@@ -180,7 +184,19 @@ function getInputValue(id) {
 function getPageSize() {
   const baseSize = parseInt(getInputValue("shopPageSize") || "8", 10);
   const safeBase = Number.isFinite(baseSize) && baseSize > 0 ? baseSize : 8;
-  return safeBase + shopState.extraPerPage;
+  return safeBase;
+}
+
+function mapThuocToProduct(x) {
+  return {
+    id: x.maThuoc,
+    name: x.tenThuoc,
+    price: Number(x.giaBan || 0),
+    stock: Number(x.soLuongTon || 0),
+    image: x.hinhAnh || "img/UATThuoc.jpg",
+    unit: x.donViTinh || "",
+    description: x.donViTinh || "Sản phẩm nhà thuốc",
+  };
 }
 
 function filterAndSortProducts(source) {
@@ -240,15 +256,18 @@ function renderShopSummary() {
   if (!countEl || !pageEl) return;
 
   const total = shopState.filtered.length;
-  const pageSize = getPageSize();
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const currentItems = getCurrentPageItems().length;
+  const totalPages = Math.max(1, shopState.totalPages || 1);
+  const currentItems = isAdvancedShopPage()
+    ? products.length
+    : getCurrentPageItems().length;
+  const totalItems = isAdvancedShopPage() ? shopState.totalItems : total;
 
-  countEl.textContent = `${total} sản phẩm | Hiển thị ${currentItems} sản phẩm`;
+  countEl.textContent = `${totalItems} sản phẩm | Hiển thị ${currentItems} sản phẩm`;
   pageEl.textContent = `Trang ${shopState.currentPage}/${totalPages}`;
 
   if (loadMoreBtn) {
-    loadMoreBtn.style.display = total > pageSize ? "inline-flex" : "none";
+    loadMoreBtn.style.display =
+      shopState.currentPage < totalPages ? "inline-flex" : "none";
   }
 }
 
@@ -257,11 +276,7 @@ function renderShopPagination() {
   if (!pagination) return;
 
   pagination.innerHTML = "";
-  const pageSize = getPageSize();
-  const totalPages = Math.max(
-    1,
-    Math.ceil(shopState.filtered.length / pageSize),
-  );
+  const totalPages = Math.max(1, shopState.totalPages || 1);
 
   const prev = document.createElement("button");
   prev.className = "shop-page-btn";
@@ -300,23 +315,59 @@ function renderShopPagination() {
 }
 
 function applyShopView(resetPage = true) {
-  if (!isAdvancedShopPage()) return;
+  if (!isAdvancedShopPage()) return Promise.resolve();
 
-  shopState.filtered = filterAndSortProducts(products);
   if (resetPage) {
     shopState.currentPage = 1;
   }
 
-  const pageSize = getPageSize();
-  const totalPages = Math.max(
-    1,
-    Math.ceil(shopState.filtered.length / pageSize),
-  );
-  if (shopState.currentPage > totalPages) {
-    shopState.currentPage = totalPages;
+  return loadShopProductsPaged({ showLoading: !resetPage });
+}
+
+function renderShopPageLoading() {
+  const wrap = getDynamicProductsGrid();
+  if (!wrap) return;
+
+  wrap.innerHTML = `
+    <div class="shop-loading-state">
+      <div class="shop-loading-spinner" aria-hidden="true"></div>
+      <p>Đang tải sản phẩm...</p>
+    </div>
+  `;
+}
+
+async function loadShopProductsPaged(options = {}) {
+  const { showLoading = false } = options;
+  if (showLoading) {
+    renderShopPageLoading();
   }
 
-  renderProducts(getCurrentPageItems());
+  const keyword = getInputValue("shopKeyword").trim();
+  const priceFilter = getInputValue("shopPriceFilter");
+  const sortBy = getInputValue("shopSortBy") || "name-asc";
+  const pageSize = getPageSize();
+
+  const params = new URLSearchParams({
+    page: String(shopState.currentPage),
+    size: String(pageSize),
+    keyword,
+    priceFilter,
+    sortBy,
+    includeImage: "true",
+  });
+
+  const data = await apiFetch(`/thuoc/paged?${params.toString()}`);
+  const items = Array.isArray(data?.items) ? data.items : [];
+
+  products = items.map(mapThuocToProduct);
+  shopState.totalItems = Number(data?.totalItems || 0);
+  shopState.totalPages = Math.max(1, Number(data?.totalPages || 1));
+  shopState.currentPage = Math.min(
+    Math.max(1, Number(data?.page || shopState.currentPage || 1)),
+    shopState.totalPages,
+  );
+
+  renderProducts(products);
   renderShopSummary();
   renderShopPagination();
 }
@@ -399,35 +450,31 @@ function bindShopControls() {
 
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener("click", () => {
-      shopState.extraPerPage += 4;
-      applyShopView(true);
+      if (shopState.currentPage < shopState.totalPages) {
+        shopState.currentPage += 1;
+        applyShopView(false);
+      }
     });
   }
 }
 
 async function loadProducts() {
   try {
-    const data = await apiFetch("/thuoc");
-    products = data.map((x) => ({
-      id: x.maThuoc,
-      name: x.tenThuoc,
-      price: Number(x.giaBan || 0),
-      stock: Number(x.soLuongTon || 0),
-      image: x.hinhAnh || "img/UATThuoc.jpg",
-      unit: x.donViTinh || "",
-      description: x.donViTinh || "Sản phẩm nhà thuốc",
-    }));
-
-    initializeGlobalSearch();
-
     if (isAdvancedShopPage()) {
       prefillShopKeywordFromQuery();
-      populateUnitFilter();
       bindShopControls();
-      applyShopView(true);
+      await applyShopView(true);
+      initializeGlobalSearch();
       return;
     }
 
+    const data = await apiFetch(
+      "/thuoc/paged?page=1&size=15&includeImage=true&sortBy=name-asc",
+    );
+    const items = Array.isArray(data?.items) ? data.items : [];
+    products = items.map(mapThuocToProduct);
+
+    initializeGlobalSearch();
     renderProducts(products);
   } catch (e) {
     const wrap = getDynamicProductsGrid();
