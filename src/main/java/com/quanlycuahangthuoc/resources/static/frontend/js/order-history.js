@@ -43,15 +43,15 @@ async function loadOrderHistory() {
             </div>
             <div class="order-details">
               <div class="detail-item">
-                <div class="detail-label">Ngay tao</div>
+                <div class="detail-label">Ngày tạo</div>
                 <div class="detail-value">${formatDate(order.ngayTao)}</div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Nhan vien</div>
+                <div class="detail-label">Nhân viên</div>
                 <div class="detail-value">${escapeHtml(order.maNhanVien || "-")}</div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Tong tien</div>
+                <div class="detail-label">Tổng tiền</div>
                 <div class="detail-value">${formatCurrency(order.tongTien)}</div>
               </div>
             </div>
@@ -60,6 +60,6 @@ async function loadOrderHistory() {
       })
       .join("");
   } catch (error) {
-    orderContainer.innerHTML = `<div class="empty-state"><h3>Loi tai du lieu</h3><p>${escapeHtml(error.message)}</p></div>`;
+    orderContainer.innerHTML = `<div class="empty-state"><h3>Lỗi tải dữ liệu</h3><p>${escapeHtml(error.message)}</p></div>`;
   }
 }

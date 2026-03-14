@@ -147,18 +147,12 @@
         </ul>
       </div>
     </nav>
-
     <main class="shop-shell">
       <div class="container">
-        <section class="shop-hero">
-          <h1>Danh sách thuốc</h1>
-          <p>Hình ảnh và thông tin thuốc lấy trực tiếp từ dữ liệu hệ thống.</p>
-        </section>
-
         <section class="shop-controls" id="shopControls">
           <div class="shop-controls-grid">
             <div>
-              <label for="shopKeyword">Từ khóa</label>
+              <label for="shopKeyword">Tên thuốc</label>
               <input
                 id="shopKeyword"
                 class="control"
@@ -167,28 +161,12 @@
               />
             </div>
             <div>
-              <label for="shopUnitFilter">Đơn vị</label>
-              <select id="shopUnitFilter" class="control">
-                <option value="">Tất cả</option>
-              </select>
-            </div>
-            <div>
               <label for="shopPriceFilter">Khoảng giá</label>
               <select id="shopPriceFilter" class="control">
                 <option value="">Tất cả</option>
-                <option value="lt5000">Dưới 5.000đ</option>
-                <option value="5000-10000">5.000đ - 10.000đ</option>
-                <option value="10000-20000">10.000đ - 20.000đ</option>
-                <option value="gt20000">Trên 20.000đ</option>
-              </select>
-            </div>
-            <div>
-              <label for="shopStockFilter">Tồn kho</label>
-              <select id="shopStockFilter" class="control">
-                <option value="">Tất cả</option>
-                <option value="in-stock">Còn hàng</option>
-                <option value="low-stock">Sắp hết (&lt;=20)</option>
-                <option value="out-stock">Hết hàng</option>
+                <option value="lt5000">Dưới 10.000đ</option>
+                <option value="5000-10000">10.000đ - 50.000đ</option>
+                <option value="gt20000">Trên 50.000đ</option>
               </select>
             </div>
             <div>
@@ -199,14 +177,6 @@
                 <option value="price-asc">Giá tăng dần</option>
                 <option value="price-desc">Giá giảm dần</option>
                 <option value="stock-desc">Tồn kho giảm dần</option>
-              </select>
-            </div>
-            <div>
-              <label for="shopPageSize">Mỗi trang</label>
-              <select id="shopPageSize" class="control">
-                <option value="8">8</option>
-                <option value="12">12</option>
-                <option value="16">16</option>
               </select>
             </div>
           </div>

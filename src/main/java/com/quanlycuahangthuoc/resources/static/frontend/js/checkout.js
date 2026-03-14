@@ -18,7 +18,7 @@ async function resolveNhanVienForCheckout() {
 
   const first = list.find((x) => x && x.maNhanVien);
   if (!first || !first.maNhanVien) {
-    throw new Error("Khong tim thay ma nhan vien hop le");
+    throw new Error("Không tìm thấy mã nhân viên hợp lệ");
   }
 
   return first.maNhanVien;

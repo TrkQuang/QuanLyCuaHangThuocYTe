@@ -42,9 +42,9 @@ async function addToCart(eventOrId, maybeIdOrPrice) {
       }),
     });
     await updateCartCount();
-    alert(`Da them \"${title}\" vao gio hang`);
+    alert(`Đã thêm \"${title}\" vào giỏ hàng`);
   } catch (e) {
-    alert(e.message || "Khong the them vao gio hang");
+    alert(e.message || "Không thể thêm vào giỏ hàng");
   }
 }
 

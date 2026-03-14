@@ -17,7 +17,7 @@ async function renderCart() {
 
   if (!cart.length) {
     cartItems.innerHTML =
-      '<tr><td colspan="5" style="text-align:center;padding:30px;">Gio hang trong</td></tr>';
+      '<tr><td colspan="5" style="text-align:center;padding:30px;">Giỏ hàng trống</td></tr>';
     totalPriceEl.innerText = "0";
     return;
   }

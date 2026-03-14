@@ -36,6 +36,71 @@ h2 {
   border: 1px solid #e2e8f0;
 }
 
+/* footer */
+.cart-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+}
+
+/* khối tổng tiền + thanh toán */
+.checkout-box {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* giảm gap cho gọn */
+}
+
+/* khung tổng thanh toán */
+.total-box {
+  background: #f8fafc; /* màu nhẹ hơn */
+  padding: 8px 16px; /* nhỏ lại */
+  border-radius: 8px;
+  text-align: right;
+}
+
+/* chữ tổng thanh toán */
+.total-box span {
+  font-size: 16px;
+  color: #64748b;
+}
+
+/* giá tiền */
+.total-box strong {
+  font-size: 22px;
+  color: #e53935;
+  font-weight: 700;
+}
+
+/* nút */
+.btn {
+  padding: 11px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.25s;
+}
+
+.btn.secondary {
+  background: #edf2f7;
+  color: #333;
+}
+
+.btn.secondary:hover {
+  background: #e2e8f0;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
 /* Table */
 table {
   width: 100%;
@@ -149,29 +214,6 @@ tbody tr:last-child {
   border-top: 3px solid #e2e8f0;
   gap: 24px;
   flex-wrap: wrap;
-}
-
-/* Total */
-.total-box {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px 32px;
-  border-radius: 12px;
-  color: white;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-}
-
-.total-box span {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  opacity: 0.9;
-}
-
-.total-box strong {
-  font-size: 28px;
-  font-weight: 800;
-  display: block;
 }
 
 /* Buttons */

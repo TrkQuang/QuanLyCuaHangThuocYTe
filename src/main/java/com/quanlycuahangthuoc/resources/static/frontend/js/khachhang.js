@@ -260,7 +260,7 @@ async function loadProducts() {
       stock: Number(x.soLuongTon || 0),
       image: x.hinhAnh || "img/UATThuoc.jpg",
       unit: x.donViTinh || "",
-      description: x.donViTinh || "San pham nha thuoc",
+      description: x.donViTinh || "Sản phẩm nhà thuốc",
     }));
 
     if (isAdvancedShopPage()) {
@@ -290,13 +290,13 @@ function renderProducts(list) {
 
     const img = document.createElement("img");
     img.src = p.image || "img/UATThuoc.jpg";
-    img.alt = p.name || "San pham";
+    img.alt = p.name || "Sản phẩm";
     img.onerror = () => {
       img.src = "img/UATThuoc.jpg";
     };
 
     const name = document.createElement("h3");
-    name.textContent = p.name || "Thuoc";
+    name.textContent = p.name || "Thuốc";
 
     const price = document.createElement("div");
     price.className = "product-price";
@@ -304,14 +304,14 @@ function renderProducts(list) {
     price.textContent = `${Number(p.price || 0).toLocaleString("vi-VN")}đ`;
 
     const desc = document.createElement("p");
-    desc.textContent = `${p.description || "San pham nha thuoc"} | Con: ${Number(p.stock || 0)}`;
+    desc.textContent = `${p.description || "Sản phẩm nhà thuốc"} | Còn: ${Number(p.stock || 0)}`;
 
     const btn = document.createElement("button");
     btn.className = "btn-primary";
-    btn.textContent = "Them gio hang";
+    btn.textContent = "Thêm giỏ hàng";
     btn.disabled = Number(p.stock || 0) <= 0;
     if (btn.disabled) {
-      btn.textContent = "Het hang";
+      btn.textContent = "Hết hàng";
       btn.style.opacity = "0.6";
       btn.style.cursor = "not-allowed";
     }
@@ -333,7 +333,7 @@ async function loadOrders() {
   const currentUser = getCurrentUser();
   if (!currentUser?.maKhachHang) {
     box.innerHTML =
-      "<p>Vui long dang nhap bang tai khoan khach hang de xem don hang.</p>";
+      "<p>Vui lòng đăng nhập bằng tài khoản khách hàng để xem đơn hàng.</p>";
     return;
   }
 
@@ -342,7 +342,7 @@ async function loadOrders() {
     const mine = all.filter((o) => o.maKhachHang === currentUser.maKhachHang);
 
     if (!mine.length) {
-      box.innerHTML = "<p>Chua co don hang nao.</p>";
+      box.innerHTML = "<p>Chưa có đơn hàng nào.</p>";
       return;
     }
 

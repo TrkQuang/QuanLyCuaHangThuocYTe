@@ -32,7 +32,7 @@
     var page = document.body;
     var role = "";
     if (location.pathname.includes("idx_admin")) role = "Admin";
-    if (location.pathname.includes("idx_nv")) role = "Nhan Vien";
+    if (location.pathname.includes("idx_nv")) role = "Nhân Viên";
     if (!role) return;
 
     var target = document.querySelector(".sidebar-header p");
@@ -101,23 +101,23 @@
           label: "Ton kho",
           column: 4,
         },
-        { key: "priceMin", type: "number-min", label: "Gia tu", column: 3 },
+        { key: "priceMin", type: "number-min", label: "Giá từ", column: 3 },
         {
           key: "priceMax",
           type: "number-max",
-          label: "Gia den",
+          label: "Giá đến",
           column: 3,
         },
         {
           key: "expDateFrom",
           type: "date-from",
-          label: "HSD tu",
+          label: "HSD từ",
           column: 5,
         },
         {
           key: "expDateTo",
           type: "date-to",
-          label: "HSD den",
+          label: "HSD đến",
           column: 5,
         },
       ],
@@ -125,17 +125,17 @@
         {
           key: "status",
           type: "dynamic-select",
-          label: "Trang thai",
-          placeholder: "Tat ca trang thai",
+          label: "Trạng thái",
+          placeholder: "Tất cả trạng thái",
           column: 5,
         },
         {
           key: "dateFrom",
           type: "date-from",
-          label: "Tu ngay",
+          label: "Từ ngày",
           column: 1,
         },
-        { key: "dateTo", type: "date-to", label: "Den ngay", column: 1 },
+        { key: "dateTo", type: "date-to", label: "Đến ngày", column: 1 },
         {
           key: "amountMin",
           type: "number-min",

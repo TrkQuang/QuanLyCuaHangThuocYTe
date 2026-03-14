@@ -722,7 +722,7 @@ async function showAddPhieuNhapModal() {
           const maNhanVien = await resolveCurrentNhanVienId();
           if (!maNhanVien) {
             showNotification(
-              "Khong tim thay nhan vien dang dang nhap",
+              "Không tìm thấy nhân viên đang đăng nhập",
               "error",
             );
             return;
@@ -730,7 +730,7 @@ async function showAddPhieuNhapModal() {
 
           const chiTiet = collectPhieuNhapDetails(raw.maPhieuNhap);
           if (chiTiet.length === 0) {
-            showNotification("Can it nhat 1 dong chi tiet", "error");
+            showNotification("Cần ít nhất 1 dòng chi tiết", "error");
             return;
           }
 
@@ -754,18 +754,18 @@ async function showAddPhieuNhapModal() {
             throw new Error(await res.text());
           }
 
-          showNotification("Tao phieu nhap thanh cong", "success");
+          showNotification("Tạo phiếu nhập thành công", "success");
           closeModal();
           loadPhieuNhapData();
           loadThuocData();
         } catch (err) {
-          showNotification(err.message || "Tao phieu nhap that bai", "error");
+          showNotification(err.message || "Tạo phiếu nhập thất bại", "error");
         }
       });
 
     openModal();
   } catch (error) {
-    showNotification("Khong the tai du lieu tao phieu nhap", "error");
+    showNotification("Không thể tải dữ liệu tạo phiếu nhập", "error");
   }
 }
 
@@ -983,14 +983,14 @@ async function createInvoice() {
   try {
     const maNhanVien = await resolveCurrentNhanVienId();
     if (!maNhanVien) {
-      showNotification("Khong tim thay nhan vien dang dang nhap", "error");
+      showNotification("Khêng tìm thấy nhân viên đang đăng nhập", "error");
       return;
     }
 
     const maKhachHang =
       document.getElementById("customerName").dataset.maKhachHang;
     if (!maKhachHang) {
-      showNotification("Khach hang chua ton tai trong he thong", "error");
+      showNotification("Khách hàng chưa tồn tại trong hệ thống", "error");
       return;
     }
 
@@ -1007,7 +1007,7 @@ async function createInvoice() {
         maHoaDon,
         maThuoc: item.maThuoc,
         soLuong: Number(item.quantity),
-        hdsd: "Dung theo huong dan bac si",
+        hdsd: "Dùng theo hướng dẫn bác sĩ",
       })),
     };
 
