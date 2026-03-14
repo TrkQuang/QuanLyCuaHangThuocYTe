@@ -7,6 +7,45 @@
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/design-system.css" />
     <style>
+      .home-products-grid {
+        align-items: stretch;
+      }
+
+      .home-products-grid .product-item {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .home-products-grid .product-item img {
+        height: 170px;
+        width: 100%;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+
+      .home-products-grid .product-item h3 {
+        min-height: 2.8em;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .home-products-grid .product-price {
+        min-height: 1.6em;
+      }
+
+      .home-products-grid .product-item p {
+        min-height: 2.4em;
+        margin: 8px 0 12px;
+      }
+
+      .home-products-grid .product-item .btn-primary {
+        margin-top: auto;
+      }
+
       .promo-products-grid {
         align-items: stretch;
       }
@@ -119,7 +158,7 @@
             Các sản phẩm được tin dùng nhất
           </p>
         </div>
-        <div class="products-grid" id="dynamicProductsGrid">
+        <div class="products-grid home-products-grid" id="dynamicProductsGrid">
           <p style="grid-column: 1 / -1; text-align: center; color: #718096">
             Đang tải danh sách thuốc...
           </p>
