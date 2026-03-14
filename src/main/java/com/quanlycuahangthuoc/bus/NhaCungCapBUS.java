@@ -40,8 +40,8 @@ public class NhaCungCapBUS {
     return nhacungcapDAO.updateNhaCungCap(ncc);
   }
 
-  //nếu đã từng hợp tác và có nhập thuốc thì sẽ chuyển thành ko hợp tác nữa
-  //nếu chưa từng nhập thuốc thì xóa trên dtb dc
+  //nếu đã từng hợp tác và có nhập thuoc thì sẽ chuyển thành ko hợp tác nữa
+  //nếu chưa từng nhập thuoc thì xóa trên dtb dc
   public boolean ngungHopTac(String maNCC) {
     NhaCungCapDTO ncc = nhacungcapDAO.getById(maNCC);
     if (ncc == null) throw new RuntimeException("Nhà cung cấp không tồn tại");

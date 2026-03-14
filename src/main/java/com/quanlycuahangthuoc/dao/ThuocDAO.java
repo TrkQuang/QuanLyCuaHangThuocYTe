@@ -208,10 +208,10 @@ public class ThuocDAO {
         }
       }
     }
-    throw new SQLException("Không tìm thấy thuốc: " + maThuoc);
+    throw new SQLException("Không tìm thấy thuoc: " + maThuoc);
   }
 
-  // Tạo mã thuốc tự động (TH001, TH002, ...)
+  // Tạo mã thuoc tự động (TH001, TH002, ...)
   public String generateMaThuoc() {
     String sql = "SELECT MaThuoc FROM Thuoc ORDER BY MaThuoc DESC LIMIT 1";
     try (

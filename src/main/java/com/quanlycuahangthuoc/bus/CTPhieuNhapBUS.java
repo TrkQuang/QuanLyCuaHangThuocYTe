@@ -23,16 +23,16 @@ public class CTPhieuNhapBUS {
 
   public boolean themCTPhieuNhap(CTPhieuNhapDTO ct) {
     if (ct.getSoLuongNhap() <= 0 || ct.getDonGia() <= 0) {
-      throw new RuntimeException("So luong va don gia phai lon hon 0");
+      throw new RuntimeException("Số lượng va đơn giá phai lon hon 0");
     }
 
     if (ct.getMaPhieuNhap() == null || ct.getMaPhieuNhap().isBlank()) {
-      throw new RuntimeException("Ma phieu nhap khong hop le");
+      throw new RuntimeException("Ma phiếu nhập không hợp lệ");
     }
 
     var pn = phieuNhapDAO.getById(ct.getMaPhieuNhap());
     if (pn == null) {
-      throw new RuntimeException("Khong tim thay phieu nhap");
+      throw new RuntimeException("Không tìm thấy phiếu nhập");
     }
     String status = String.valueOf(
       pn.getTrangThai() == null ? "" : pn.getTrangThai()
@@ -41,14 +41,14 @@ public class CTPhieuNhapBUS {
       .toUpperCase();
     if (!("CHO_XAC_NHAN".equals(status) || "CHOXACNHAN".equals(status))) {
       throw new RuntimeException(
-        "Phieu nhap da hoan tat, khong the them chi tiet"
+        "Phiếu nhập đã hoàn tất, không thể thêm chi tiết"
       );
     }
 
     boolean ok = ctPhieuNhapDAO.insertCTPhieuNhap(ct);
     if (!ok) return false;
 
-    // Cap nhat tong tien phieu nhap, ton kho chi cong khi xac nhan phieu
+    // Cập nhật tổng tiền phiếu nhập; tồn kho chỉ cộng khi xác nhận phiếu.
     float tien = ct.getSoLuongNhap() * ct.getDonGia();
     phieuNhapDAO.CongTongTien(ct.getMaPhieuNhap(), tien);
 

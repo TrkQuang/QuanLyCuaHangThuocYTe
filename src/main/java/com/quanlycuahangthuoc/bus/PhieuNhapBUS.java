@@ -91,7 +91,7 @@ public class PhieuNhapBUS {
       float tongTien = 0;
       for (CTPhieuNhapDTO ct : dsChiTiet) {
         if (ct.getMaThuoc() == null || ct.getMaThuoc().isBlank()) {
-          throw new ValidationException("Mã thuốc không được rỗng");
+          throw new ValidationException("Mã thuoc không được rỗng");
         }
         if (ct.getSoLuongNhap() <= 0 || ct.getDonGia() <= 0) {
           throw new ValidationException("Số lượng và đơn giá phải lớn hơn 0");
@@ -167,7 +167,7 @@ public class PhieuNhapBUS {
       float tongTien = 0;
       for (CTPhieuNhapDTO ct : dsChiTiet) {
         if (ct.getMaThuoc() == null || ct.getMaThuoc().isBlank()) {
-          throw new ValidationException("Mã thuốc không được rỗng");
+          throw new ValidationException("Mã thuoc không được rỗng");
         }
         if (ct.getSoLuongNhap() <= 0 || ct.getDonGia() <= 0) {
           throw new ValidationException("Số lượng và đơn giá phải lớn hơn 0");
@@ -248,7 +248,7 @@ public class PhieuNhapBUS {
           !thuocDAO.CongSoLuongTon(conn, ct.getMaThuoc(), ct.getSoLuongNhap())
         ) {
           throw new DatabaseException(
-            "Không thể cập nhật tồn kho cho thuốc: " + ct.getMaThuoc()
+            "Không thể cập nhật tồn kho cho thuoc: " + ct.getMaThuoc()
           );
         }
       }

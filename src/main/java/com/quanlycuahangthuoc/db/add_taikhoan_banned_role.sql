@@ -1,5 +1,5 @@
--- Cho phep trang thai tai khoan BANNED trong rang buoc LoaiTK
--- Chay script nay tren DB hien tai neu thao tac ban khong cap nhat duoc.
+-- Cho phep trạng thái tài khoản BANNED trong rang buoc LoaiTK
+-- Chay script nay tren DB hien tai neu thao tac ban không cap nhat duoc.
 
 ALTER TABLE TaiKhoan
   DROP CHECK ck_taikhoan_loaitk;

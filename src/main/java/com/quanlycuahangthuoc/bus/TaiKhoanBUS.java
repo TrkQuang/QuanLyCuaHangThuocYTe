@@ -6,6 +6,7 @@ import com.quanlycuahangthuoc.dao.PhieuNhapDAO;
 import com.quanlycuahangthuoc.dao.TaiKhoanDAO;
 import com.quanlycuahangthuoc.dto.KhachHangDTO;
 import com.quanlycuahangthuoc.dto.TaiKhoanDTO;
+import com.quanlycuahangthuoc.dto.requests.CreateKhachHangRequest;
 import com.quanlycuahangthuoc.exception.AuthenticationException;
 import com.quanlycuahangthuoc.exception.ValidationException;
 import java.util.ArrayList;
@@ -39,6 +40,145 @@ public class TaiKhoanBUS {
 
   @Autowired
   private PhieuNhapDAO phieuNhapDAO;
+
+  private String normalizeGender(String rawGender) {
+    String gender = String.valueOf(rawGender == null ? "" : rawGender).trim();
+    if (gender.equalsIgnoreCase("Nam")) return "Nam";
+    if (gender.equalsIgnoreCase("Nu") || gender.equalsIgnoreCase("Nữ")) {
+      return "Nu";
+    }
+    if (gender.equalsIgnoreCase("Khac") || gender.equalsIgnoreCase("Khác")) {
+      return "Khac";
+    }
+    throw new ValidationException("Giới tính phải là Nam, Nu hoặc Khac");
+  }
+
+  private void validateDateString(String date, String fieldName) {
+    try {
+      java.time.LocalDate parsed = java.time.LocalDate.parse(date);
+      if (parsed.isAfter(java.time.LocalDate.now())) {
+        throw new ValidationException(fieldName + " không được lớn hơn ngày hiện tại");
+      }
+      if (parsed.isBefore(java.time.LocalDate.of(1900, 1, 1))) {
+        throw new ValidationException(fieldName + " không hợp lệ");
+      }
+    } catch (java.time.format.DateTimeParseException e) {
+      throw new ValidationException(fieldName + " phải đúng định dạng yyyy-MM-dd");
+    }
+  }
+
+  public boolean dangKyKhachDayDu(CreateKhachHangRequest request) {
+    if (request == null) {
+      throw new ValidationException("Thông tin đăng ký không được để trống");
+    }
+
+    String tenDangNhap = String.valueOf(request.getTenDangNhap() == null ? "" : request.getTenDangNhap()).trim();
+    String matKhau = String.valueOf(request.getMatKhau() == null ? "" : request.getMatKhau()).trim();
+    String email = String.valueOf(request.getEmail() == null ? "" : request.getEmail()).trim();
+    String hoTen = String.valueOf(request.getHoTen() == null ? "" : request.getHoTen()).trim();
+    String soDienThoai = String.valueOf(request.getSoDienThoai() == null ? "" : request.getSoDienThoai()).trim();
+    String diaChi = String.valueOf(request.getDiaChi() == null ? "" : request.getDiaChi()).trim();
+    String ngaySinh = String.valueOf(request.getNgaySinh() == null ? "" : request.getNgaySinh()).trim();
+    String tienSuBenhLy = String.valueOf(request.getTienSuBenhLy() == null ? "" : request.getTienSuBenhLy()).trim();
+    String gioiTinh = normalizeGender(request.getGioiTinh());
+
+    if (tenDangNhap.isBlank()) {
+      throw new ValidationException("Tên đăng nhập không được để trống");
+    }
+    if (tenDangNhap.length() < 3 || tenDangNhap.length() > 50) {
+      throw new ValidationException("Tên đăng nhập phải từ 3-50 ký tự");
+    }
+    if (!tenDangNhap.matches("^[a-zA-Z0-9_]+$")) {
+      throw new ValidationException("Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới");
+    }
+
+    if (matKhau.isBlank()) {
+      throw new ValidationException("Mật khẩu không được để trống");
+    }
+    if (matKhau.length() < 6 || matKhau.length() > 100) {
+      throw new ValidationException("Mật khẩu phải từ 6-100 ký tự");
+    }
+
+    if (email.isBlank()) {
+      throw new ValidationException("Email không được để trống");
+    }
+    if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+      throw new ValidationException("Email không hợp lệ");
+    }
+
+    if (hoTen.isBlank()) {
+      throw new ValidationException("Họ tên không được để trống");
+    }
+    if (soDienThoai.isBlank()) {
+      throw new ValidationException("Số điện thoại không được để trống");
+    }
+    if (!soDienThoai.matches("^[0-9]{10,15}$")) {
+      throw new ValidationException("Số điện thoại phải gồm 10-15 chữ số");
+    }
+    if (diaChi.isBlank()) {
+      throw new ValidationException("Địa chỉ không được để trống");
+    }
+    if (ngaySinh.isBlank()) {
+      throw new ValidationException("Ngày sinh không được để trống");
+    }
+    validateDateString(ngaySinh, "Ngày sinh");
+    if (tienSuBenhLy.isBlank()) {
+      throw new ValidationException("Tiền sử bệnh lý không được để trống");
+    }
+
+    if (taiKhoanDAO.existUsername(tenDangNhap)) {
+      throw new ValidationException("Tên đăng nhập đã tồn tại");
+    }
+    if (taiKhoanDAO.existEmail(email)) {
+      throw new ValidationException("Email đã tồn tại");
+    }
+    if (khachHangDAO.getBySDT(soDienThoai) != null) {
+      throw new ValidationException("Số điện thoại đã tồn tại");
+    }
+
+    String maTK = taiKhoanDAO.generateMaTK();
+    TaiKhoanDTO tk = new TaiKhoanDTO();
+    tk.setMaTaiKhoan(maTK);
+    tk.setTenDangNhap(tenDangNhap);
+    tk.setMatKhau(matKhau);
+    tk.setEmail(email);
+    tk.setLoaiTaiKhoan("KHACHHANG");
+
+    if (!taiKhoanDAO.insertTaiKhoan(tk)) {
+      throw new ValidationException("Không thể tạo tài khoản");
+    }
+
+    try {
+      String maKH = khachHangDAO.generateMaKH();
+      String ho = "";
+      String ten = hoTen;
+      int lastSpace = hoTen.lastIndexOf(' ');
+      if (lastSpace > 0) {
+        ho = hoTen.substring(0, lastSpace).trim();
+        ten = hoTen.substring(lastSpace + 1).trim();
+      }
+
+      KhachHangDTO kh = new KhachHangDTO();
+      kh.setMaKhachHang(maKH);
+      kh.setMaTaiKhoan(maTK);
+      kh.setHo(ho);
+      kh.setTen(ten);
+      kh.setNgaySinh(ngaySinh);
+      kh.setGioiTinh(gioiTinh);
+      kh.setSDT(soDienThoai);
+      kh.setDiaChi(diaChi);
+      kh.setTienSuBenhLy(tienSuBenhLy);
+
+      if (!khachHangDAO.insertKhachHang(kh)) {
+        throw new ValidationException("Không thể tạo hồ sơ khách hàng");
+      }
+
+      return true;
+    } catch (Exception e) {
+      taiKhoanDAO.deleteTaiKhoan(maTK);
+      throw e;
+    }
+  }
 
   // ================== KHÁCH ĐĂNG KÝ ==================
   public boolean dangKyKhach(TaiKhoanDTO tk) {

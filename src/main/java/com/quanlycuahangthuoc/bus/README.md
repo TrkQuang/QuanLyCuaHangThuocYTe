@@ -16,7 +16,7 @@ public class ThuocBUS {
     public boolean themThuoc(Thuoc thuoc) {
         // Validate
         if (thuoc.getTenThuoc().isEmpty()) 
-            throw new Exception("Tên thuốc không được rỗng");
+            throw new Exception("Tên thuoc không được rỗng");
         // Gọi DAO
         return dao.insert(thuoc);
     }

@@ -24,7 +24,7 @@ public class ThuocBUS {
     }
 
     if (t.getTenThuoc() == null || t.getTenThuoc().isEmpty()) {
-      throw new RuntimeException("Tên thuốc không được rỗng");
+      throw new RuntimeException("Tên thuoc không được rỗng");
     }
     if (t.getDonViTinh() == null || t.getDonViTinh().isEmpty()) {
       throw new RuntimeException("Đơn vị tính không được rỗng");

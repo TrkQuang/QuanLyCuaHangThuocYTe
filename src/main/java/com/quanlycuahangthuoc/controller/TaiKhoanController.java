@@ -3,6 +3,7 @@ package com.quanlycuahangthuoc.controller;
 import com.quanlycuahangthuoc.bus.TaiKhoanBUS;
 import com.quanlycuahangthuoc.dto.KhachHangDTO;
 import com.quanlycuahangthuoc.dto.TaiKhoanDTO;
+import com.quanlycuahangthuoc.dto.requests.CreateKhachHangRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +29,9 @@ public class TaiKhoanController {
 
   //Khách đăng ký
   @PostMapping("/dangky")
-  public ResponseEntity<?> dangky(@RequestBody TaiKhoanDTO tk) {
+  public ResponseEntity<?> dangky(@RequestBody CreateKhachHangRequest request) {
     try {
-      return ResponseEntity.ok(taikhoanBUS.dangKyKhach(tk));
+      return ResponseEntity.ok(taikhoanBUS.dangKyKhachDayDu(request));
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }

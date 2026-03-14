@@ -2,9 +2,9 @@
 
 ## 📋 Mô tả dự án
 
-Hệ thống quản lý nhà thuốc với 2 giao diện:
+Hệ thống quản lý nhà thuoc với 2 giao diện:
 
-- **Admin**: Quản lý toàn bộ hệ thống (nhân viên, khách hàng, thuốc, phiếu nhập, hóa đơn, tài khoản)
+- **Admin**: Quản lý toàn bộ hệ thống (nhân viên, khách hàng, thuoc, phiếu nhập, hóa đơn, tài khoản)
 - **Nhân viên**: Quản lý thuốc, nhập hàng, bán hàng, xem hóa đơn
 
 ## 🚀 Cách chạy dự án
@@ -112,10 +112,10 @@ frontend/
 - `PUT /api/khachhang` - Cập nhật khách hàng
 - `DELETE /api/khachhang/{maKH}` - Xóa khách hàng
 
-### Thuốc
+### Thuoc
 
 - `GET /api/thuoc` - Lấy danh sách thuốc
-- `GET /api/thuoc/{maThuoc}` - Lấy thuốc theo ID
+- `GET /api/thuoc/{maThuoc}` - Lấy thuoc theo ID
 - `POST /api/thuoc/them-thuoc` - Thêm thuốc
 - `PUT /api/thuoc` - Cập nhật thuốc
 - `DELETE /api/thuoc/{maThuoc}` - Xóa thuốc

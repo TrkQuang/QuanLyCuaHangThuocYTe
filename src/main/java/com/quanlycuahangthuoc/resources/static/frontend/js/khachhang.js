@@ -1,10 +1,165 @@
 let products = [];
 let shopControlsInitialized = false;
+let globalSearchInitialized = false;
+let shopKeywordPrefilledFromUrl = false;
 const shopState = {
   filtered: [],
   currentPage: 1,
   extraPerPage: 0,
 };
+
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getQueryParamKeyword() {
+  const params = new URLSearchParams(window.location.search);
+  return String(params.get("q") || "").trim();
+}
+
+function navigateToShopWithKeyword(rawKeyword) {
+  const keyword = String(rawKeyword || "").trim();
+  if (!keyword) return;
+  window.location.href = `shop.html?q=${encodeURIComponent(keyword)}`;
+}
+
+function getSearchInput() {
+  return document.getElementById("searchInput");
+}
+
+function getOrCreateSearchDropdown() {
+  const searchInput = getSearchInput();
+  const searchBox = searchInput?.closest(".search-box");
+  if (!searchInput || !searchBox) return null;
+
+  let dropdown = searchBox.querySelector(".search-suggestions");
+  if (!dropdown) {
+    dropdown = document.createElement("div");
+    dropdown.className = "search-suggestions";
+    dropdown.setAttribute("role", "listbox");
+    searchBox.appendChild(dropdown);
+  }
+
+  return dropdown;
+}
+
+function hideSearchDropdown() {
+  const dropdown = document.querySelector(".search-suggestions");
+  if (dropdown) {
+    dropdown.innerHTML = "";
+    dropdown.style.display = "none";
+  }
+}
+
+function renderSearchDropdown(keyword) {
+  const normalizedKeyword = normalizeText(keyword);
+  const dropdown = getOrCreateSearchDropdown();
+  if (!dropdown) return;
+
+  if (!normalizedKeyword || !products.length) {
+    hideSearchDropdown();
+    return;
+  }
+
+  const matches = products
+    .filter((p) => {
+      const name = normalizeText(p.name);
+      const desc = normalizeText(p.description);
+      return name.includes(normalizedKeyword) || desc.includes(normalizedKeyword);
+    })
+    .slice(0, 8);
+
+  if (!matches.length) {
+    hideSearchDropdown();
+    return;
+  }
+
+  dropdown.innerHTML = matches
+    .map(
+      (p) => `
+        <button type="button" class="search-suggestion-item" data-name="${escapeHtml(p.name)}">
+          <span class="search-suggestion-name">${escapeHtml(p.name)}</span>
+          <span class="search-suggestion-price">${Number(p.price || 0).toLocaleString("vi-VN")}đ</span>
+        </button>
+      `,
+    )
+    .join("");
+
+  dropdown
+    .querySelectorAll(".search-suggestion-item")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const keywordSelected = btn.getAttribute("data-name") || "";
+        navigateToShopWithKeyword(keywordSelected);
+      });
+    });
+
+  dropdown.style.display = "block";
+}
+
+function initializeGlobalSearch() {
+  if (globalSearchInitialized) return;
+
+  const searchInput = getSearchInput();
+  const searchForm = document.getElementById("searchForm");
+  const searchBox = searchInput?.closest(".search-box");
+  if (!searchInput || !searchBox) return;
+
+  globalSearchInitialized = true;
+
+  searchInput.addEventListener("input", () => {
+    renderSearchDropdown(searchInput.value);
+  });
+
+  searchInput.addEventListener("focus", () => {
+    renderSearchDropdown(searchInput.value);
+  });
+
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      hideSearchDropdown();
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const keyword = String(searchInput.value || "").trim();
+      navigateToShopWithKeyword(keyword);
+    }
+  });
+
+  if (searchForm) {
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const keyword = String(searchInput.value || "").trim();
+      navigateToShopWithKeyword(keyword);
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!searchBox.contains(e.target)) {
+      hideSearchDropdown();
+    }
+  });
+}
+
+function prefillShopKeywordFromQuery() {
+  if (shopKeywordPrefilledFromUrl || !isAdvancedShopPage()) return;
+  const queryKeyword = getQueryParamKeyword();
+  if (!queryKeyword) return;
+
+  const headerSearchInput = getSearchInput();
+  if (headerSearchInput) {
+    headerSearchInput.value = queryKeyword;
+  }
+
+  const shopKeywordInput = document.getElementById("shopKeyword");
+  if (shopKeywordInput) {
+    shopKeywordInput.value = queryKeyword;
+  }
+
+  shopKeywordPrefilledFromUrl = true;
+}
 
 function getDynamicProductsGrid() {
   return (
@@ -263,7 +418,10 @@ async function loadProducts() {
       description: x.donViTinh || "Sản phẩm nhà thuốc",
     }));
 
+    initializeGlobalSearch();
+
     if (isAdvancedShopPage()) {
+      prefillShopKeywordFromQuery();
       populateUnitFilter();
       bindShopControls();
       applyShopView(true);
@@ -296,7 +454,7 @@ function renderProducts(list) {
     };
 
     const name = document.createElement("h3");
-    name.textContent = p.name || "Thuốc";
+    name.textContent = p.name || "Thuoc";
 
     const price = document.createElement("div");
     price.className = "product-price";
@@ -352,9 +510,9 @@ async function loadOrders() {
         (o) => `
         <div class="order-card">
           <h3>Don #${escapeHtml(o.maHoaDon)}</h3>
-          <p>Ngay tao: ${formatDate(o.ngayTao)}</p>
-          <p>Tong tien: ${formatCurrency(o.tongTien)}</p>
-          <p>Trang thai: ${escapeHtml(o.trangThai || "CHO_XAC_NHAN")}</p>
+          <p>Ngày tạo: ${formatDate(o.ngayTao)}</p>
+          <p>Tổng tiền: ${formatCurrency(o.tongTien)}</p>
+          <p>Trạng thái: ${escapeHtml(o.trangThai || "CHO_XAC_NHAN")}</p>
         </div>
       `,
       )
@@ -367,6 +525,7 @@ async function loadOrders() {
 document.addEventListener("DOMContentLoaded", async () => {
   await updateCartCount();
   const hasProductGrid = !!getDynamicProductsGrid();
+  initializeGlobalSearch();
   if (hasProductGrid) {
     await loadProducts();
   }

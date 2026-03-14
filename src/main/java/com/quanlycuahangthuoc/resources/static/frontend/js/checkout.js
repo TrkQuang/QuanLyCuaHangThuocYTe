@@ -13,7 +13,7 @@ async function clearCart() {
 async function resolveNhanVienForCheckout() {
   const list = await apiFetch("/nhanvien");
   if (!Array.isArray(list) || list.length === 0) {
-    throw new Error("He thong chua co nhan vien de xu ly hoa don");
+    throw new Error("Hệ thống chưa có nhân viên để xử lý hóa đơn");
   }
 
   const first = list.find((x) => x && x.maNhanVien);
@@ -34,7 +34,7 @@ async function renderCheckout() {
   let total = 0;
 
   if (!cart.length) {
-    checkoutItems.innerHTML = "<p>Gio hang trong</p>";
+    checkoutItems.innerHTML = "<p>Giỏ hàng trống</p>";
     totalPriceEl.textContent = "0";
     return;
   }
@@ -48,7 +48,7 @@ async function renderCheckout() {
           <h4>${escapeHtml(item.title || item.name || "")}</h4>
           <p>${item.quantity} x ${Number(item.price || 0).toLocaleString("vi-VN")}đ</p>
         </div>
-        <button class="btn-remove" onclick="removeCheckoutItem('${escapeHtml(String(item.id))}')">Bo</button>
+        <button class="btn-remove" onclick="removeCheckoutItem('${escapeHtml(String(item.id))}')">Bỏ</button>
       </div>
     `;
   });
@@ -67,20 +67,20 @@ async function handleCheckout() {
   const address = document.getElementById("address")?.value.trim();
 
   if (!fullName || !phone || !address) {
-    alert("Vui long nhap day du thong tin thanh toan");
+    alert("Vui lòng nhap day du thong tin thanh toán");
     return;
   }
 
   const user = getCurrentUser();
   if (!user || !user.maKhachHang) {
-    alert("Khong tim thay thong tin khach hang, vui long dang nhap lai");
+    alert("Không tìm thấy thong tin khách hàng, vui long đăng nhập lai");
     window.location.href = "login.html";
     return;
   }
 
   const cart = await getCart();
   if (!cart.length) {
-    alert("Gio hang trong");
+    alert("Giỏ hàng trống");
     return;
   }
 
@@ -106,16 +106,16 @@ async function handleCheckout() {
       body: JSON.stringify({ hoaDon, chiTiet }),
     });
     await clearCart();
-    alert("Dat hang thanh cong");
+    alert("Dat hang thành công");
     window.location.href = "order-history.html";
   } catch (e) {
-    alert(e.message || "Dat hang that bai");
+    alert(e.message || "Dat hang thất bại");
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!getCurrentUser()) {
-    alert("Vui long dang nhap de thanh toan");
+    alert("Vui lòng đăng nhập de thanh toán");
     window.location.href = "login.html";
     return;
   }

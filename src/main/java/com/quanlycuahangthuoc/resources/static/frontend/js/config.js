@@ -80,7 +80,7 @@ async function apiFetch(path, options = {}) {
 
   if (!response.ok) {
     const message =
-      typeof data === "string" ? data : data?.error || "Yeu cau that bai";
+      typeof data === "string" ? data : data?.error || "Yeu cau thất bại";
     throw new Error(message);
   }
 

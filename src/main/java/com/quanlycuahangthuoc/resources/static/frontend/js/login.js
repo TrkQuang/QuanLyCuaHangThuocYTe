@@ -50,7 +50,7 @@ loginForm.addEventListener("submit", async (e) => {
   const matKhau = document.getElementById("password").value.trim();
 
   if (!tenDangNhap || !matKhau) {
-    showError("Vui long nhap day du thong tin");
+    showError("Vui lòng nhap day du thong tin");
     return;
   }
 
@@ -64,6 +64,6 @@ loginForm.addEventListener("submit", async (e) => {
       await loginKhach(payload);
     }
   } catch (e) {
-    showError(e.message || "Dang nhap that bai");
+    showError(e.message || "Đăng nhập thất bại");
   }
 });

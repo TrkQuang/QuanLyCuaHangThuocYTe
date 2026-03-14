@@ -74,7 +74,7 @@ public class HoaDonBUS {
       for (CTHoaDonDTO ct : details) {
         if (!thuocDAO.CongSoLuongTon(conn, ct.getMaThuoc(), -ct.getSoLuong())) {
           throw new DatabaseException(
-            "Khong du ton kho cho thuoc: " + ct.getMaThuoc()
+            "Không du ton kho cho thuoc: " + ct.getMaThuoc()
           );
         }
       }
@@ -82,7 +82,7 @@ public class HoaDonBUS {
       if (
         !hoaDonDAO.updateTrangThai(conn, hd.getMaHoaDon(), STATUS_DA_THANH_TOAN)
       ) {
-        throw new DatabaseException("Khong the cap nhat trang thai hoa don");
+        throw new DatabaseException("Không thể cap nhat trạng thái hóa đơn");
       }
 
       conn.commit();
@@ -90,7 +90,7 @@ public class HoaDonBUS {
     } catch (Exception e) {
       DBConnection.rollbackQuietly(conn);
       throw new DatabaseException(
-        "Xac nhan hoa don that bai: " + e.getMessage(),
+        "Xác nhận hóa đơn thất bại: " + e.getMessage(),
         e
       );
     } finally {
@@ -171,7 +171,7 @@ public class HoaDonBUS {
       float tongTien = 0;
       for (CTHoaDonDTO ct : dsChiTiet) {
         if (ct.getMaThuoc() == null || ct.getMaThuoc().isBlank()) {
-          throw new ValidationException("Mã thuốc không được rỗng");
+          throw new ValidationException("Mã thuoc không được rỗng");
         }
         if (ct.getSoLuong() <= 0) {
           throw new ValidationException("Số lượng phải lớn hơn 0");

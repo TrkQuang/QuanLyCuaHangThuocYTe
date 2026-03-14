@@ -25,12 +25,12 @@ public class TestConnection {
 
         System.out.println("========================================");
 
-        // Test query: Đếm số lượng thuốc
+        // Test query: Đếm số lượng thuoc
         ResultSet rsThuoc = stmt.executeQuery(
           "SELECT COUNT(*) as total FROM Thuoc"
         );
         if (rsThuoc.next()) {
-          System.out.println("💊 Tổng số thuốc: " + rsThuoc.getInt("total"));
+          System.out.println("💊 Tổng số thuoc: " + rsThuoc.getInt("total"));
         }
 
         // Test query: Đếm số lượng nhân viên

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../css/login.css" />
     <link rel="stylesheet" href="../css/design-system.css" />
   </head>
-  <body>
+  <body class="register-page">
     <div class="login-container">
       <div class="login-box">
         <!-- Logo và tiêu đề -->
@@ -18,6 +18,17 @@
 
         <!-- Form đăng ký -->
         <form id="registerForm">
+          <div class="form-group">
+            <label for="fullName">Họ và tên</label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              required
+              placeholder="Nhập họ và tên đầy đủ"
+            />
+          </div>
+
           <div class="form-group">
             <label for="username">Tên đăng nhập</label>
             <input
@@ -38,6 +49,54 @@
               required
               placeholder="Nhập email"
             />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Số điện thoại</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              required
+              placeholder="Nhập số điện thoại"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="birthDate">Ngày sinh</label>
+            <input type="date" id="birthDate" name="birthDate" required />
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Giới tính</label>
+            <select id="gender" name="gender" required>
+              <option value="">Chọn giới tính</option>
+              <option value="Nam">Nam</option>
+              <option value="Nu">Nữ</option>
+              <option value="Khac">Khác</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="address">Địa chỉ</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              required
+              placeholder="Nhập địa chỉ"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="medicalHistory">Tiền sử bệnh lý</label>
+            <textarea
+              id="medicalHistory"
+              name="medicalHistory"
+              required
+              placeholder="Ví dụ: Viêm mũi dị ứng, dạ dày..."
+              rows="3"
+            ></textarea>
           </div>
 
           <div class="form-group">
@@ -63,13 +122,15 @@
           </div>
 
           <!-- Thông báo lỗi -->
-          <div id="errorMessage" class="error-message"></div>
+          <div id="errorMessage" class="error-message full-width"></div>
 
           <!-- Thông báo thành công -->
-          <div id="successMessage" class="success-message"></div>
+          <div id="successMessage" class="success-message full-width"></div>
 
-          <button type="submit" class="btn-login">Đăng ký ngay</button>
-          <a href="login.html">Đã có tài khoản ? Đăng nhập</a>
+          <button type="submit" class="btn-login full-width">Đăng ký ngay</button>
+          <a href="login.html" class="register-link full-width"
+            >Đã có tài khoản ? Đăng nhập</a
+          >
         </form>
 
         <div class="login-footer">

@@ -8,50 +8,7 @@
     <link rel="stylesheet" href="../css/design-system.css" />
   </head>
   <body>
-    <!--Header-->
-    <header class="header">
-      <div class="header-top">
-        <div class="container">
-          Hotline: 19001514 | Giao hàng miễn phí từ 200k
-        </div>
-      </div>
-      <div class="header-main">
-        <div class="container">
-          <div class="content">
-            <a href="index.html" class="logo">
-              <span class="logo-icon">🏥</span>
-              <span class="logo-text">Nhà Thuốc</span>
-            </a>
-            <div class="search-box">
-              <input
-                type="text"
-                id="searchInput"
-                placeholder="Tìm kiếm thuốc......."
-              />
-            </div>
-            <div class="menu">
-              <a href="login.html" id="loginLink">👤 Đăng nhập</a>
-              <a href="cart.html"
-                >🛒 Giỏ hàng (<span id="cartCount">0</span>)</a
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!--Navigation-->
-    <nav class="nav">
-      <div class="container">
-        <ul>
-          <li><a href="index.html" class="active">🏠 Trang chủ</a></li>
-          <li><a href="shop.html">💊 Sản phẩm</a></li>
-          <li><a href="cart.html">🛒 Giỏ hàng</a></li>
-          <li><a href="order-history.html">📋 Đơn hàng</a></li>
-          <li><a href="login.html">👤 Tài khoản</a></li>
-        </ul>
-      </div>
-    </nav>
+    <script src="../js/shared-header-loader.js" data-active="home"></script>
 
     <!--Banner-->
     <section
@@ -177,7 +134,7 @@
         <div class="footer-content">
           <div class="footer-section">
             <h3>Nhà Thuốc</h3>
-            <p>CỬa hàng trức tuyến uy tín</p>
+            <p>Cửa hàng trực tuyến uy tín</p>
             <p>📞 Hotline: 19001514</p>
             <p>📧 Email: nhathuocyte@gmail.com</p>
           </div>
@@ -217,31 +174,7 @@
     <script src="../js/config.js"></script>
     <script src="../js/ui-layout.js"></script>
     <script src="../js/header.js"></script>
-    <script src="../js/khachhang.js"></script>
-    <script>
-      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-      const loginLink = document.getElementById("loginLink");
-
-      if (currentUser && currentUser.tenDangNhap) {
-        // Đã đăng nhập
-        loginLink.textContent = `👋 ${currentUser.tenDangNhap}`;
-        loginLink.href = "#";
-
-        // Click để logout (tuỳ chọn)
-        loginLink.addEventListener("click", () => {
-          const confirmLogout = confirm("Bạn muốn đăng xuất?");
-          if (confirmLogout) {
-            localStorage.removeItem("currentUser");
-            localStorage.removeItem("role");
-            window.location.reload();
-          }
-        });
-      } else {
-        // Chưa đăng nhập
-        loginLink.textContent = "👤 Đăng nhập";
-        loginLink.href = "login.html";
-      }
-    </script>
     <script src="../js/cart.js"></script>
+    <script src="../js/khachhang.js"></script>
   </body>
 </html>

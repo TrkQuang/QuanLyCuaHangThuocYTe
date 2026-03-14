@@ -112,6 +112,53 @@ body {
   background: #2b6cb0;
 }
 
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #dbe4ff;
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(49, 130, 206, 0.15);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 1200;
+  display: none;
+}
+
+.search-suggestion-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.search-suggestion-item + .search-suggestion-item {
+  border-top: 1px solid #eef2ff;
+}
+
+.search-suggestion-item:hover {
+  background: #f7f9ff;
+}
+
+.search-suggestion-name {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.search-suggestion-price {
+  color: #2b6cb0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .menu a {
   color: #2d3748;
   text-decoration: none;

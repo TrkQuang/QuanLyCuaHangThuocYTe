@@ -346,7 +346,7 @@ function displayLowStockDrugs(thuocList) {
 }
 
 // ====================
-// QUẢN LÝ THUỐC
+// QUẢN LÝ THUOC
 // ====================
 
 /**
@@ -431,7 +431,7 @@ function searchThuoc() {
 function showAddThuocModal() {
   const modalBody = document.getElementById("modalBody");
   modalBody.innerHTML = `
-        <h2>Thêm Thuốc Mới</h2>
+        <h2>Thêm Thuoc Mới</h2>
         <form id="addThuocForm">
             <div class="form-group">
                 <label>Tên thuốc *</label>
@@ -545,13 +545,13 @@ function displayPhieuNhapTable(data) {
     const canEdit = isPendingPhieuNhapStatus(pn.trangThai);
     const editButtons = canEdit
       ? `
-          <button class="btn btn-success" onclick="editPhieuNhap('${pn.maPhieuNhap}')" title="Chinh sua chi tiet">
+          <button class="btn btn-success" onclick="editPhieuNhap('${pn.maPhieuNhap}')" title="Chỉnh sửa chi tiết">
             <i class="fas fa-pen"></i>
           </button>
-          <button class="btn btn-success" onclick="xacNhanPhieuNhap('${pn.maPhieuNhap}')" title="Xac nhan phieu nhap">
+          <button class="btn btn-success" onclick="xacNhanPhieuNhap('${pn.maPhieuNhap}')" title="Xác nhận phiếu nhập">
             <i class="fas fa-check"></i>
           </button>
-          <button class="btn btn-danger" onclick="huyPhieuNhap('${pn.maPhieuNhap}')" title="Huy phieu nhap">
+          <button class="btn btn-danger" onclick="huyPhieuNhap('${pn.maPhieuNhap}')" title="Hủy phiếu nhập">
             <i class="fas fa-times"></i>
           </button>
         `
@@ -640,11 +640,11 @@ async function showAddPhieuNhapModal() {
     );
 
     if (activeNcc.length === 0) {
-      showNotification("Khong co nha cung cap hop le", "error");
+      showNotification("Không có nhà cung cấp hợp lệ", "error");
       return;
     }
     if (thuocList.length === 0) {
-      showNotification("Khong co thuoc de tao phieu nhap", "error");
+      showNotification("Không có thuốc để tạo phiếu nhập", "error");
       return;
     }
 
@@ -664,10 +664,10 @@ async function showAddPhieuNhapModal() {
 
     const modalBody = document.getElementById("modalBody");
     modalBody.innerHTML = `
-      <h2>Tao phieu nhap</h2>
+      <h2>Tao phiếu nhập</h2>
       <form id="addImportForm">
         <div class="form-group">
-          <label>Ma phieu nhap</label>
+          <label>Ma phiếu nhập</label>
           <input type="text" name="maPhieuNhap" required value="PN${Date.now()}" />
         </div>
         <div class="form-group">
@@ -677,11 +677,11 @@ async function showAddPhieuNhapModal() {
           </select>
         </div>
         <div class="form-group">
-          <label>Chi tiet thuoc nhap</label>
+          <label>Chi tiết thuốc nhập</label>
           <div class="pn-detail-table-wrap">
             <table id="detailTable">
               <thead>
-                <tr><th>Thuoc</th><th>So luong</th><th>Don gia nhap</th><th>Thao tac</th></tr>
+                <tr><th>Thuốc</th><th>Số lượng</th><th>Đơn giá nhập</th><th>Thao tác</th></tr>
               </thead>
               <tbody id="phieuNhapDetailBody">
                 ${buildPhieuNhapDetailRow(thuocOptions)}
@@ -690,13 +690,13 @@ async function showAddPhieuNhapModal() {
           </div>
           <div style="margin-top: 10px;">
             <button type="button" class="btn btn-secondary" id="btnAddPhieuNhapRow">
-              <i class="fas fa-plus"></i> Them dong thuoc
+              <i class="fas fa-plus"></i> Thêm dòng thuốc
             </button>
           </div>
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-cancel" onclick="closeModal()">Huy</button>
-          <button type="submit" class="btn btn-primary">Luu phieu nhap</button>
+          <button type="submit" class="btn btn-primary">Luu phiếu nhập</button>
         </div>
       </form>
     `;
@@ -832,7 +832,7 @@ function searchDrugForSale() {
  * @param {Object} drug - Thông tin thuốc
  */
 function addToCart(drug) {
-  // Kiểm tra xem thuốc đã có trong giỏ chưa
+  // Kiểm tra xem thuoc đã có trong giỏ chưa
   const existingItem = cartItems.find((item) => item.maThuoc === drug.maThuoc);
 
   if (existingItem) {
@@ -1080,10 +1080,10 @@ function displayHoaDonTable(data) {
 
     const actionButtons = canHandle
       ? `
-          <button class="btn btn-success" onclick="confirmThanhToanNhanVien('${hd.maHoaDon}')" title="Xac nhan thanh toan">
+          <button class="btn btn-success" onclick="confirmThanhToanNhanVien('${hd.maHoaDon}')" title="Xác nhận thanh toán">
             <i class="fas fa-check"></i>
           </button>
-          <button class="btn btn-danger" onclick="confirmHuyHoaDonNhanVien('${hd.maHoaDon}')" title="Huy hoa don">
+          <button class="btn btn-danger" onclick="confirmHuyHoaDonNhanVien('${hd.maHoaDon}')" title="Hủy hóa đơn">
             <i class="fas fa-times"></i>
           </button>
         `
@@ -1409,19 +1409,19 @@ async function loadHoSoCuaToi() {
 function editThuoc(id) {
   const item = allThuoc.find((t) => t.maThuoc === id);
   if (!item) {
-    showNotification("Khong tim thay thuoc", "error");
+    showNotification("Không tìm thấy thuốc", "error");
     return;
   }
 
   const modalBody = document.getElementById("modalBody");
   modalBody.innerHTML = `
-    <h2>Cap nhat thuoc</h2>
+    <h2>Cập nhật thuốc</h2>
     <form id="editThuocFormNv">
       <input type="hidden" name="maThuoc" value="${item.maThuoc}" />
-      <div class="form-group"><label>Ten thuoc</label><input name="tenThuoc" required value="${item.tenThuoc || ""}" /></div>
+      <div class="form-group"><label>Tên thuốc</label><input name="tenThuoc" required value="${item.tenThuoc || ""}" /></div>
       <div class="form-group"><label>Don vi tinh</label><input name="donViTinh" value="${item.donViTinh || ""}" /></div>
       <div class="form-group"><label>Gia ban</label><input type="number" name="giaBan" min="0" value="${item.giaBan || 0}" /></div>
-      <div class="form-group"><label>So luong ton</label><input type="number" name="soLuongTon" min="0" value="${item.soLuongTon || 0}" /></div>
+      <div class="form-group"><label>Số lượng ton</label><input type="number" name="soLuongTon" min="0" value="${item.soLuongTon || 0}" /></div>
       <div class="form-group"><label>Han su dung</label><input type="date" name="hsd" value="${item.hsd ? String(item.hsd).split("T")[0] : ""}" /></div>
       <div class="form-actions">
         <button type="button" class="btn btn-cancel" onclick="closeModal()">Huy</button>
@@ -1448,9 +1448,9 @@ function editThuoc(id) {
         }
         closeModal();
         await loadThuocData();
-        showNotification("Cap nhat thuoc thanh cong", "success");
+        showNotification("Cập nhật thuốc thành công", "success");
       } catch (err) {
-        showNotification(err.message || "Cap nhat that bai", "error");
+        showNotification(err.message || "Cập nhật thất bại", "error");
       }
     });
 
@@ -1465,7 +1465,7 @@ function viewPhieuNhap(id) {
   ])
     .then(([pn, details]) => {
       if (!pn) {
-        showNotification("Khong tim thay phieu nhap", "error");
+        showNotification("Không tìm thấy phiếu nhập", "error");
         return;
       }
       const canEdit = isPendingPhieuNhapStatus(pn.trangThai);
@@ -1479,25 +1479,25 @@ function viewPhieuNhap(id) {
       const actionButtons = canEdit
         ? `
           <div class="form-actions" style="margin-top: 14px;">
-            <button type="button" class="btn btn-secondary" onclick="editPhieuNhap('${pn.maPhieuNhap}')">Chinh sua chi tiet</button>
-            <button type="button" class="btn btn-success" onclick="xacNhanPhieuNhap('${pn.maPhieuNhap}')">Xac nhan</button>
-            <button type="button" class="btn btn-danger" onclick="huyPhieuNhap('${pn.maPhieuNhap}')">Huy phieu</button>
+            <button type="button" class="btn btn-secondary" onclick="editPhieuNhap('${pn.maPhieuNhap}')">Chỉnh sửa chi tiết</button>
+            <button type="button" class="btn btn-success" onclick="xacNhanPhieuNhap('${pn.maPhieuNhap}')">Xác nhận</button>
+            <button type="button" class="btn btn-danger" onclick="huyPhieuNhap('${pn.maPhieuNhap}')">Hủy phiếu</button>
           </div>
         `
         : "";
 
       document.getElementById("modalBody").innerHTML = `
-        <h2>Chi tiet phieu nhap ${pn.maPhieuNhap}</h2>
-        <p>Ngay nhap: ${formatDate(pn.ngayNhap)} | NV: ${pn.maNhanVien || ""} | NCC: ${pn.maNhaCungCap || ""} | Trang thai: ${formatPhieuNhapStatus(pn.trangThai)}</p>
+        <h2>Chi tiết phiếu nhập ${pn.maPhieuNhap}</h2>
+        <p>Ngày nhập: ${formatDate(pn.ngayNhap)} | NV: ${pn.maNhanVien || ""} | NCC: ${pn.maNhaCungCap || ""} | Trạng thái: ${formatPhieuNhapStatus(pn.trangThai)}</p>
         <div class="pn-detail-table-wrap">
-          <table id="detailTable"><thead><tr><th>Ma CTPN</th><th>Ma thuoc</th><th>So luong</th><th>Don gia</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Khong co chi tiet</td></tr>'}</tbody></table>
+          <table id="detailTable"><thead><tr><th>Mã CTPN</th><th>Mã thuốc</th><th>Số lượng</th><th>Đơn giá</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Không có chi tiết</td></tr>'}</tbody></table>
         </div>
         ${actionButtons}
       `;
       openModal();
     })
     .catch(() =>
-      showNotification("Khong tai duoc chi tiet phieu nhap", "error"),
+      showNotification("Không tải được chi tiết phiếu nhập", "error"),
     );
 }
 
@@ -1510,20 +1510,20 @@ async function editPhieuNhap(maPhieuNhap) {
     ]);
 
     if (!pnRes.ok) {
-      showNotification("Khong tim thay phieu nhap", "error");
+      showNotification("Không tìm thấy phiếu nhập", "error");
       return;
     }
 
     const pn = await pnRes.json();
     if (!isPendingPhieuNhapStatus(pn.trangThai)) {
-      showNotification("Phieu nhap da hoan tat, khong the sua", "error");
+      showNotification("Phiếu nhập đã hoàn tất, không thể sửa", "error");
       return;
     }
 
     const details = detailRes.ok ? await detailRes.json() : [];
     const thuocList = thuocRes.ok ? await thuocRes.json() : [];
     if (thuocList.length === 0) {
-      showNotification("Khong co thuoc de cap nhat", "error");
+      showNotification("Không có thuốc để cập nhật", "error");
       return;
     }
 
@@ -1545,24 +1545,24 @@ async function editPhieuNhap(maPhieuNhap) {
       .join("");
 
     document.getElementById("modalBody").innerHTML = `
-      <h2>Chinh sua phieu nhap ${pn.maPhieuNhap}</h2>
-      <p>NCC: ${pn.maNhaCungCap || ""} | NV: ${pn.maNhanVien || ""} | Trang thai: ${formatPhieuNhapStatus(pn.trangThai)}</p>
+      <h2>Chỉnh sửa phiếu nhập ${pn.maPhieuNhap}</h2>
+      <p>NCC: ${pn.maNhaCungCap || ""} | NV: ${pn.maNhanVien || ""} | Trạng thái: ${formatPhieuNhapStatus(pn.trangThai)}</p>
       <div class="pn-detail-table-wrap">
         <table id="detailTable">
           <thead>
-            <tr><th>Thuoc</th><th>So luong</th><th>Don gia nhap</th><th>Thao tac</th></tr>
+            <tr><th>Thuốc</th><th>Số lượng</th><th>Đơn giá nhập</th><th>Thao tác</th></tr>
           </thead>
           <tbody id="phieuNhapDetailBody">${rowsHtml || buildPhieuNhapDetailRow(thuocOptions)}</tbody>
         </table>
       </div>
       <div style="margin-top: 10px;">
         <button type="button" class="btn btn-secondary" id="btnAddEditPhieuNhapRow">
-          <i class="fas fa-plus"></i> Them dong thuoc
+          <i class="fas fa-plus"></i> Thêm dòng thuốc
         </button>
       </div>
       <div class="form-actions" style="margin-top: 14px;">
-        <button type="button" class="btn btn-cancel" onclick="closeModal()">Dong</button>
-        <button type="button" class="btn btn-primary" id="btnSavePhieuNhapEdit">Luu thay doi</button>
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Đóng</button>
+        <button type="button" class="btn btn-primary" id="btnSavePhieuNhapEdit">Lưu thay đổi</button>
       </div>
     `;
 
@@ -1606,30 +1606,30 @@ async function editPhieuNhap(maPhieuNhap) {
           if (!response.ok || result !== true) {
             const errText = await response.text().catch(() => "");
             showNotification(
-              errText || "Cap nhat phieu nhap that bai",
+              errText || "Cập nhật phiếu nhập thất bại",
               "error",
             );
             return;
           }
 
-          showNotification("Cap nhat phieu nhap thanh cong", "success");
+          showNotification("Cập nhật phiếu nhập thành công", "success");
           closeModal();
           await loadPhieuNhapData();
           await loadThuocData();
           await loadDashboardData();
         } catch (error) {
-          showNotification("Co loi khi cap nhat phieu nhap", "error");
+          showNotification("Có lỗi khi cập nhật phiếu nhập", "error");
         }
       });
 
     openModal();
   } catch (error) {
-    showNotification("Khong the tai du lieu chinh sua phieu nhap", "error");
+    showNotification("Không thể tải dữ liệu chỉnh sửa phiếu nhập", "error");
   }
 }
 
 async function xacNhanPhieuNhap(maPhieuNhap) {
-  if (!confirm("Xac nhan phieu nhap nay? Sau khi xac nhan se khong sua duoc."))
+  if (!confirm("Xác nhận phiếu nhập này? Sau khi xác nhận sẽ không sửa được."))
     return;
 
   try {
@@ -1643,20 +1643,20 @@ async function xacNhanPhieuNhap(maPhieuNhap) {
 
     if (!response.ok || result !== true) {
       const errText = await response.text().catch(() => "");
-      showNotification(errText || "Xac nhan phieu nhap that bai", "error");
+      showNotification(errText || "Xác nhận phiếu nhập thất bại", "error");
       return;
     }
 
-    showNotification("Xac nhan phieu nhap thanh cong", "success");
+    showNotification("Xác nhận phiếu nhập thành công", "success");
     await loadPhieuNhapData();
     await loadDashboardData();
   } catch (error) {
-    showNotification("Co loi khi xac nhan phieu nhap", "error");
+    showNotification("Có lỗi khi xác nhận phiếu nhập", "error");
   }
 }
 
 async function huyPhieuNhap(maPhieuNhap) {
-  if (!confirm("Huy phieu nhap nay? He thong se hoan lai ton kho da nhap."))
+  if (!confirm("Hủy phiếu nhập này? Hệ thống sẽ hoàn lại tồn kho đã nhập."))
     return;
 
   try {
@@ -1667,16 +1667,16 @@ async function huyPhieuNhap(maPhieuNhap) {
 
     if (!response.ok || result !== true) {
       const errText = await response.text().catch(() => "");
-      showNotification(errText || "Huy phieu nhap that bai", "error");
+      showNotification(errText || "Hủy phiếu nhập thất bại", "error");
       return;
     }
 
-    showNotification("Da huy phieu nhap", "success");
+    showNotification("Đã hủy phiếu nhập", "success");
     await loadPhieuNhapData();
     await loadThuocData();
     await loadDashboardData();
   } catch (error) {
-    showNotification("Co loi khi huy phieu nhap", "error");
+    showNotification("Có lỗi khi hủy phiếu nhập", "error");
   }
 }
 function viewHoaDon(id) {
@@ -1687,7 +1687,7 @@ function viewHoaDon(id) {
     .then(([hoadonList, details]) => {
       const hd = (hoadonList || []).find((x) => x.maHoaDon === id);
       if (!hd) {
-        showNotification("Khong tim thay hoa don", "error");
+        showNotification("Không tìm thấy hóa đơn", "error");
         return;
       }
       const rows = (details || [])
@@ -1697,17 +1697,17 @@ function viewHoaDon(id) {
         )
         .join("");
       document.getElementById("modalBody").innerHTML = `
-        <h2>Chi tiet hoa don ${hd.maHoaDon}</h2>
-        <p>Ngay tao: ${formatDate(hd.ngayTao || hd.ngayLap)} | KH: ${hd.maKhachHang || ""} | NV: ${hd.maNhanVien || ""} | Tong tien: ${formatCurrency(hd.tongTien)}</p>
-        <table id="detailTable"><thead><tr><th>Ma CTHD</th><th>Ma thuoc</th><th>So luong</th><th>Huong dan</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Khong co chi tiet</td></tr>'}</tbody></table>
+        <h2>Chi tiết hóa đơn ${hd.maHoaDon}</h2>
+        <p>Ngày tạo: ${formatDate(hd.ngayTao || hd.ngayLap)} | KH: ${hd.maKhachHang || ""} | NV: ${hd.maNhanVien || ""} | Tổng tiền: ${formatCurrency(hd.tongTien)}</p>
+        <table id="detailTable"><thead><tr><th>Mã CTHD</th><th>Mã thuốc</th><th>Số lượng</th><th>Hướng dẫn</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Không có chi tiết</td></tr>'}</tbody></table>
       `;
       openModal();
     })
-    .catch(() => showNotification("Khong tai duoc chi tiet hoa don", "error"));
+    .catch(() => showNotification("Không tải được chi tiết hóa đơn", "error"));
 }
 
 async function confirmThanhToanNhanVien(maHoaDon) {
-  if (!confirm("Xac nhan thanh toan hoa don nay?")) return;
+  if (!confirm("Xác nhận thanh toán hóa đơn này?")) return;
 
   try {
     const response = await fetch(`${API_URL}/hoadon/thanhtoan`, {
@@ -1718,20 +1718,20 @@ async function confirmThanhToanNhanVien(maHoaDon) {
 
     const result = await response.json().catch(() => false);
     if (!response.ok || result !== true) {
-      showNotification("Xac nhan thanh toan that bai", "error");
+      showNotification("Xác nhận thanh toán thất bại", "error");
       return;
     }
 
-    showNotification("Xac nhan thanh toan thanh cong", "success");
+    showNotification("Xác nhận thanh toán thành công", "success");
     loadHoaDonData();
     loadDashboardData();
   } catch (error) {
-    showNotification("Co loi xay ra", "error");
+    showNotification("Có lỗi xảy ra", "error");
   }
 }
 
 async function confirmHuyHoaDonNhanVien(maHoaDon) {
-  if (!confirm("Ban co chac muon huy hoa don nay?")) return;
+  if (!confirm("Bạn có chắc muốn hủy hóa đơn này?")) return;
 
   try {
     const response = await fetch(`${API_URL}/hoadon/huy`, {
@@ -1742,15 +1742,15 @@ async function confirmHuyHoaDonNhanVien(maHoaDon) {
 
     const result = await response.json().catch(() => false);
     if (!response.ok || result !== true) {
-      showNotification("Huy hoa don that bai", "error");
+      showNotification("Hủy hóa đơn thất bại", "error");
       return;
     }
 
-    showNotification("Da huy hoa don", "success");
+    showNotification("Đã hủy hóa đơn", "success");
     loadHoaDonData();
     loadDashboardData();
   } catch (error) {
-    showNotification("Co loi xay ra", "error");
+    showNotification("Có lỗi xảy ra", "error");
   }
 }
 

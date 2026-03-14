@@ -16,12 +16,12 @@ Chứa các file JavaScript để tương tác với backend và xử lý giao d
 ### 1. **Lấy danh sách thuốc** (GET)
 
 ```javascript
-// Gọi API để lấy tất cả thuốc
+// Gọi API để lấy tất cả thuoc
 function layDanhSachThuoc() {
   fetch("/api/thuoc")
     .then((response) => response.json()) // Parse JSON từ backend
     .then((data) => {
-      // data là array của các thuốc
+      // data là array của các thuoc
       hienThiDanhSach(data);
     })
     .catch((error) => {
@@ -110,7 +110,7 @@ function xemChiTiet(maThuoc) {
     })
     .catch((error) => {
       console.error("Lỗi:", error);
-      alert("Không thể xem chi tiết thuốc!");
+      alert("Không thể xem chi tiết thuoc!");
     });
 }
 ```UT)
@@ -321,7 +321,7 @@ if (!tenThuoc || gia <= 0) {
   "timestamp": "2026-01-17T20:30:00",
   "status": 404,
   "error": "Not Found",
-  "message": "Thuốc không tồn tại"
+  "message": "Thuoc không tồn tại"
 }
 
 // Sai

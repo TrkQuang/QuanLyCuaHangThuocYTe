@@ -41,7 +41,7 @@ Chứa các file giao diện HTML cho từng chức năng của hệ thống.
 
 - Hiển thị tất cả thuốc (dạng grid/card)
 - Tìm kiếm thuốc (theo tên, loại)
-- Lọc theo: giá, loại thuốc, hãng
+- Lọc theo: giá, loại thuoc, hãng
 - Sắp xếp: giá tăng/giảm, bán chạy, mới nhất
 - Phân trang
 - Nút "Thêm vào giỏ hàng"
@@ -103,8 +103,8 @@ Chứa các file giao diện HTML cho từng chức năng của hệ thống.
 
 - Thống kê doanh thu ngày/tháng/năm
 - Số lượng đơn hàng
-- Thuốc sắp hết hạn (cảnh báo)
-- Thuốc sắp hết tồn kho
+- Thuoc sắp hết hạn (cảnh báo)
+- Thuoc sắp hết tồn kho
 - Biểu đồ doanh thu
 - Top thuốc bán chạy
 

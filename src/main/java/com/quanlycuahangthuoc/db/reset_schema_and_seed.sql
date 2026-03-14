@@ -77,7 +77,7 @@ FOR EACH ROW
 BEGIN
     IF NEW.NgaySinh > CURRENT_DATE() THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'NgaySinh khong duoc lon hon ngay hien tai';
+            SET MESSAGE_TEXT = 'NgaySinh không được lon hon ngay hien tai';
     END IF;
 END$$
 
@@ -87,7 +87,7 @@ FOR EACH ROW
 BEGIN
     IF NEW.NgaySinh > CURRENT_DATE() THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'NgaySinh khong duoc lon hon ngay hien tai';
+            SET MESSAGE_TEXT = 'NgaySinh không được lon hon ngay hien tai';
     END IF;
 END$$
 DELIMITER ;

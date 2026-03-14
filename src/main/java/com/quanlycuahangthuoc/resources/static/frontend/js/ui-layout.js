@@ -91,14 +91,14 @@
         {
           key: "unit",
           type: "dynamic-select",
-          label: "Don vi",
-          placeholder: "Tat ca don vi",
+          label: "Đơn vị",
+          placeholder: "Tất cả đơn vị",
           column: 2,
         },
         {
           key: "stockLevel",
           type: "stock-level",
-          label: "Ton kho",
+          label: "Tồn kho",
           column: 4,
         },
         { key: "priceMin", type: "number-min", label: "Giá từ", column: 3 },
@@ -139,13 +139,13 @@
         {
           key: "amountMin",
           type: "number-min",
-          label: "Tien tu",
+          label: "Tiền từ",
           column: 4,
         },
         {
           key: "amountMax",
           type: "number-max",
-          label: "Tien den",
+          label: "Tiền đến",
           column: 4,
         },
       ],
@@ -153,27 +153,27 @@
         {
           key: "status",
           type: "dynamic-select",
-          label: "Trang thai",
-          placeholder: "Tat ca trang thai",
+          label: "Trạng thái",
+          placeholder: "Tất cả trạng thái",
           column: 5,
         },
         {
           key: "dateFrom",
           type: "date-from",
-          label: "Tu ngay",
+          label: "Từ ngày",
           column: 1,
         },
-        { key: "dateTo", type: "date-to", label: "Den ngay", column: 1 },
+        { key: "dateTo", type: "date-to", label: "Đến ngày", column: 1 },
         {
           key: "amountMin",
           type: "number-min",
-          label: "Tien tu",
+          label: "Tiền từ",
           column: 4,
         },
         {
           key: "amountMax",
           type: "number-max",
-          label: "Tien den",
+          label: "Tiền đến",
           column: 4,
         },
       ],
@@ -181,8 +181,8 @@
         {
           key: "role",
           type: "dynamic-select",
-          label: "Loai tai khoan",
-          placeholder: "Tat ca vai tro",
+          label: "Loai tài khoản",
+          placeholder: "Tất cả vai trò",
           column: 3,
         },
       ],
@@ -190,33 +190,33 @@
         {
           key: "status",
           type: "dynamic-select",
-          label: "Trang thai",
-          placeholder: "Tat ca trang thai",
+          label: "Trạng thái",
+          placeholder: "Tat ca trạng thái",
           column: 5,
         },
         {
           key: "dateFrom",
           type: "date-from",
-          label: "Tu ngay",
+          label: "Từ ngày",
           column: 2,
         },
-        { key: "dateTo", type: "date-to", label: "Den ngay", column: 2 },
+        { key: "dateTo", type: "date-to", label: "Đến ngày", column: 2 },
       ],
       lichdangkyTable: [
         {
           key: "status",
           type: "dynamic-select",
-          label: "Trang thai",
-          placeholder: "Tat ca trang thai",
+          label: "Trạng thái",
+          placeholder: "Tat ca trạng thái",
           column: 4,
         },
         {
           key: "dateFrom",
           type: "date-from",
-          label: "Tu ngay",
+          label: "Từ ngày",
           column: 1,
         },
-        { key: "dateTo", type: "date-to", label: "Den ngay", column: 1 },
+        { key: "dateTo", type: "date-to", label: "Đến ngày", column: 1 },
       ],
     };
 
@@ -300,7 +300,7 @@
           control.className = "ui-biz-input";
           control.setAttribute("data-biz-key", rule.key);
           control.innerHTML =
-            '<option value="">' + (rule.placeholder || "Tat ca") + "</option>";
+            '<option value="">' + (rule.placeholder || "Tất cả") + "</option>";
         }
 
         if (rule.type === "stock-level") {
@@ -308,10 +308,10 @@
           control.className = "ui-biz-input";
           control.setAttribute("data-biz-key", rule.key);
           control.innerHTML =
-            '<option value="">Tat ca ton kho</option>' +
-            '<option value="low">Sap het (< 10)</option>' +
-            '<option value="normal">Con hang (>= 10)</option>' +
-            '<option value="out">Het hang (= 0)</option>';
+            '<option value="">Tất cả</option>' +
+            '<option value="low">Sắp hết (< 10)</option>' +
+            '<option value="normal">Còn hàng (>= 10)</option>' +
+            '<option value="out">Hết hàng (= 0)</option>';
         }
 
         if (rule.type === "date-from" || rule.type === "date-to") {
@@ -327,7 +327,7 @@
           control.min = "0";
           control.className = "ui-biz-input";
           control.setAttribute("data-biz-key", rule.key);
-          control.placeholder = rule.type === "number-min" ? "Tu" : "Den";
+          control.placeholder = rule.type === "number-min" ? "Từ" : "Đến";
         }
 
         if (!control) return;

@@ -19,13 +19,13 @@ public class ThuocController {
   @Autowired
   private ThuocDAO thuocDAO;
 
-  // Lấy tất cả thuốc
+  // Lấy tất cả thuoc
   @GetMapping
   public ArrayList<ThuocDTO> getAll() {
     return thuocDAO.getAllThuoc();
   }
 
-  // Lấy thuốc theo ID
+  // Lấy thuoc theo ID
   @GetMapping("/{maThuoc}")
   public ResponseEntity<?> getById(@PathVariable String maThuoc) {
     ThuocDTO thuoc = thuocDAO.getById(maThuoc);
@@ -35,40 +35,40 @@ public class ThuocController {
     return ResponseEntity.notFound().build();
   }
 
-  // Thêm thuốc
+  // Thêm thuoc
   @PostMapping("/them-thuoc")
   public ResponseEntity<?> themThuoc(@RequestBody ThuocDTO th) {
     try {
       if (thuocBUS.themThuoc(th)) {
-        return ResponseEntity.ok("Thêm thuốc thành công");
+        return ResponseEntity.ok("Thêm thuoc thành công");
       }
-      return ResponseEntity.badRequest().body("Thêm thuốc thất bại");
+      return ResponseEntity.badRequest().body("Thêm thuoc thất bại");
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
-  // Cập nhật thuốc
+  // Cập nhật thuoc
   @PutMapping
   public ResponseEntity<?> suaThuoc(@RequestBody ThuocDTO th) {
     try {
       if (thuocDAO.updateThuoc(th)) {
-        return ResponseEntity.ok("Cập nhật thuốc thành công");
+        return ResponseEntity.ok("Cập nhật thuoc thành công");
       }
-      return ResponseEntity.badRequest().body("Cập nhật thuốc thất bại");
+      return ResponseEntity.badRequest().body("Cập nhật thuoc thất bại");
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
-  // Xóa thuốc
+  // Xóa thuoc
   @DeleteMapping("/{maThuoc}")
   public ResponseEntity<?> xoaThuoc(@PathVariable String maThuoc) {
     try {
       if (thuocDAO.deleteThuoc(maThuoc)) {
-        return ResponseEntity.ok("Xóa thuốc thành công");
+        return ResponseEntity.ok("Xóa thuoc thành công");
       }
-      return ResponseEntity.badRequest().body("Xóa thuốc thất bại");
+      return ResponseEntity.badRequest().body("Xóa thuoc thất bại");
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }

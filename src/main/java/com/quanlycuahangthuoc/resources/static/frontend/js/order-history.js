@@ -14,11 +14,11 @@ async function loadOrderHistory() {
   const currentUser = getCurrentUser();
   if (!currentUser?.maKhachHang) {
     orderContainer.innerHTML =
-      '<div class="empty-state"><h3>Vui long dang nhap bang tai khoan khach hang</h3></div>';
+      '<div class="empty-state"><h3>Vui lòng đăng nhập bằng tài khoản khách hàng</h3></div>';
     return;
   }
 
-  orderContainer.innerHTML = "<p>Dang tai don hang...</p>";
+  orderContainer.innerHTML = "<p>Đang tải đơn hàng...</p>";
 
   try {
     const allOrders = await apiFetch("/hoadon");
@@ -28,7 +28,7 @@ async function loadOrderHistory() {
 
     if (!orders.length) {
       orderContainer.innerHTML =
-        '<div class="empty-state"><h3>Chua co don hang</h3></div>';
+        '<div class="empty-state"><h3>Chưa có đơn hàng</h3></div>';
       return;
     }
 

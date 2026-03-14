@@ -117,14 +117,14 @@ public class LichLamBUS {
   public boolean ThemLichLam(LichLamDTO ll) {
     if (
       ll.getMaLich().isEmpty() || ll.getMaNhanVien().isEmpty()
-    ) throw new RuntimeException("Ma lich va ma nhan vien khong duoc rong");
+    ) throw new RuntimeException("Ma lich va ma nhan vien không được rong");
 
     if (
       ll.getNgayLam().isEmpty() ||
       ll.getGioBatDau().isEmpty() ||
       ll.getGioKetThuc().isEmpty()
     ) throw new RuntimeException(
-      "Ngay lam, gio bat dau, gio ket thuc khong duoc rong"
+      "Ngay lam, gio bat dau, gio ket thuc không được rong"
     );
 
     // Gio bat dau < gio ket thuc

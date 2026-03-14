@@ -4,7 +4,7 @@
 
   const currentUser = getCurrentUser();
   if (!currentUser || !currentUser.tenDangNhap) {
-    loginLink.textContent = "👤 Dang nhap";
+    loginLink.textContent = "👤 Đăng nhập";
     loginLink.href = "login.html";
     return;
   }
@@ -26,8 +26,8 @@
       "position:absolute;top:100%;right:0;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);padding:8px 0;min-width:160px;z-index:1000;margin-top:8px;";
 
     menu.innerHTML =
-      '<a href="profile.html" style="display:block;padding:8px 14px;color:#333;text-decoration:none;">👤 Tai khoan</a>' +
-      '<a href="order-history.html" style="display:block;padding:8px 14px;color:#333;text-decoration:none;">📋 Don hang</a>' +
+      '<a href="profile.html" style="display:block;padding:8px 14px;color:#333;text-decoration:none;">👤 Tài khoản</a>' +
+      '<a href="order-history.html" style="display:block;padding:8px 14px;color:#333;text-decoration:none;">📋 Đơn hàng</a>' +
       '<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">' +
       '<a href="#" id="logoutBtnHeader" style="display:block;padding:8px 14px;color:#d00;text-decoration:none;">🚪 Dang xuat</a>';
 

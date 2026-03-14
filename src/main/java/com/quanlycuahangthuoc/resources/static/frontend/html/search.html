@@ -6,42 +6,70 @@
     <title>Kết quả tìm kiếm - Nhà Thuốc</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/design-system.css" />
+    <style>
+      .search-shell {
+        padding: 30px 0 56px;
+        background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 55%, #ffffff 100%);
+        min-height: calc(100vh - 200px);
+      }
+
+      .search-hero {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 22px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+      }
+
+      .search-hero h1 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 30px;
+      }
+
+      .search-hero p {
+        margin-top: 8px;
+        color: #475569;
+      }
+
+      .search-empty {
+        text-align: center;
+        font-size: 18px;
+        color: #64748b;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 28px;
+      }
+    </style>
   </head>
   <body>
-    <header class="search-header">
-      <div class="search-container">
-        <a href="index.html" class="logo">
-          <span class="logo-icon">🏥</span>
-          <span class="logo-text">Nhà Thuốc</span>
-        </a>
+    <script src="../js/shared-header-loader.js" data-active="shop"></script>
 
-        <div class="search-box">
-          <form id="searchForm" action="search.html" method="get">
-            <input
-              type="text"
-              id="searchInput"
-              name="q"
-              placeholder="Tìm kiếm thuốc......."
-              autocomplete="off"
-              value=""
-            />
-            <button type="submit" class="search-btn">🔍</button>
-          </form>
+    <main class="search-shell">
+      <section>
+        <div class="container">
+          <div class="search-hero">
+            <h1>Kết quả tìm kiếm</h1>
+            <p>Từ khóa: <strong id="searchKeyword"></strong></p>
+          </div>
+
+          <div class="products-grid" id="searchResults"></div>
         </div>
+      </section>
+    </main>
 
-        <footer class="back-home-footer">
-          <a href="index.html" class="home-btn">← Về Trang Chủ</a>
-        </footer>
-      </div>
-    </header>
-
-    <section style="padding: 40px 0">
+    <footer class="footer">
       <div class="container">
-        <h1>Kết quả tìm kiếm cho: <span id="searchKeyword"></span></h1>
-
-        <div class="products-grid" id="searchResults"></div>
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>Nhà Thuốc</h3>
+            <p>Cửa hàng thuốc trực tuyến uy tín</p>
+          </div>
+        </div>
       </div>
-    </section>
+    </footer>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -101,7 +129,7 @@
 
         if (filtered.length === 0) {
           resultsContainer.innerHTML =
-            '<p style="text-align:center; font-size:18px; color:#718096;">Không tìm thấy sản phẩm nào phù hợp.</p>';
+            '<p class="search-empty">Không tìm thấy sản phẩm nào phù hợp.</p>';
           return;
         }
 
@@ -122,6 +150,7 @@
 
     <script src="../js/config.js"></script>
     <script src="../js/ui-layout.js"></script>
+    <script src="../js/header.js"></script>
     <script src="../js/cart.js"></script>
   </body>
 </html>

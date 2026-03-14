@@ -7,6 +7,7 @@ public class CreateKhachHangRequest {
   private String email;
   private String loaiTaiKhoan;
   private String hoTen;
+  private String gioiTinh;
   private String soDienThoai;
   private String diaChi;
   private String ngaySinh;
@@ -54,6 +55,14 @@ public class CreateKhachHangRequest {
 
   public String getSoDienThoai() {
     return soDienThoai;
+  }
+
+  public String getGioiTinh() {
+    return gioiTinh;
+  }
+
+  public void setGioiTinh(String gioiTinh) {
+    this.gioiTinh = gioiTinh;
   }
 
   public void setSoDienThoai(String soDienThoai) {

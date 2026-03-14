@@ -82,7 +82,7 @@ public class DBConnection {
         })
       );
     } catch (Exception e) {
-      throw new DatabaseException("Khong the khoi tao HikariCP", e);
+      throw new DatabaseException("Không thể khoi tao HikariCP", e);
     }
   }
 
@@ -92,7 +92,7 @@ public class DBConnection {
     try {
       return dataSource.getConnection();
     } catch (Exception e) {
-      throw new DatabaseException("Ket noi CSDL that bai", e);
+      throw new DatabaseException("Ket noi CSDL thất bại", e);
     }
   }
 
