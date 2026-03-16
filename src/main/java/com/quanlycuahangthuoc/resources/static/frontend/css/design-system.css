@@ -303,6 +303,30 @@ textarea:focus,
   font-size: 13px;
 }
 
+.lichlam-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.lichlam-filter-grid .form-group {
+  margin-bottom: 0;
+}
+
+.lichlam-filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.lichlam-filter-actions .btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
 .ui-pagination {
   display: flex;
   justify-content: flex-end;
@@ -448,6 +472,11 @@ textarea:focus,
 
   .ui-business-filters {
     width: 100%;
+  }
+
+  .lichlam-filter-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .ui-table-meta {
