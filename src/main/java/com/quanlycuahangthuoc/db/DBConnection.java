@@ -56,7 +56,7 @@ public class DBConnection {
       config.setPassword(password);
       config.setDriverClassName(driver);
       config.setMaximumPoolSize(
-        parseInt(props.getProperty("db.hikari.maximum-pool-size"), 10)
+        parseInt(props.getProperty("db.hikari.maximum-pool-size"), 8)
       );
       config.setMinimumIdle(
         parseInt(props.getProperty("db.hikari.minimum-idle"), 2)
