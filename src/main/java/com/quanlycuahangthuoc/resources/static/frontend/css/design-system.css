@@ -220,7 +220,7 @@ textarea:focus,
 .ui-table-tools {
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   flex-wrap: wrap;
   margin: 0 0 12px;
@@ -233,6 +233,8 @@ textarea:focus,
   padding: 9px 12px;
   background: #fff;
   font-size: 14px;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .ui-business-filters {
@@ -261,7 +263,8 @@ textarea:focus,
   padding: 8px 10px;
   background: #fff;
   font-size: 13px;
-  min-height: 38px;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .ui-filter-column {
@@ -278,6 +281,8 @@ textarea:focus,
   padding: 9px 10px;
   background: #fff;
   font-size: 14px;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .ui-btn-reset {
@@ -288,6 +293,8 @@ textarea:focus,
   color: #1f2937;
   font-weight: 600;
   cursor: pointer;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .ui-table-meta {

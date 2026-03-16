@@ -181,7 +181,7 @@
         {
           key: "role",
           type: "dynamic-select",
-          label: "Loai tài khoản",
+          label: "Loại tài khoản",
           placeholder: "Tất cả vai trò",
           column: 3,
         },
@@ -191,7 +191,7 @@
           key: "status",
           type: "dynamic-select",
           label: "Trạng thái",
-          placeholder: "Tat ca trạng thái",
+          placeholder: "Tất cả trạng thái",
           column: 5,
         },
         {
@@ -498,7 +498,7 @@
 
       var meta = tools.querySelector(".ui-table-meta");
       meta.textContent =
-        filtered.length + " ban ghi | Trang " + state.page + "/" + totalPages;
+        filtered.length + " Bản ghi | Trang " + state.page + "/" + totalPages;
 
       pagination.innerHTML = "";
       if (totalPages <= 1) return;

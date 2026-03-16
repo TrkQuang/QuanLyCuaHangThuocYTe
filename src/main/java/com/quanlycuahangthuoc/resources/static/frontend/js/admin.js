@@ -833,7 +833,7 @@ function displayThuocTable(data) {
 function showAddThuocModal() {
   const modalBody = document.getElementById("modalBody");
   modalBody.innerHTML = `
-        <h2>Thêm Thuoc Mới</h2>
+        <h2>Thêm Thuốc Mới</h2>
         <form id="addThuocForm">
             <div class="form-group">
                 <label>Tên thuốc *</label>
@@ -2481,7 +2481,7 @@ async function viewThuoc(maThuoc) {
     modalBody.innerHTML = `
       <div style="max-width: 600px; margin: 0 auto;">
         <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">
-          <i class="fas fa-pills"></i> Chi Tiết Thuoc
+          <i class="fas fa-pills"></i> Chi Tiết Thuốc
         </h2>
         
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; text-align: center; margin-bottom: 30px;">
@@ -2556,7 +2556,7 @@ async function editThuoc(maThuoc) {
 
     const modalBody = document.getElementById("modalBody");
     modalBody.innerHTML = `
-      <h2>Chỉnh Sửa Thuoc</h2>
+      <h2>Chỉnh Sửa Thuốc</h2>
       <form id="editThuocForm">
         <div class="form-group">
           <label>Mã thuốc</label>
