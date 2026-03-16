@@ -132,7 +132,10 @@ public class NhanVienDAO {
 
       return ps.executeUpdate() > 0;
     } catch (SQLException e) {
-      throw new RuntimeException("Lỗi cập nhật nhân viên: " + e.getMessage(), e);
+      throw new RuntimeException(
+        "Lỗi cập nhật nhân viên: " + e.getMessage(),
+        e
+      );
     }
   }
 
@@ -147,7 +150,10 @@ public class NhanVienDAO {
         return rs.next();
       }
     } catch (SQLException e) {
-      throw new RuntimeException("Lỗi kiểm tra số điện thoại nhân viên: " + e.getMessage(), e);
+      throw new RuntimeException(
+        "Lỗi kiểm tra số điện thoại nhân viên: " + e.getMessage(),
+        e
+      );
     }
   }
 
@@ -163,5 +169,41 @@ public class NhanVienDAO {
       e.printStackTrace();
     }
     return false;
+  }
+
+  public NhanVienDTO getByMaTaiKhoan(String maTK) {
+    String sql = "SELECT * FROM NhanVien WHERE MaTK=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, maTK);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          NhanVienDTO nv = new NhanVienDTO();
+          nv.setMaNhanVien(rs.getString("MaNV"));
+          nv.setMaTaiKhoan(rs.getString("MaTK"));
+
+          String hoTen = rs.getString("HoTen");
+          if (hoTen != null && !hoTen.isBlank()) {
+            String[] parts = hoTen.trim().split("\\s+", 2);
+            if (parts.length == 1) {
+              nv.setHo("");
+              nv.setTen(parts[0]);
+            } else {
+              nv.setHo(parts[0]);
+              nv.setTen(parts[1]);
+            }
+          }
+
+          nv.setSDT(rs.getString("SDT"));
+          nv.setDiaChi(rs.getString("DiaChi"));
+          return nv;
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }

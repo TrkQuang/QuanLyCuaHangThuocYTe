@@ -280,6 +280,24 @@ public class LichLamDAO {
     return false;
   }
 
+  public int countByNhanVien(String maNV) {
+    String sql = "SELECT COUNT(*) FROM LichLamViec WHERE MaNV=?";
+    try (
+      Connection conn = DBConnection.getConnection();
+      PreparedStatement ps = conn.prepareStatement(sql)
+    ) {
+      ps.setString(1, maNV);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1);
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return 0;
+  }
+
   public String generateMaLich() {
     String sql =
       "SELECT MaLich FROM LichLamViec " +

@@ -2119,11 +2119,13 @@ async function deleteTaiKhoan(maTK) {
       method: "DELETE",
     });
 
+    const rawBody = await response.text();
+
     if (response.ok) {
       showNotification("Xóa tài khoản thành công", "success");
       loadTaiKhoanData();
     } else {
-      showNotification("Xóa tài khoản thất bại", "error");
+      showNotification(rawBody || "Xóa tài khoản thất bại", "error");
     }
   } catch (error) {
     console.error("Lỗi:", error);

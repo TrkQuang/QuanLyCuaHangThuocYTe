@@ -2,9 +2,12 @@ package com.quanlycuahangthuoc.bus;
 
 import com.quanlycuahangthuoc.dao.HoaDonDAO;
 import com.quanlycuahangthuoc.dao.KhachHangDAO;
+import com.quanlycuahangthuoc.dao.LichLamDAO;
+import com.quanlycuahangthuoc.dao.NhanVienDAO;
 import com.quanlycuahangthuoc.dao.PhieuNhapDAO;
 import com.quanlycuahangthuoc.dao.TaiKhoanDAO;
 import com.quanlycuahangthuoc.dto.KhachHangDTO;
+import com.quanlycuahangthuoc.dto.NhanVienDTO;
 import com.quanlycuahangthuoc.dto.TaiKhoanDTO;
 import com.quanlycuahangthuoc.dto.requests.CreateKhachHangRequest;
 import com.quanlycuahangthuoc.exception.AuthenticationException;
@@ -39,6 +42,12 @@ public class TaiKhoanBUS {
   private KhachHangDAO khachHangDAO;
 
   @Autowired
+  private NhanVienDAO nhanVienDAO;
+
+  @Autowired
+  private LichLamDAO lichLamDAO;
+
+  @Autowired
   private PhieuNhapDAO phieuNhapDAO;
 
   private String normalizeGender(String rawGender) {
@@ -57,13 +66,17 @@ public class TaiKhoanBUS {
     try {
       java.time.LocalDate parsed = java.time.LocalDate.parse(date);
       if (parsed.isAfter(java.time.LocalDate.now())) {
-        throw new ValidationException(fieldName + " không được lớn hơn ngày hiện tại");
+        throw new ValidationException(
+          fieldName + " không được lớn hơn ngày hiện tại"
+        );
       }
       if (parsed.isBefore(java.time.LocalDate.of(1900, 1, 1))) {
         throw new ValidationException(fieldName + " không hợp lệ");
       }
     } catch (java.time.format.DateTimeParseException e) {
-      throw new ValidationException(fieldName + " phải đúng định dạng yyyy-MM-dd");
+      throw new ValidationException(
+        fieldName + " phải đúng định dạng yyyy-MM-dd"
+      );
     }
   }
 
@@ -72,14 +85,30 @@ public class TaiKhoanBUS {
       throw new ValidationException("Thông tin đăng ký không được để trống");
     }
 
-    String tenDangNhap = String.valueOf(request.getTenDangNhap() == null ? "" : request.getTenDangNhap()).trim();
-    String matKhau = String.valueOf(request.getMatKhau() == null ? "" : request.getMatKhau()).trim();
-    String email = String.valueOf(request.getEmail() == null ? "" : request.getEmail()).trim();
-    String hoTen = String.valueOf(request.getHoTen() == null ? "" : request.getHoTen()).trim();
-    String soDienThoai = String.valueOf(request.getSoDienThoai() == null ? "" : request.getSoDienThoai()).trim();
-    String diaChi = String.valueOf(request.getDiaChi() == null ? "" : request.getDiaChi()).trim();
-    String ngaySinh = String.valueOf(request.getNgaySinh() == null ? "" : request.getNgaySinh()).trim();
-    String tienSuBenhLy = String.valueOf(request.getTienSuBenhLy() == null ? "" : request.getTienSuBenhLy()).trim();
+    String tenDangNhap = String.valueOf(
+      request.getTenDangNhap() == null ? "" : request.getTenDangNhap()
+    ).trim();
+    String matKhau = String.valueOf(
+      request.getMatKhau() == null ? "" : request.getMatKhau()
+    ).trim();
+    String email = String.valueOf(
+      request.getEmail() == null ? "" : request.getEmail()
+    ).trim();
+    String hoTen = String.valueOf(
+      request.getHoTen() == null ? "" : request.getHoTen()
+    ).trim();
+    String soDienThoai = String.valueOf(
+      request.getSoDienThoai() == null ? "" : request.getSoDienThoai()
+    ).trim();
+    String diaChi = String.valueOf(
+      request.getDiaChi() == null ? "" : request.getDiaChi()
+    ).trim();
+    String ngaySinh = String.valueOf(
+      request.getNgaySinh() == null ? "" : request.getNgaySinh()
+    ).trim();
+    String tienSuBenhLy = String.valueOf(
+      request.getTienSuBenhLy() == null ? "" : request.getTienSuBenhLy()
+    ).trim();
     String gioiTinh = normalizeGender(request.getGioiTinh());
 
     if (tenDangNhap.isBlank()) {
@@ -89,7 +118,9 @@ public class TaiKhoanBUS {
       throw new ValidationException("Tên đăng nhập phải từ 3-50 ký tự");
     }
     if (!tenDangNhap.matches("^[a-zA-Z0-9_]+$")) {
-      throw new ValidationException("Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới");
+      throw new ValidationException(
+        "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới"
+      );
     }
 
     if (matKhau.isBlank()) {
@@ -333,12 +364,47 @@ public class TaiKhoanBUS {
 
   // ================== XOÁ / KHOÁ ==================
   public boolean xoaTaiKhoan(String maTK) {
-    if (
-      hoaDonDAO.countByNhanVien(maTK) > 0 ||
-      phieuNhapDAO.countByNhanVien(maTK) > 0
-    ) throw new ValidationException(
-      "Tài khoản đã phát sinh giao dịch, không được xoá"
-    );
+    if (maTK == null || maTK.isBlank()) {
+      throw new ValidationException("Mã tài khoản không hợp lệ");
+    }
+
+    TaiKhoanDTO tk = taiKhoanDAO.getById(maTK);
+    if (tk == null) {
+      throw new ValidationException("Không tìm thấy tài khoản");
+    }
+
+    NhanVienDTO nv = nhanVienDAO.getByMaTaiKhoan(maTK);
+    if (nv != null) {
+      String maNV = nv.getMaNhanVien();
+      if (
+        hoaDonDAO.countByNhanVien(maNV) > 0 ||
+        phieuNhapDAO.countByNhanVien(maNV) > 0
+      ) {
+        throw new ValidationException(
+          "Tài khoản nhân viên đã phát sinh giao dịch, không được xoá"
+        );
+      }
+      if (lichLamDAO.countByNhanVien(maNV) > 0) {
+        throw new ValidationException(
+          "Tài khoản nhân viên đã có lịch làm, không được xoá"
+        );
+      }
+      if (!nhanVienDAO.deleteNhanVien(maNV)) {
+        throw new ValidationException("Không thể xoá hồ sơ nhân viên");
+      }
+    }
+
+    var kh = khachHangDAO.getByMaTK(maTK);
+    if (kh != null) {
+      if (hoaDonDAO.countByKhachHang(kh.getMaKhachHang()) > 0) {
+        throw new ValidationException(
+          "Tài khoản khách hàng đã phát sinh hóa đơn, không được xoá"
+        );
+      }
+      if (!khachHangDAO.deleteKhachHang(kh.getMaKhachHang())) {
+        throw new ValidationException("Không thể xoá hồ sơ khách hàng");
+      }
+    }
 
     return taiKhoanDAO.deleteTaiKhoan(maTK);
   }
