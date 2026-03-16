@@ -126,7 +126,11 @@ public class TaiKhoanController {
   @DeleteMapping("/{maTK}")
   public ResponseEntity<?> xoa(@PathVariable String maTK) {
     try {
-      return ResponseEntity.ok(taikhoanBUS.xoaTaiKhoan(maTK));
+      boolean deleted = taikhoanBUS.xoaTaiKhoan(maTK);
+      if (!deleted) {
+        return ResponseEntity.badRequest().body("Xóa tài khoản thất bại");
+      }
+      return ResponseEntity.ok(true);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
