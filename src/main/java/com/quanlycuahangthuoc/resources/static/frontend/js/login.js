@@ -40,7 +40,7 @@ async function loginKhach(loginData) {
     maKhachHang: khachHang?.maKhachHang || null,
     hoTenKhachHang: `${khachHang?.ho || ""} ${khachHang?.ten || ""}`.trim(),
   });
-  window.location.href = "index.html";
+  window.location.href = "user.html";
   return true;
 }
 
