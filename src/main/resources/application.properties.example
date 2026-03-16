@@ -6,7 +6,7 @@ db.password=your-password
 db.driver=com.mysql.cj.jdbc.Driver
 
 # Optional HikariCP pool tuning
-db.hikari.maximum-pool-size=10
+db.hikari.maximum-pool-size=8
 db.hikari.minimum-idle=2
 db.hikari.connection-timeout=30000
 db.hikari.idle-timeout=600000
