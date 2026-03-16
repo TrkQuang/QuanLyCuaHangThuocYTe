@@ -526,9 +526,11 @@ async function viewHoSoNhanVien(maNV) {
 
     const hoTen = `${nhanvien.ho || ""} ${nhanvien.ten || ""}`.trim();
 
+    setNhanVienProfileModalLayout(true);
+
     const modalBody = document.getElementById("modalBody");
     modalBody.innerHTML = `
-      <div style="max-width: 600px; margin: 0 auto;">
+      <div style="width: 100%; max-width: 560px; margin: 0 auto; box-sizing: border-box;">
         <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">
           <i class="fas fa-id-card"></i> Hồ Sơ Nhân Viên
         </h2>
@@ -557,7 +559,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-envelope" style="color: #667eea; width: 20px;"></i>
                 <strong>Email:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.email || "Chưa cập nhật"}</div>
+              <div style="padding-left: 30px; color: #555; overflow-wrap: anywhere;">${nhanvien.email || "Chưa cập nhật"}</div>
             </div>
 
             <div class="info-row">
@@ -573,7 +575,7 @@ async function viewHoSoNhanVien(maNV) {
                 <i class="fas fa-id-badge" style="color: #667eea; width: 20px;"></i>
                 <strong>Mã tài khoản:</strong>
               </div>
-              <div style="padding-left: 30px; color: #555;">${nhanvien.maTaiKhoan || "Chưa cập nhật"}</div>
+              <div style="padding-left: 30px; color: #555; overflow-wrap: anywhere;">${nhanvien.maTaiKhoan || "Chưa cập nhật"}</div>
             </div>
 
           </div>
@@ -587,7 +589,7 @@ async function viewHoSoNhanVien(maNV) {
       </div>
     `;
 
-    document.getElementById("modal").style.display = "flex";
+    openModal();
   } catch (error) {
     console.error("Lỗi:", error);
     showNotification("Có lỗi xảy ra khi tải hồ sơ", "error");
@@ -603,21 +605,44 @@ async function viewHoSoNhanVien(maNV) {
  */
 async function loadKhachHangData() {
   try {
-    const response = await fetch(`${API_URL}/khachhang`);
-    const data = await response.json();
+    const [khachHangResponse, taiKhoanResponse] = await Promise.all([
+      fetch(`${API_URL}/khachhang`),
+      fetch(`${API_URL}/taikhoan`),
+    ]);
 
-    displayKhachHangTable(data);
+    const data = await khachHangResponse.json();
+    const taiKhoanData = taiKhoanResponse.ok
+      ? await taiKhoanResponse.json()
+      : [];
+    const emailByMaTaiKhoan = new Map(
+      (taiKhoanData || []).map((tk) => [
+        (tk.maTaiKhoan || tk.MaTaiKhoan || "").trim(),
+        (tk.email || tk.Email || "").trim(),
+      ]),
+    );
+
+    displayKhachHangTable(data, emailByMaTaiKhoan);
   } catch (error) {
     console.error("Lỗi khi load khách hàng:", error);
     showNotification("Không thể tải danh sách khách hàng", "error");
   }
 }
 
+function resolveKhachHangEmail(kh, emailByMaTaiKhoan = new Map()) {
+  const directEmail = kh.email || kh.Email || "";
+  if (directEmail) return directEmail;
+
+  const maTaiKhoan = (kh.maTaiKhoan || kh.MaTaiKhoan || "").trim();
+  if (!maTaiKhoan) return "";
+
+  return emailByMaTaiKhoan.get(maTaiKhoan) || "";
+}
+
 /**
  * Hiển thị bảng khách hàng
  * @param {Array} data - Danh sách khách hàng
  */
-function displayKhachHangTable(data) {
+function displayKhachHangTable(data, emailByMaTaiKhoan = new Map()) {
   const tbody = document.getElementById("khachhangTableBody");
 
   if (data.length === 0) {
@@ -629,12 +654,13 @@ function displayKhachHangTable(data) {
   let html = "";
   data.forEach((kh) => {
     const hoTen = `${kh.ho || ""} ${kh.ten || ""}`.trim();
+    const email = resolveKhachHangEmail(kh, emailByMaTaiKhoan);
     html += `
             <tr>
                 <td>${kh.maKhachHang}</td>
                 <td>${hoTen}</td>
                 <td>${kh.sdt}</td>
-                <td>${kh.email || ""}</td>
+                <td>${email}</td>
                 <td>${kh.diaChi || ""}</td>
                 <td>
                     <button class="btn btn-edit" onclick="editKhachHang('${kh.maKhachHang}')">
@@ -2207,12 +2233,19 @@ function setPhieuNhapModalLayout(enabled) {
   modalContent.classList.toggle("modal-phieunhap", Boolean(enabled));
 }
 
+function setNhanVienProfileModalLayout(enabled) {
+  const modalContent = getModalContentElement();
+  if (!modalContent) return;
+  modalContent.classList.toggle("modal-hoso-nhanvien", Boolean(enabled));
+}
+
 /**
  * Đóng modal
  */
 function closeModal() {
   document.getElementById("modal").style.display = "none";
   setPhieuNhapModalLayout(false);
+  setNhanVienProfileModalLayout(false);
 }
 
 /**
@@ -2369,8 +2402,20 @@ async function editNhanVien(maNV) {
 async function editKhachHang(maKH) {
   try {
     // Lấy thông tin khách hàng hiện tại
-    const response = await fetch(`${API_URL}/khachhang`);
-    const data = await response.json();
+    const [khachHangResponse, taiKhoanResponse] = await Promise.all([
+      fetch(`${API_URL}/khachhang`),
+      fetch(`${API_URL}/taikhoan`),
+    ]);
+    const data = await khachHangResponse.json();
+    const taiKhoanData = taiKhoanResponse.ok
+      ? await taiKhoanResponse.json()
+      : [];
+    const emailByMaTaiKhoan = new Map(
+      (taiKhoanData || []).map((tk) => [
+        (tk.maTaiKhoan || tk.MaTaiKhoan || "").trim(),
+        (tk.email || tk.Email || "").trim(),
+      ]),
+    );
     const khachhang = data.find((kh) => kh.maKhachHang === maKH);
 
     if (!khachhang) {
@@ -2379,6 +2424,7 @@ async function editKhachHang(maKH) {
     }
 
     const hoTen = `${khachhang.ho || ""} ${khachhang.ten || ""}`.trim();
+    const resolvedEmail = resolveKhachHangEmail(khachhang, emailByMaTaiKhoan);
 
     const modalBody = document.getElementById("modalBody");
     modalBody.innerHTML = `
@@ -2398,7 +2444,7 @@ async function editKhachHang(maKH) {
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" name="email" value="${khachhang.email || ""}">
+          <input type="email" name="email" value="${resolvedEmail}">
         </div>
         <div class="form-group">
           <label>Địa chỉ</label>
