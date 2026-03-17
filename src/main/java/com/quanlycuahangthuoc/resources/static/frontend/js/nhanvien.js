@@ -1707,7 +1707,7 @@ function viewHoaDon(id) {
       document.getElementById("modalBody").innerHTML = `
         <h2>Chi tiết hóa đơn ${hd.maHoaDon}</h2>
         <p>Ngày tạo: ${formatDate(hd.ngayTao || hd.ngayLap)} | KH: ${hd.maKhachHang || ""} | NV: ${hd.maNhanVien || ""} | Tổng tiền: ${formatCurrency(hd.tongTien)}</p>
-        <table id="detailTable"><thead><tr><th>Mã CTHD</th><th>Mã thuốc</th><th>Số lượng</th><th>Hướng dẫn</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Không có chi tiết</td></tr>'}</tbody></table>
+        <table id="detailTable"><thead><tr><th>Mã CTHD</th><th>Mã thuốc</th><th>Số lượng</th><th>Ghi chú</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Không có chi tiết</td></tr>'}</tbody></table>
       `;
       openModal();
     })

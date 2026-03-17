@@ -1,0 +1,1453 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nhà Thuốc Trực Tuyến</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body>
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+      <symbol id="icon-med" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-1 8h-4v4h-4v-4H6V7h4V3h4v4h4v4Z"
+        />
+      </symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M10 2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"
+        />
+      </symbol>
+      <symbol id="icon-cart" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M7 4H3v2h2l2.6 9.6A2 2 0 0 0 9.5 17H18v-2H9.5l-.5-2H18a2 2 0 0 0 1.9-1.4L22 6H7.4L7 4Zm3 15a2 2 0 1 0 .001 3.999A2 2 0 0 0 10 19Zm7 0a2 2 0 1 0 .001 3.999A2 2 0 0 0 17 19Z"
+        />
+      </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2-8 4.5V22h16v-3.5c0-2.5-3.6-4.5-8-4.5Z"
+        />
+      </symbol>
+      <symbol id="icon-facebook" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M13 22v-9h3l1-4h-4V7c0-1.2.3-2 2-2h2V1.4A23 23 0 0 0 14 1c-3 0-5 1.8-5 5.2V9H6v4h3v9h4Z"
+        />
+      </symbol>
+      <symbol id="icon-youtube" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M23 12s0-3.3-.4-4.8a2.5 2.5 0 0 0-1.8-1.8C19.2 5 12 5 12 5s-7.2 0-8.8.4a2.5 2.5 0 0 0-1.8 1.8C1 8.7 1 12 1 12s0 3.3.4 4.8a2.5 2.5 0 0 0 1.8 1.8C4.8 19 12 19 12 19s7.2 0 8.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.5.4-4.8.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"
+        />
+      </symbol>
+      <symbol id="icon-chat" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm3 6h10V7H7v2Zm0 4h7v-2H7v2Z"
+        />
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 6h2v9h-2V9Zm4 0h2v9h-2V9ZM7 9h2v9H7V9Z"
+        />
+      </symbol>
+    </svg>
+
+    <header class="site-header">
+      <div class="header-top">
+        <a class="brand" href="#" data-section-link="trang-chu">
+          <span class="brand-icon"
+            ><svg class="app-icon" viewBox="0 0 24 24">
+              <use href="#icon-med"></use></svg
+          ></span>
+          <span>
+            <strong>Nhà Thuốc Xanh</strong>
+            <small>Chăm sóc sức khỏe mỗi ngày</small>
+          </span>
+        </a>
+
+        <form class="header-search" id="headerSearchForm" autocomplete="off">
+          <svg class="app-icon" viewBox="0 0 24 24">
+            <use href="#icon-search"></use>
+          </svg>
+          <input
+            type="search"
+            id="headerSearchInput"
+            placeholder="Tìm kiếm thuốc, vitamin, thiết bị y tế..."
+            aria-label="Tìm kiếm thuốc"
+          />
+          <div class="search-suggest" id="headerSearchSuggest"></div>
+        </form>
+
+        <div class="header-actions">
+          <button
+            class="icon-btn"
+            type="button"
+            id="headerCartBtn"
+            aria-label="Giỏ hàng"
+          >
+            <svg class="app-icon" viewBox="0 0 24 24">
+              <use href="#icon-cart"></use>
+            </svg>
+            <span id="headerCartCount" class="cart-count">0</span>
+          </button>
+          <button
+            class="icon-btn"
+            type="button"
+            id="accountMenuBtn"
+            aria-label="Tài khoản"
+          >
+            <svg class="app-icon" viewBox="0 0 24 24">
+              <use href="#icon-user"></use>
+            </svg>
+          </button>
+          <div class="account-menu" id="accountMenu">
+            <button type="button" id="menuHistoryBtn">Lịch sử đơn hàng</button>
+            <button type="button" id="menuAccountBtn">Tài khoản</button>
+            <button type="button" id="logoutBtn">Đăng xuất</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button
+          class="nav-link active"
+          data-section-link="trang-chu"
+          type="button"
+        >
+          Trang chủ
+        </button>
+        <button class="nav-link" data-section-link="cua-hang" type="button">
+          Cửa hàng
+        </button>
+      </nav>
+    </header>
+
+    <div class="top-loader" id="topLoader" aria-hidden="true">
+      <span></span>
+    </div>
+
+    <main class="container">
+      <section class="page-section active" id="trang-chu">
+        <div class="hero-banner">
+          <div>
+            <p class="hero-tag">Nhà thuốc trực tuyến hiện đại</p>
+            <h1>Đặt thuốc nhanh, an tâm chính hãng, giao tận nhà</h1>
+            <p>
+              Sản phẩm được tải trực tiếp từ hệ thống quản lý nhà thuốc, đồng bộ
+              theo dữ liệu thật.
+            </p>
+            <div class="hero-cta">
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-section-link="cua-hang"
+              >
+                Mua ngay
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-section-link="lich-su"
+              >
+                Theo dõi đơn hàng
+              </button>
+            </div>
+          </div>
+          <ul class="hero-stats">
+            <li><strong>30 phút</strong><span>Giao hàng nội thành</span></li>
+            <li><strong>100%</strong><span>Thuốc chính hãng</span></li>
+            <li><strong>24/7</strong><span>Tư vấn dược sĩ</span></li>
+          </ul>
+        </div>
+
+        <div class="section-block">
+          <div class="section-header">
+            <h2>Thuốc nổi bật</h2>
+            <button class="link-btn" type="button" data-section-link="cua-hang">
+              Xem tất cả
+            </button>
+          </div>
+          <div class="medicine-grid" id="featuredGrid"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-header"><h2>Thuốc bán chạy</h2></div>
+          <div class="medicine-grid" id="bestSellerGrid"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-header"><h2>Thuốc mới</h2></div>
+          <div class="medicine-grid" id="newMedicineGrid"></div>
+        </div>
+      </section>
+
+      <section class="page-section" id="cua-hang">
+        <div class="section-header">
+          <h2>Cửa hàng thuốc</h2>
+          <p>Dễ dàng tìm đúng thuốc theo nhu cầu sức khỏe.</p>
+        </div>
+
+        <div class="store-toolbar">
+          <form id="storeSearchForm" class="store-search">
+            <svg class="app-icon" viewBox="0 0 24 24">
+              <use href="#icon-search"></use>
+            </svg>
+            <input
+              type="search"
+              id="storeSearchInput"
+              placeholder="Nhập tên thuốc cần tìm..."
+            />
+            <button type="submit">Tìm</button>
+          </form>
+          <div class="store-filter-row">
+            <select
+              id="storeUnitFilter"
+              class="store-unit-select"
+              aria-label="Lọc theo đơn vị tính"
+            ></select>
+            <button
+              type="button"
+              class="store-clear-btn"
+              id="clearStoreFilters"
+            >
+              Xóa bộ lọc
+            </button>
+          </div>
+        </div>
+
+        <div class="medicine-grid" id="storeGrid"></div>
+        <div class="store-pagination" id="storePagination"></div>
+      </section>
+
+      <section class="page-section" id="ket-qua">
+        <div class="section-header">
+          <h2>Kết quả tìm kiếm</h2>
+          <p id="searchResultLabel">Nhập từ khóa để tìm thuốc.</p>
+        </div>
+        <div class="medicine-grid" id="searchGrid"></div>
+      </section>
+
+      <section class="page-section" id="gio-hang">
+        <div class="section-header">
+          <h2>Giỏ hàng</h2>
+          <p>Xem lại sản phẩm trước khi thanh toán.</p>
+        </div>
+
+        <div class="cart-layout">
+          <div class="table-wrap">
+            <table class="cart-table">
+              <thead>
+                <tr>
+                  <th>Hình ảnh</th>
+                  <th>Tên thuốc</th>
+                  <th>Giá</th>
+                  <th>Số lượng</th>
+                  <th>Thành tiền</th>
+                  <th>Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="cartTableBody"></tbody>
+            </table>
+          </div>
+
+          <aside class="cart-summary">
+            <h3>Tóm tắt đơn hàng</h3>
+            <div class="summary-line">
+              <span>Tạm tính</span><strong id="subtotalPrice">0 đ</strong>
+            </div>
+            <div class="summary-line">
+              <span>Phí vận chuyển</span><strong id="shippingFee">0 đ</strong>
+            </div>
+            <div class="summary-line total">
+              <span>Tổng tiền</span><strong id="totalPrice">0 đ</strong>
+            </div>
+            <button
+              class="btn btn-primary w-full"
+              id="checkoutBtn"
+              type="button"
+              data-section-link="thanh-toan"
+            >
+              Thanh toán
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page-section" id="thanh-toan">
+        <div class="section-header">
+          <h2>Thanh toán</h2>
+          <p>Điền thông tin nhận hàng để hoàn tất đơn.</p>
+        </div>
+
+        <div class="checkout-layout">
+          <form class="checkout-form" id="checkoutForm">
+            <label
+              >Họ và tên<input
+                type="text"
+                id="customerName"
+                placeholder="Nhập họ và tên"
+                required
+            /></label>
+            <label
+              >Số điện thoại<input
+                type="tel"
+                id="customerPhone"
+                placeholder="Nhập số điện thoại"
+                required
+            /></label>
+            <label
+              >Địa chỉ giao hàng<textarea
+                id="customerAddress"
+                rows="4"
+                placeholder="Nhập địa chỉ nhận hàng"
+                required
+              ></textarea>
+            </label>
+
+            <div class="payment-methods">
+              <p>Phương thức thanh toán</p>
+              <label
+                ><input
+                  type="radio"
+                  name="paymentMethod"
+                  value="Thanh toán khi nhận hàng"
+                  checked
+                />
+                Thanh toán khi nhận hàng</label
+              >
+              <label
+                ><input
+                  type="radio"
+                  name="paymentMethod"
+                  value="Chuyển khoản ngân hàng"
+                />
+                Chuyển khoản ngân hàng</label
+              >
+              <label
+                ><input type="radio" name="paymentMethod" value="Ví điện tử" />
+                Ví điện tử</label
+              >
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+              Xác nhận đặt hàng
+            </button>
+          </form>
+
+          <aside class="checkout-summary">
+            <h3>Danh sách sản phẩm</h3>
+            <ul id="checkoutItems"></ul>
+            <div class="summary-line total">
+              <span>Tổng tiền</span><strong id="checkoutTotalPrice">0 đ</strong>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page-section" id="lich-su">
+        <div class="section-header">
+          <h2>Lịch sử mua hàng</h2>
+          <p>Theo dõi toàn bộ trạng thái đơn hàng của bạn.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Mã đơn hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Xem chi tiết</th>
+              </tr>
+            </thead>
+            <tbody id="orderHistoryBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page-section" id="tai-khoan">
+        <div class="section-header">
+          <h2>Thông tin tài khoản</h2>
+          <p>Hiển thị thông tin cơ bản và thống kê mua hàng gần đây.</p>
+        </div>
+
+        <div class="account-card">
+          <div class="account-row">
+            <span>Họ tên</span><strong id="accName">-</strong>
+          </div>
+          <div class="account-row">
+            <span>Email</span><strong id="accEmail">-</strong>
+          </div>
+          <div class="account-row">
+            <span>Số điện thoại</span><strong id="accPhone">-</strong>
+          </div>
+          <div class="account-row">
+            <span>Địa chỉ</span><strong id="accAddress">-</strong>
+          </div>
+
+          <div class="account-stats">
+            <div class="account-stat">
+              <span>Đơn hàng đã mua</span><strong id="accTotalOrders">0</strong>
+            </div>
+            <div class="account-stat">
+              <span>Tổng tiền đã chi</span
+              ><strong id="accTotalSpent">0 đ</strong>
+            </div>
+            <div class="account-stat">
+              <span>Đơn hàng gần nhất</span><strong id="accLastOrder">-</strong>
+            </div>
+          </div>
+
+          <div class="recent-orders">
+            <h3>Đơn hàng gần đây</h3>
+            <ul id="accountRecentOrders"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h4>Giới thiệu nhà thuốc xanh</h4>
+          <p>
+            Nhà Thuốc cung cấp thuốc và sản phẩm chăm sóc sức khỏe chính hãng,
+            dịch vụ nhanh và uy tín.
+          </p>
+        </div>
+        <div>
+          <h4>Thông tin liên hệ</h4>
+          <p>Hotline: 1900 1514</p>
+          <p>Email: hotro@nhathuoc.vn</p>
+          <p>Địa chỉ: 4 Nguyễn Trãi, Quận 5, TP. Hồ Chí Minh</p>
+        </div>
+        <div>
+          <h4>Chính sách</h4>
+          <ul>
+            <li>Chính sách đổi trả</li>
+            <li>Chính sách bảo mật</li>
+            <li>Điều khoản sử dụng</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Hỗ trợ khách hàng</h4>
+          <ul>
+            <li>Hướng dẫn mua hàng</li>
+            <li>Câu hỏi thường gặp</li>
+            <li>Hỗ trợ đơn thuốc</li>
+          </ul>
+          <div class="socials">
+            <a href="#" aria-label="Facebook"
+              ><svg class="app-icon" viewBox="0 0 24 24">
+                <use href="#icon-facebook"></use></svg
+            ></a>
+            <a href="#" aria-label="YouTube"
+              ><svg class="app-icon" viewBox="0 0 24 24">
+                <use href="#icon-youtube"></use></svg
+            ></a>
+            <a href="#" aria-label="Zalo"
+              ><svg class="app-icon" viewBox="0 0 24 24">
+                <use href="#icon-chat"></use></svg
+            ></a>
+          </div>
+        </div>
+      </div>
+      <p class="copyright">© 2026 Nhà Thuốc Trực Tuyến. Nhóm 30 PTTKHTTT.</p>
+    </footer>
+
+    <div class="modal" id="detailModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="detailModal"></div>
+      <div class="modal-content">
+        <button
+          class="modal-close"
+          type="button"
+          data-close-modal="detailModal"
+        >
+          ×
+        </button>
+        <h3 id="detailModalTitle">Chi tiết thuốc</h3>
+        <div id="detailModalBody"></div>
+      </div>
+    </div>
+
+    <div class="modal" id="orderModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="orderModal"></div>
+      <div class="modal-content">
+        <button class="modal-close" type="button" data-close-modal="orderModal">
+          ×
+        </button>
+        <h3 id="orderModalTitle">Chi tiết đơn hàng</h3>
+        <div id="orderModalBody"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="appToast" role="status" aria-live="polite"></div>
+
+    <script src="../js/config.js"></script>
+    <script>
+      const sectionIds = [
+        "trang-chu",
+        "cua-hang",
+        "ket-qua",
+        "gio-hang",
+        "thanh-toan",
+        "lich-su",
+        "tai-khoan",
+      ];
+
+      const state = {
+        medicines: [],
+        cart: [],
+        orders: [],
+        user: null,
+        khachHang: null,
+        storeKeyword: "",
+        storeUnit: "all",
+        storePage: 1,
+        storePageSize: 10,
+      };
+
+      let toastTimer = null;
+
+      function showToast(message) {
+        const toast = document.getElementById("appToast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("show");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2200);
+      }
+
+      function setPageLoading(isLoading) {
+        document.body.classList.toggle("loading-data", isLoading);
+      }
+
+      function createSkeletonCards(count) {
+        return new Array(count)
+          .fill(0)
+          .map(
+            () => `
+              <article class="medicine-card skeleton-card" aria-hidden="true">
+                <div class="skeleton-media"></div>
+                <div class="medicine-content">
+                  <div class="skeleton-line w-70"></div>
+                  <div class="skeleton-line w-45"></div>
+                  <div class="skeleton-line w-35"></div>
+                  <div class="skeleton-actions">
+                    <div class="skeleton-btn"></div>
+                    <div class="skeleton-btn"></div>
+                  </div>
+                </div>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
+      function renderLoadingState() {
+        document.getElementById("featuredGrid").innerHTML =
+          createSkeletonCards(4);
+        document.getElementById("bestSellerGrid").innerHTML =
+          createSkeletonCards(4);
+        document.getElementById("newMedicineGrid").innerHTML =
+          createSkeletonCards(4);
+        document.getElementById("storeGrid").innerHTML = createSkeletonCards(8);
+        document.getElementById("storePagination").innerHTML = "";
+        document.getElementById("searchGrid").innerHTML =
+          '<p class="empty">Đang tải dữ liệu thuốc...</p>';
+        document.getElementById("cartTableBody").innerHTML =
+          '<tr><td colspan="6" class="empty">Đang tải giỏ hàng...</td></tr>';
+        document.getElementById("orderHistoryBody").innerHTML =
+          '<tr><td colspan="5" class="empty">Đang tải lịch sử đơn hàng...</td></tr>';
+      }
+
+      function toCurrency(value) {
+        return new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(Number(value || 0));
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function normalizeText(text) {
+        return String(text || "")
+          .trim()
+          .toLowerCase();
+      }
+
+      function formatStatus(status) {
+        return String(status || "Đang xử lý").replaceAll("_", " ");
+      }
+
+      function statusClass(status) {
+        const normalized = normalizeText(status).toUpperCase();
+        if (normalized.includes("HUY")) return "cancelled";
+        if (normalized.includes("GIAO") || normalized.includes("THANH"))
+          return "done";
+        if (normalized.includes("XAC_NHAN") || normalized.includes("XÁC NHẬN"))
+          return "confirm";
+        return "processing";
+      }
+
+      function getImageUrl(rawImage) {
+        const image = String(rawImage || "").trim();
+        if (!image) return "img/UATThuoc.jpg";
+        if (
+          image.startsWith("data:") ||
+          image.startsWith("http://") ||
+          image.startsWith("https://")
+        )
+          return image;
+        if (
+          image.startsWith("img/") ||
+          image.startsWith("./") ||
+          image.startsWith("../")
+        )
+          return image;
+        return `img/${image}`;
+      }
+
+      function inferCategory(name, unit) {
+        const text = `${normalizeText(name)} ${normalizeText(unit)}`;
+        if (/vitamin|omega|centrum|c\s*tw3/.test(text)) return "Vitamin";
+        if (/cerave|la roche|sunscreen|chống nắng|rửa mặt|da/.test(text))
+          return "Chăm sóc da";
+        if (/kim tiêm|bơm tiêm|nhiệt kế|test|dụng cụ|thiết bị/.test(text))
+          return "Thiết bị y tế";
+        if (/panadol|paracetamol|hapacol|brufen|giảm đau|alphachy/.test(text))
+          return "Thuốc giảm đau";
+        if (/ho|cảm|cúm|augmentin|amoxicillin|cef|telfast|loratadin/.test(text))
+          return "Thuốc cảm cúm";
+        return "Thuốc cảm cúm";
+      }
+
+      function mapMedicine(raw) {
+        const tenThuoc = raw.tenThuoc || raw.name || "Chưa có tên";
+        const donViTinh = raw.donViTinh || "Sản phẩm nhà thuốc";
+        return {
+          id: String(raw.maThuoc || raw.id || ""),
+          ten: tenThuoc,
+          gia: Number(raw.giaBan || raw.price || 0),
+          ton: Number(raw.soLuongTon || raw.stock || 0),
+          moTa: donViTinh,
+          donViTinh,
+          danhMuc: inferCategory(tenThuoc, donViTinh),
+          anh: getImageUrl(raw.hinhAnh || raw.image),
+          nsx: raw.nsx || "Không có",
+          hsd: raw.hsd || "Không có",
+        };
+      }
+
+      function renderStoreUnitFilter() {
+        const select = document.getElementById("storeUnitFilter");
+        const uniqueUnits = Array.from(
+          new Set(
+            state.medicines
+              .map((item) => String(item.donViTinh || "").trim())
+              .filter(Boolean),
+          ),
+        ).sort((a, b) => a.localeCompare(b, "vi"));
+
+        select.innerHTML = [
+          '<option value="all">Tất cả đơn vị tính</option>',
+          ...uniqueUnits.map(
+            (unit) =>
+              `<option value="${escapeHtml(unit)}">${escapeHtml(unit)}</option>`,
+          ),
+        ].join("");
+        select.value = state.storeUnit;
+      }
+
+      function openModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+
+      function bindModalClose() {
+        document.querySelectorAll("[data-close-modal]").forEach((node) => {
+          node.addEventListener("click", () =>
+            closeModal(node.dataset.closeModal),
+          );
+        });
+      }
+
+      function showSection(id) {
+        sectionIds.forEach((sectionId) => {
+          const section = document.getElementById(sectionId);
+          section.classList.toggle("active", sectionId === id);
+        });
+
+        document.querySelectorAll(".nav-link").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.sectionLink === id);
+        });
+
+        if (id === "gio-hang") renderCart();
+        if (id === "thanh-toan") renderCheckoutSummary();
+        if (id === "tai-khoan") renderAccount();
+      }
+
+      function cardTemplate(item) {
+        return `
+          <article class="medicine-card">
+            <div class="medicine-image-wrap">
+              <img src="${escapeHtml(item.anh)}" alt="${escapeHtml(item.ten)}" loading="lazy" />
+            </div>
+            <div class="medicine-content">
+              <h3>${escapeHtml(item.ten)}</h3>
+              <p>${escapeHtml(item.moTa)}</p>
+              <div class="medicine-meta"><strong>${toCurrency(item.gia)}</strong></div>
+              <div class="card-actions">
+                <button class="btn btn-primary" type="button" onclick="addToCart('${escapeHtml(item.id)}')">Thêm vào giỏ</button>
+                <button class="btn btn-ghost" type="button" onclick="showDetail('${escapeHtml(item.id)}')">Xem chi tiết</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderHome() {
+        const all = state.medicines;
+        const featured = all.slice(0, 8);
+        const bestSeller = [...all].sort((a, b) => a.ton - b.ton).slice(0, 8);
+        const newest = [...all]
+          .sort((a, b) => b.id.localeCompare(a.id, "vi"))
+          .slice(0, 8);
+
+        document.getElementById("featuredGrid").innerHTML = featured.length
+          ? featured.map(cardTemplate).join("")
+          : '<p class="empty">Chưa có dữ liệu thuốc.</p>';
+        document.getElementById("bestSellerGrid").innerHTML = bestSeller.length
+          ? bestSeller.map(cardTemplate).join("")
+          : '<p class="empty">Chưa có dữ liệu thuốc.</p>';
+        document.getElementById("newMedicineGrid").innerHTML = newest.length
+          ? newest.map(cardTemplate).join("")
+          : '<p class="empty">Chưa có dữ liệu thuốc.</p>';
+      }
+
+      function filterMedicines(keyword = "") {
+        const normalizedKeyword = normalizeText(keyword);
+        return state.medicines.filter((item) => {
+          const text = normalizeText(
+            `${item.ten} ${item.moTa} ${item.donViTinh || ""} ${item.danhMuc}`,
+          );
+          const matchKeyword =
+            !normalizedKeyword || text.includes(normalizedKeyword);
+          const matchUnit =
+            state.storeUnit === "all" ||
+            normalizeText(item.donViTinh) === normalizeText(state.storeUnit);
+          return matchKeyword && matchUnit;
+        });
+      }
+
+      function renderStorePagination(totalItems) {
+        const totalPages = Math.max(
+          1,
+          Math.ceil(totalItems / state.storePageSize),
+        );
+        if (state.storePage > totalPages) state.storePage = totalPages;
+
+        const pagination = document.getElementById("storePagination");
+        if (totalItems <= state.storePageSize) {
+          pagination.innerHTML = "";
+          return;
+        }
+
+        let html = `<button type="button" class="page-btn" ${state.storePage === 1 ? "disabled" : ""} data-page="prev">Trước</button>`;
+        for (let p = 1; p <= totalPages; p += 1) {
+          html += `<button type="button" class="page-btn ${p === state.storePage ? "active" : ""}" data-page="${p}">${p}</button>`;
+        }
+        html += `<button type="button" class="page-btn" ${state.storePage === totalPages ? "disabled" : ""} data-page="next">Sau</button>`;
+        pagination.innerHTML = html;
+
+        pagination.querySelectorAll(".page-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.dataset.page;
+            if (target === "prev" && state.storePage > 1) state.storePage -= 1;
+            else if (target === "next" && state.storePage < totalPages)
+              state.storePage += 1;
+            else if (/^\d+$/.test(target)) state.storePage = Number(target);
+            renderStore();
+          });
+        });
+      }
+
+      function renderStore(keyword = state.storeKeyword) {
+        state.storeKeyword = keyword;
+        const list = filterMedicines(keyword);
+        const start = (state.storePage - 1) * state.storePageSize;
+        const pageItems = list.slice(start, start + state.storePageSize);
+        const grid = document.getElementById("storeGrid");
+        grid.innerHTML = pageItems.length
+          ? pageItems.map(cardTemplate).join("")
+          : '<p class="empty">Không tìm thấy thuốc phù hợp với từ khóa hiện tại.</p>';
+        renderStorePagination(list.length);
+      }
+
+      function renderSearchSuggest() {
+        const suggestWrap = document.getElementById("headerSearchSuggest");
+        const keyword = normalizeText(
+          document.getElementById("headerSearchInput").value,
+        );
+        if (!keyword) {
+          suggestWrap.classList.remove("open");
+          suggestWrap.innerHTML = "";
+          return;
+        }
+
+        const matches = state.medicines
+          .filter((item) => normalizeText(item.ten).includes(keyword))
+          .slice(0, 8);
+
+        if (!matches.length) {
+          suggestWrap.classList.remove("open");
+          suggestWrap.innerHTML = "";
+          return;
+        }
+
+        suggestWrap.innerHTML = matches
+          .map(
+            (item) =>
+              `<button type="button" class="suggest-item" data-id="${escapeHtml(item.id)}">${escapeHtml(item.ten)}</button>`,
+          )
+          .join("");
+        suggestWrap.classList.add("open");
+
+        suggestWrap.querySelectorAll(".suggest-item").forEach((node) => {
+          node.addEventListener("click", () => {
+            document.getElementById("headerSearchInput").value =
+              node.textContent || "";
+            suggestWrap.classList.remove("open");
+            runSearch(node.textContent || "");
+          });
+        });
+      }
+
+      function runSearch(keywordRaw) {
+        const keyword = String(keywordRaw || "").trim();
+        const label = document.getElementById("searchResultLabel");
+        const grid = document.getElementById("searchGrid");
+
+        if (!keyword) {
+          label.textContent = "Vui lòng nhập từ khóa để tìm kiếm thuốc.";
+          grid.innerHTML = '<p class="empty">Chưa có từ khóa tìm kiếm.</p>';
+          showSection("ket-qua");
+          return;
+        }
+
+        const found = state.medicines.filter((item) =>
+          normalizeText(`${item.ten} ${item.moTa} ${item.danhMuc}`).includes(
+            normalizeText(keyword),
+          ),
+        );
+        label.textContent = `Có ${found.length} kết quả cho từ khóa "${keyword}".`;
+        grid.innerHTML = found.length
+          ? found.map(cardTemplate).join("")
+          : '<p class="empty">Không tìm thấy thuốc phù hợp.</p>';
+        showSection("ket-qua");
+      }
+
+      function getCartTotals() {
+        const subtotal = state.cart.reduce(
+          (sum, line) =>
+            sum + Number(line.price || 0) * Number(line.quantity || 0),
+          0,
+        );
+        const shipping = subtotal > 0 ? 30000 : 0;
+        return { subtotal, shipping, total: subtotal + shipping };
+      }
+
+      async function loadCart() {
+        try {
+          const data = await apiFetch("/cart");
+          state.cart = Array.isArray(data) ? data : [];
+        } catch {
+          state.cart = [];
+        }
+        updateCartBadge();
+      }
+
+      function updateCartBadge() {
+        const totalQty = state.cart.reduce(
+          (sum, line) => sum + Number(line.quantity || 0),
+          0,
+        );
+        document.getElementById("headerCartCount").textContent =
+          String(totalQty);
+      }
+
+      function updateCheckoutButtonState() {
+        const canCheckout = state.cart.length > 0;
+        const checkoutBtn = document.getElementById("checkoutBtn");
+        checkoutBtn.disabled = !canCheckout;
+      }
+
+      async function addToCart(medicineId) {
+        const item = state.medicines.find((m) => m.id === medicineId);
+        if (!item) {
+          alert("Không tìm thấy sản phẩm trong hệ thống.");
+          return;
+        }
+
+        try {
+          await apiFetch("/cart/add", {
+            method: "POST",
+            body: JSON.stringify({
+              id: item.id,
+              name: item.ten,
+              title: item.ten,
+              price: item.gia,
+              image: item.anh,
+              quantity: 1,
+            }),
+          });
+          await loadCart();
+          renderCart();
+          renderCheckoutSummary();
+          showToast("Bạn đã thêm vào giỏ hàng thành công");
+        } catch (error) {
+          alert(error.message || "Không thể thêm vào giỏ hàng.");
+        }
+      }
+
+      async function removeFromCart(medicineId) {
+        try {
+          await apiFetch(`/cart/${encodeURIComponent(medicineId)}`, {
+            method: "DELETE",
+          });
+          await loadCart();
+          renderCart();
+          renderCheckoutSummary();
+        } catch (error) {
+          alert(error.message || "Không thể xóa sản phẩm khỏi giỏ hàng.");
+        }
+      }
+
+      async function updateQuantity(medicineId, quantityRaw) {
+        const quantity = Math.max(1, Number(quantityRaw || 1));
+        try {
+          await apiFetch("/cart/update", {
+            method: "PUT",
+            body: JSON.stringify({ id: medicineId, quantity }),
+          });
+          await loadCart();
+          renderCart();
+          renderCheckoutSummary();
+        } catch (error) {
+          alert(error.message || "Không thể cập nhật số lượng.");
+        }
+      }
+
+      function renderCart() {
+        const tbody = document.getElementById("cartTableBody");
+        if (!state.cart.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="6" class="empty">Giỏ hàng chưa có sản phẩm.</td></tr>';
+        } else {
+          tbody.innerHTML = state.cart
+            .map((line) => {
+              const lineTotal =
+                Number(line.price || 0) * Number(line.quantity || 0);
+              return `
+                <tr>
+                  <td><img class="cart-thumb" src="${escapeHtml(getImageUrl(line.image))}" alt="${escapeHtml(line.title || line.name || "Thuốc")}" /></td>
+                  <td>${escapeHtml(line.title || line.name || "Thuốc")}</td>
+                  <td>${toCurrency(line.price)}</td>
+                  <td>
+                    <input type="number" min="1" class="qty-input" value="${Number(line.quantity || 1)}" onchange="updateQuantity('${escapeHtml(String(line.id))}', this.value)" />
+                  </td>
+                  <td>${toCurrency(lineTotal)}</td>
+                  <td>
+                    <button class="delete-btn" type="button" onclick="removeFromCart('${escapeHtml(String(line.id))}')">
+                      <svg class="app-icon" viewBox="0 0 24 24"><use href="#icon-trash"></use></svg>
+                    </button>
+                  </td>
+                </tr>
+              `;
+            })
+            .join("");
+        }
+
+        const totals = getCartTotals();
+        document.getElementById("subtotalPrice").textContent = toCurrency(
+          totals.subtotal,
+        );
+        document.getElementById("shippingFee").textContent = toCurrency(
+          totals.shipping,
+        );
+        document.getElementById("totalPrice").textContent = toCurrency(
+          totals.total,
+        );
+        updateCheckoutButtonState();
+      }
+
+      function renderCheckoutSummary() {
+        const list = document.getElementById("checkoutItems");
+        if (!state.cart.length) {
+          list.innerHTML =
+            '<li class="empty">Chưa có sản phẩm để thanh toán.</li>';
+          document.getElementById("checkoutTotalPrice").textContent =
+            toCurrency(0);
+          updateCheckoutButtonState();
+          return;
+        }
+
+        list.innerHTML = state.cart
+          .map((line) => {
+            const lineTotal =
+              Number(line.price || 0) * Number(line.quantity || 0);
+            return `<li><span>${escapeHtml(line.title || line.name || "Thuốc")} x ${Number(line.quantity || 1)}</span><strong>${toCurrency(lineTotal)}</strong></li>`;
+          })
+          .join("");
+
+        document.getElementById("checkoutTotalPrice").textContent = toCurrency(
+          getCartTotals().total,
+        );
+        updateCheckoutButtonState();
+      }
+
+      async function loadOrders() {
+        if (!state.khachHang?.maKhachHang) {
+          state.orders = [];
+          return;
+        }
+
+        try {
+          const all = await apiFetch("/hoadon");
+          state.orders = (Array.isArray(all) ? all : [])
+            .filter(
+              (order) =>
+                String(order.maKhachHang || "") ===
+                String(state.khachHang.maKhachHang),
+            )
+            .sort(
+              (a, b) => new Date(b.ngayTao || 0) - new Date(a.ngayTao || 0),
+            );
+        } catch {
+          state.orders = [];
+        }
+      }
+
+      function renderOrderHistory() {
+        const tbody = document.getElementById("orderHistoryBody");
+        if (!state.orders.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="empty">Bạn chưa có đơn hàng nào.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = state.orders
+          .map((order) => {
+            const maHoaDon = order.maHoaDon || "-";
+            const ngayDat = order.ngayTao
+              ? new Date(order.ngayTao).toLocaleDateString("vi-VN")
+              : "-";
+            return `
+              <tr>
+                <td>${escapeHtml(maHoaDon)}</td>
+                <td>${escapeHtml(ngayDat)}</td>
+                <td>${toCurrency(order.tongTien || 0)}</td>
+                <td><span class="status ${statusClass(order.trangThai)}">${escapeHtml(formatStatus(order.trangThai))}</span></td>
+                <td><button class="detail-btn" type="button" onclick="showOrderDetail('${escapeHtml(maHoaDon)}')">Xem chi tiết</button></td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      async function showOrderDetail(maHoaDon) {
+        try {
+          const details = await apiFetch(
+            `/cthoadon/${encodeURIComponent(maHoaDon)}`,
+          );
+          const lines = (Array.isArray(details) ? details : []).map((d) => {
+            const qty = Number(d.soLuong || 0);
+            const price = Number(d.donGiaBan || 0);
+            return `
+              <tr>
+                <td>${escapeHtml(d.maThuoc || "?")}</td>
+                <td>${qty}</td>
+                <td>${toCurrency(price)}</td>
+                <td>${toCurrency(qty * price)}</td>
+              </tr>
+            `;
+          });
+
+          document.getElementById("orderModalTitle").textContent =
+            `Chi tiết đơn hàng ${maHoaDon}`;
+          document.getElementById("orderModalBody").innerHTML = lines.length
+            ? `<div class="table-wrap"><table><thead><tr><th>Mã thuốc</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>${lines.join("")}</tbody></table></div>`
+            : '<p class="empty">Đơn hàng chưa có chi tiết.</p>';
+          openModal("orderModal");
+        } catch (error) {
+          alert(error.message || "Không thể tải chi tiết đơn hàng.");
+        }
+      }
+
+      async function resolveNhanVienForCheckout() {
+        const list = await apiFetch("/nhanvien");
+        if (!Array.isArray(list) || list.length === 0)
+          throw new Error("Hệ thống chưa có nhân viên để xử lý hóa đơn.");
+        const first = list.find((x) => x && x.maNhanVien);
+        if (!first) throw new Error("Không tìm thấy mã nhân viên hợp lệ.");
+        return first.maNhanVien;
+      }
+
+      async function submitCheckout(event) {
+        event.preventDefault();
+        if (!state.cart.length) {
+          alert(
+            "Giỏ hàng đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.",
+          );
+          showSection("cua-hang");
+          return;
+        }
+
+        const fullName = document.getElementById("customerName").value.trim();
+        const phone = document.getElementById("customerPhone").value.trim();
+        const address = document.getElementById("customerAddress").value.trim();
+        const paymentMethod =
+          document.querySelector("input[name='paymentMethod']:checked")
+            ?.value || "Thanh toán khi nhận hàng";
+
+        if (!fullName || !phone || !address) {
+          alert("Vui lòng nhập đầy đủ thông tin nhận hàng.");
+          return;
+        }
+
+        try {
+          const maNhanVien = await resolveNhanVienForCheckout();
+          const maHoaDon = `HD${Date.now()}`;
+          const totals = getCartTotals();
+
+          const hoaDon = {
+            maHoaDon,
+            maKhachHang: state.khachHang.maKhachHang,
+            maNhanVien,
+            ngayTao: new Date().toISOString().split("T")[0],
+            tongTien: totals.total,
+            trangThai: "CHO_XAC_NHAN",
+          };
+
+          const huongDan = `Khách: ${fullName} | SĐT: ${phone} | ĐC: ${address} | TT: ${paymentMethod}`;
+          const chiTiet = state.cart.map((line, index) => ({
+            maCTHD: `CTHD${Date.now()}${index}`,
+            maHoaDon,
+            maThuoc: line.id,
+            soLuong: Number(line.quantity || 1),
+            hdsd: huongDan,
+            donGiaBan: Number(line.price || 0),
+          }));
+
+          await apiFetch("/hoadon/full", {
+            method: "POST",
+            body: JSON.stringify({ hoaDon, chiTiet }),
+          });
+
+          await apiFetch("/cart", { method: "DELETE" });
+          await loadCart();
+          await loadOrders();
+
+          renderCart();
+          renderCheckoutSummary();
+          renderOrderHistory();
+          renderAccount();
+          document.getElementById("checkoutForm").reset();
+
+          alert(`Đặt hàng thành công. Mã đơn hàng: ${maHoaDon}`);
+          showSection("lich-su");
+        } catch (error) {
+          alert(error.message || "Đặt hàng thất bại.");
+        }
+      }
+
+      function renderAccount() {
+        const user = state.user || {};
+        const kh = state.khachHang || {};
+        const fullName =
+          [kh.ho, kh.ten].filter(Boolean).join(" ").trim() ||
+          kh.hoTen ||
+          user.hoTenKhachHang ||
+          user.tenDangNhap ||
+          "-";
+
+        document.getElementById("accName").textContent = fullName || "-";
+        document.getElementById("accEmail").textContent = user.email || "-";
+        document.getElementById("accPhone").textContent =
+          kh.sdt || user.soDienThoai || "-";
+        document.getElementById("accAddress").textContent =
+          kh.diaChi || user.diaChi || "-";
+
+        const totalSpent = state.orders.reduce(
+          (sum, order) => sum + Number(order.tongTien || 0),
+          0,
+        );
+        const lastOrder = state.orders[0];
+        document.getElementById("accTotalOrders").textContent = String(
+          state.orders.length,
+        );
+        document.getElementById("accTotalSpent").textContent =
+          toCurrency(totalSpent);
+        document.getElementById("accLastOrder").textContent = lastOrder
+          ? `${lastOrder.maHoaDon} - ${toCurrency(lastOrder.tongTien || 0)}`
+          : "-";
+
+        const recentList = document.getElementById("accountRecentOrders");
+        const recent = state.orders.slice(0, 5);
+        recentList.innerHTML = recent.length
+          ? recent
+              .map(
+                (order) =>
+                  `<li><span>${escapeHtml(order.maHoaDon || "-")} - ${escapeHtml(new Date(order.ngayTao || Date.now()).toLocaleDateString("vi-VN"))}</span><strong>${toCurrency(order.tongTien || 0)}</strong></li>`,
+              )
+              .join("")
+          : '<li class="empty">Chưa có đơn hàng gần đây.</li>';
+      }
+
+      function showDetail(medicineId) {
+        const item = state.medicines.find((x) => x.id === medicineId);
+        if (!item) return;
+
+        document.getElementById("detailModalTitle").textContent = item.ten;
+        document.getElementById("detailModalBody").innerHTML = `
+          <div class="product-detail-modal">
+            <img src="${escapeHtml(item.anh)}" alt="${escapeHtml(item.ten)}" />
+            <div>
+              <p><strong>Danh mục:</strong> ${escapeHtml(item.danhMuc)}</p>
+              <p><strong>Giá bán:</strong> ${toCurrency(item.gia)}</p>
+              <p><strong>Đơn vị:</strong> ${escapeHtml(item.moTa)}</p>
+              <p><strong>Tồn kho:</strong> ${item.ton}</p>
+              <p><strong>NSX:</strong> ${escapeHtml(item.nsx)}</p>
+              <p><strong>HSD:</strong> ${escapeHtml(item.hsd)}</p>
+            </div>
+          </div>
+        `;
+        openModal("detailModal");
+      }
+
+      async function resolveCurrentCustomer() {
+        let user = getCurrentUser();
+        if (!user) {
+          user = await apiFetch("/taikhoan/session/me");
+          setCurrentUser(user);
+        }
+
+        state.user = user;
+        const maTaiKhoan = user.maTaiKhoan || user.maTK;
+        if (!maTaiKhoan) throw new Error("Không tìm thấy thông tin tài khoản.");
+
+        const kh = await apiFetch(
+          `/khachhang/by-tk/${encodeURIComponent(maTaiKhoan)}`,
+        );
+        state.khachHang = kh;
+
+        setCurrentUser({
+          ...user,
+          maKhachHang: kh?.maKhachHang || user.maKhachHang || null,
+          hoTenKhachHang:
+            [kh?.ho, kh?.ten].filter(Boolean).join(" ").trim() ||
+            kh?.hoTen ||
+            "",
+        });
+      }
+
+      async function loadMedicines() {
+        const response = await apiFetch(
+          "/thuoc/paged?page=1&size=500&sortBy=name-asc&includeImage=true",
+        );
+        const items = Array.isArray(response?.items) ? response.items : [];
+        state.medicines = items.map(mapMedicine).filter((x) => x.id);
+      }
+
+      function toggleAccountMenu(forceClose = false) {
+        const menu = document.getElementById("accountMenu");
+        if (forceClose) {
+          menu.classList.remove("open");
+          return;
+        }
+        menu.classList.toggle("open");
+      }
+
+      async function handleLogout() {
+        await logoutSession();
+        window.location.href = "login.html";
+      }
+
+      function bindEvents() {
+        document.querySelectorAll("[data-section-link]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.dataset.sectionLink;
+            if (target) showSection(target);
+          });
+        });
+
+        document
+          .getElementById("headerSearchInput")
+          .addEventListener("input", renderSearchSuggest);
+
+        document
+          .getElementById("headerSearchForm")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+            document
+              .getElementById("headerSearchSuggest")
+              .classList.remove("open");
+            runSearch(document.getElementById("headerSearchInput").value);
+          });
+
+        document
+          .getElementById("storeSearchForm")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+            state.storePage = 1;
+            renderStore(document.getElementById("storeSearchInput").value);
+          });
+
+        document
+          .getElementById("storeUnitFilter")
+          .addEventListener("change", (event) => {
+            state.storeUnit = event.target.value || "all";
+            state.storePage = 1;
+            renderStore();
+          });
+
+        document
+          .getElementById("clearStoreFilters")
+          .addEventListener("click", () => {
+            const searchInput = document.getElementById("storeSearchInput");
+            const unitSelect = document.getElementById("storeUnitFilter");
+            searchInput.value = "";
+            state.storeKeyword = "";
+            state.storeUnit = "all";
+            unitSelect.value = "all";
+            state.storePage = 1;
+            renderStore("");
+          });
+
+        document
+          .getElementById("checkoutForm")
+          .addEventListener("submit", submitCheckout);
+        document
+          .getElementById("headerCartBtn")
+          .addEventListener("click", () => {
+            showSection("gio-hang");
+          });
+        document
+          .getElementById("accountMenuBtn")
+          .addEventListener("click", (event) => {
+            event.stopPropagation();
+            toggleAccountMenu();
+          });
+
+        document
+          .getElementById("menuHistoryBtn")
+          .addEventListener("click", () => {
+            toggleAccountMenu(true);
+            showSection("lich-su");
+          });
+
+        document
+          .getElementById("menuAccountBtn")
+          .addEventListener("click", () => {
+            toggleAccountMenu(true);
+            showSection("tai-khoan");
+          });
+
+        document
+          .getElementById("logoutBtn")
+          .addEventListener("click", handleLogout);
+
+        document.addEventListener("click", (event) => {
+          if (!event.target.closest(".header-search")) {
+            document
+              .getElementById("headerSearchSuggest")
+              .classList.remove("open");
+          }
+          if (!event.target.closest(".header-actions")) {
+            toggleAccountMenu(true);
+          }
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            closeModal("detailModal");
+            closeModal("orderModal");
+            toggleAccountMenu(true);
+            document
+              .getElementById("headerSearchSuggest")
+              .classList.remove("open");
+          }
+        });
+      }
+
+      async function bootstrap() {
+        bindEvents();
+        bindModalClose();
+        setPageLoading(true);
+        renderLoadingState();
+
+        try {
+          await resolveCurrentCustomer();
+        } catch {
+          setPageLoading(false);
+          alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          window.location.href = "login.html";
+          return;
+        }
+
+        try {
+          await Promise.all([loadMedicines(), loadCart(), loadOrders()]);
+        } catch (error) {
+          alert(error.message || "Không thể tải dữ liệu hệ thống.");
+        }
+
+        renderHome();
+        renderStoreUnitFilter();
+        renderStore();
+        renderCart();
+        renderCheckoutSummary();
+        renderOrderHistory();
+        renderAccount();
+        setPageLoading(false);
+      }
+
+      window.addToCart = addToCart;
+      window.removeFromCart = removeFromCart;
+      window.updateQuantity = updateQuantity;
+      window.showOrderDetail = showOrderDetail;
+      window.showDetail = showDetail;
+
+      bootstrap();
+    </script>
+  </body>
+</html>
