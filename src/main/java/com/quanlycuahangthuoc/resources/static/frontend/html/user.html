@@ -341,18 +341,13 @@
               >
             </div>
 
-            <div class="checkout-actions">
-              <button
-                class="btn btn-ghost"
-                type="button"
-                data-section-link="gio-hang"
-              >
-                Quay lại giỏ hàng
-              </button>
-              <button class="btn btn-primary" type="submit">
-                Xác nhận đặt hàng
-              </button>
-            </div>
+            <button
+              class="checkout-back-btn"
+              type="button"
+              data-section-link="gio-hang"
+            >
+              <- Quay lại
+            </button>
           </form>
 
           <aside class="checkout-summary">
@@ -361,6 +356,9 @@
             <div class="summary-line total">
               <span>Tổng tiền</span><strong id="checkoutTotalPrice">0 đ</strong>
             </div>
+            <button class="btn btn-primary w-full" type="submit" form="checkoutForm">
+              Xác nhận đặt hàng
+            </button>
           </aside>
         </div>
       </section>

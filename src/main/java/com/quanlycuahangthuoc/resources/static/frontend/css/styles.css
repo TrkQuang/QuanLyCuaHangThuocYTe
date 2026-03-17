@@ -707,6 +707,16 @@ td {
   padding: 1rem;
 }
 
+.checkout-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.checkout-summary .btn {
+  margin-top: auto;
+}
+
 .summary-line {
   display: flex;
   justify-content: space-between;
@@ -767,10 +777,15 @@ td {
   justify-content: flex-start;
 }
 
-.checkout-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+.checkout-back-btn {
+  border: 0;
+  background: transparent;
+  color: var(--primary-strong);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  justify-self: start;
 }
 
 .checkout-summary ul,
@@ -1068,7 +1083,4 @@ td {
     grid-template-columns: 1fr;
   }
 
-  .checkout-actions {
-    grid-template-columns: 1fr;
-  }
 }
