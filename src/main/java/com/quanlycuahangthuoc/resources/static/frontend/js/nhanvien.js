@@ -1427,13 +1427,13 @@ function editThuoc(id) {
     <form id="editThuocFormNv">
       <input type="hidden" name="maThuoc" value="${item.maThuoc}" />
       <div class="form-group"><label>Tên thuốc</label><input name="tenThuoc" required value="${item.tenThuoc || ""}" /></div>
-      <div class="form-group"><label>Don vi tinh</label><input name="donViTinh" value="${item.donViTinh || ""}" /></div>
-      <div class="form-group"><label>Gia ban</label><input type="number" name="giaBan" min="0" value="${item.giaBan || 0}" /></div>
-      <div class="form-group"><label>Số lượng ton</label><input type="number" name="soLuongTon" min="0" value="${item.soLuongTon || 0}" /></div>
-      <div class="form-group"><label>Han su dung</label><input type="date" name="hsd" value="${item.hsd ? String(item.hsd).split("T")[0] : ""}" /></div>
+      <div class="form-group"><label>Đơn vị tính</label><input name="donViTinh" value="${item.donViTinh || ""}" /></div>
+      <div class="form-group"><label>Giá bán</label><input type="number" name="giaBan" min="0" value="${item.giaBan || 0}" /></div>
+      <div class="form-group"><label>Số lượng tồn</label><input type="number" name="soLuongTon" min="0" value="${item.soLuongTon || 0}" /></div>
+      <div class="form-group"><label>Hạn sử dụng</label><input type="date" name="hsd" value="${item.hsd ? String(item.hsd).split("T")[0] : ""}" /></div>
       <div class="form-actions">
-        <button type="button" class="btn btn-cancel" onclick="closeModal()">Huy</button>
-        <button type="submit" class="btn btn-primary">Luu</button>
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu</button>
       </div>
     </form>
   `;
