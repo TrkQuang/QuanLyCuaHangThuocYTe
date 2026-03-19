@@ -1,6 +1,6 @@
 USE QuanLyNhaThuoc;
 
--- Reset full schema + seed data (MySQL 8+)
+-- Full schema creation script (MySQL 8+)
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -77,7 +77,7 @@ FOR EACH ROW
 BEGIN
     IF NEW.NgaySinh > CURRENT_DATE() THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'NgaySinh không được lon hon ngay hien tai';
+            SET MESSAGE_TEXT = 'NgaySinh khong duoc lon hon ngay hien tai';
     END IF;
 END$$
 
@@ -87,7 +87,7 @@ FOR EACH ROW
 BEGIN
     IF NEW.NgaySinh > CURRENT_DATE() THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'NgaySinh không được lon hon ngay hien tai';
+            SET MESSAGE_TEXT = 'NgaySinh khong duoc lon hon ngay hien tai';
     END IF;
 END$$
 DELIMITER ;
@@ -214,7 +214,7 @@ CREATE TABLE LichLamViec (
     CONSTRAINT ck_lichlam_trangthai CHECK (TrangThai IN ('CHO_DUYET', 'DA_DUYET', 'TU_CHOI'))
 ) ENGINE=InnoDB;
 
--- Helpful indexes for query performance
+-- Helpful indexes
 CREATE INDEX idx_hoadon_makh ON HoaDon(MaKH);
 CREATE INDEX idx_hoadon_manv ON HoaDon(MaNV);
 CREATE INDEX idx_cthoadon_mahd ON CT_HoaDon(MaHD);
@@ -224,65 +224,3 @@ CREATE INDEX idx_phieunhap_mancc ON PhieuNhap(MaNCC);
 CREATE INDEX idx_ctphieunhap_mapn ON CT_PhieuNhap(MaPN);
 CREATE INDEX idx_ctphieunhap_mathuoc ON CT_PhieuNhap(MaThuoc);
 CREATE INDEX idx_lichlam_manv_ngay ON LichLamViec(MaNV, NgayLam);
-
--- ============================
--- SEED DATA
--- ============================
-
-INSERT INTO TaiKhoan (MaTK, TenDangNhap, MatKhau, Email, LoaiTK) VALUES
-('TKAD01', 'admin', '123456', 'admin@nhathuoc.local', 'ADMIN'),
-('TKNV01', 'nv01', '123456', 'nv01@nhathuoc.local', 'NHANVIEN'),
-('TKNV02', 'nv02', '123456', 'nv02@nhathuoc.local', 'NHANVIEN'),
-('TKKH01', 'kh01', '123456', 'kh01@nhathuoc.local', 'KHACHHANG'),
-('TKKH02', 'kh02', '123456', 'kh02@nhathuoc.local', 'KHACHHANG');
-
-INSERT INTO NhanVien (MaNV, HoTen, SDT, DiaChi, MaTK) VALUES
-('NV01', 'Le Van Admin', '0901000001', 'Q1, TP HCM', 'TKAD01'),
-('NV02', 'Tran Thi BanHang', '0901000002', 'Q3, TP HCM', 'TKNV01'),
-('NV03', 'Pham Van Kho', '0901000003', 'Q7, TP HCM', 'TKNV02');
-
-INSERT INTO KhachHang (MaKH, HoTen, NgaySinh, GioiTinh, SDT, DiaChi, TienSuBenhLy, MaTK) VALUES
-('KH01', 'Nguyen Van A', '1995-04-12', 'Nam', '0912000001', 'Thu Duc, TP HCM', 'Viem mui di ung', 'TKKH01'),
-('KH02', 'Tran Thi B', '1992-08-20', 'Nu', '0912000002', 'Binh Thanh, TP HCM', 'Da day', 'TKKH02');
-
-INSERT INTO NhaCungCap (MaNCC, TenNCC, SDT, DiaChi, TrangThai) VALUES
-('NCC01', 'Duoc Sai Gon', '02873000001', 'Tan Binh, TP HCM', 'HOAT_DONG'),
-('NCC02', 'Duoc Hau Giang', '02873000002', 'Can Tho', 'HOAT_DONG'),
-('NCC03', 'Medi Wholesale', '02873000003', 'Ha Noi', 'TAM_NGUNG');
-
-INSERT INTO Thuoc (MaThuoc, TenThuoc, HinhAnh, DonViTinh, GiaBan, SoLuongTon, HanSuDung, NgaySanXuat) VALUES
-('T01', 'Paracetamol 500mg', 'img/paracetamol.png', 'Vien', 3000, 194, '2027-12-31', '2025-12-31'),
-('T02', 'Amoxicillin 500mg', 'img/amocxicilin.jpg', 'Vien', 12000, 118, '2027-11-30', '2025-11-30'),
-('T03', 'Vitamin C 1000mg', 'img/vitaminC.webp', 'Vien', 2500, 146, '2027-10-31', '2025-10-31'),
-('T04', 'Oresol', 'img/ORESOL-oresol.jpg', 'Goi', 4500, 97, '2027-09-30', '2025-09-30'),
-('T05', 'Loratadin 10mg', 'img/loratadin.webp', 'Vien', 7000, 130, '2027-08-31', '2025-08-31');
-
-INSERT INTO PhieuNhap (MaPN, NgayNhap, TongTien, MaNV, MaNCC, TrangThai) VALUES
-('PN01', '2026-02-01', 1050000, 'NV03', 'NCC01', 'DA_XAC_NHAN'),
-('PN02', '2026-02-10', 1520000, 'NV03', 'NCC02', 'DA_XAC_NHAN');
-
-INSERT INTO CT_PhieuNhap (MaCTPN, MaPN, MaThuoc, SoLuong, DonGiaNhap) VALUES
-('CTPN01', 'PN01', 'T01', 200, 2000),
-('CTPN02', 'PN01', 'T03', 150, 1500),
-('CTPN03', 'PN01', 'T04', 100, 2500),
-('CTPN04', 'PN01', 'T05', 50, 3500),
-('CTPN05', 'PN02', 'T02', 120, 9000),
-('CTPN06', 'PN02', 'T05', 80, 5500);
-
-INSERT INTO HoaDon (MaHD, NgayTao, TongTien, MaKH, MaNV, TrangThai) VALUES
-('HD01', '2026-02-12', 41000, 'KH01', 'NV02', 'DA_THANH_TOAN'),
-('HD02', '2026-02-15', 24500, 'KH02', 'NV02', 'DA_THANH_TOAN');
-
-INSERT INTO CT_HoaDon (MaCTHD, MaHD, MaThuoc, SoLuong, HuongDanSD, DonGiaBan) VALUES
-('CTHD01', 'HD01', 'T01', 4, 'Ngay 2 lan, moi lan 1 vien sau an', 3000),
-('CTHD02', 'HD01', 'T02', 2, 'Ngay 2 lan, moi lan 1 vien', 12000),
-('CTHD03', 'HD01', 'T03', 2, 'Ngay 1 vien sau an sang', 2500),
-('CTHD04', 'HD02', 'T04', 3, 'Pha 1 goi voi 200ml nuoc', 4500),
-('CTHD05', 'HD02', 'T01', 2, 'Sot tren 38 do C moi dung', 3000),
-('CTHD06', 'HD02', 'T03', 2, 'Ngay 1 vien sau bua trua', 2500);
-
-INSERT INTO LichLamViec (MaLich, MaNV, NgayLam, GioBD, GioKT) VALUES
-('LICH01', 'NV02', '2026-03-14', '08:00:00', '17:00:00'),
-('LICH02', 'NV03', '2026-03-14', '09:00:00', '18:00:00'),
-('LICH03', 'NV02', '2026-03-15', '08:00:00', '17:00:00'),
-('LICH04', 'NV03', '2026-03-15', '09:00:00', '18:00:00');

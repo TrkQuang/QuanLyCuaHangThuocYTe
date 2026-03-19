@@ -431,7 +431,7 @@ function searchThuoc() {
 function showAddThuocModal() {
   const modalBody = document.getElementById("modalBody");
   modalBody.innerHTML = `
-        <h2>Thêm Thuoc Mới</h2>
+        <h2>Thêm Thuốc Mới</h2>
         <form id="addThuocForm">
             <div class="form-group">
                 <label>Tên thuốc *</label>
@@ -675,11 +675,11 @@ async function showAddPhieuNhapModal() {
       <h2>Tao phiếu nhập</h2>
       <form id="addImportForm">
         <div class="form-group">
-          <label>Ma phiếu nhập</label>
+          <label>Mã phiếu nhập</label>
           <input type="text" name="maPhieuNhap" required value="PN${Date.now()}" />
         </div>
         <div class="form-group">
-          <label>Nha cung cap</label>
+          <label>Nhà cung cấp</label>
           <select name="maNhaCungCap" required>
             ${nccOptions}
           </select>
@@ -703,8 +703,8 @@ async function showAddPhieuNhapModal() {
           </div>
         </div>
         <div class="form-actions">
-          <button type="button" class="btn btn-cancel" onclick="closeModal()">Huy</button>
-          <button type="submit" class="btn btn-primary">Luu phiếu nhập</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu phiếu nhập</button>
         </div>
       </form>
     `;
